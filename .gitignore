@@ -1,0 +1,6 @@
+/node_modules
+/test/js
+/test/browsertest/js
+/examples/*/js
+/coverage
+.DS_Store
