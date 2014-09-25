@@ -1,6 +1,5 @@
 /node_modules
-/test/js
-/test/browsertest/js
-/examples/*/js
+/test/fixtures
+/playground/folder
 /coverage
 .DS_Store
