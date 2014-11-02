@@ -37,6 +37,11 @@ TestHelper.prototype.file = function file(name) {
 	fs.writeFileSync(path.join(this.testdir, name), Math.random() + "", "utf-8");
 };
 
+TestHelper.prototype.mtime = function mtime(name, mtime) {
+	var stats = fs.statSync(path.join(this.testdir, name));
+	fs.utimesSync(path.join(this.testdir, name), stats.atime, new Date(mtime));
+};
+
 TestHelper.prototype.remove = function remove(name) {
 	rimraf.sync(path.join(this.testdir, name));
 };
