@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "async": "^0.9.0",
-    "chokidar": "^0.10.3",
+    "chokidar": "^0.11.0",
     "graceful-fs": "^3.0.2"
   }
 }

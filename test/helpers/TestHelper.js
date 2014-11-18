@@ -2,6 +2,8 @@ var fs = require("fs");
 var path = require("path");
 var rimraf = require("rimraf");
 
+var watcherManager = require("../../lib/watcherManager");
+
 function TestHelper(testdir) {
 	this.testdir = testdir;
 	var self = this;
@@ -15,6 +17,7 @@ function TestHelper(testdir) {
 module.exports = TestHelper;
 
 TestHelper.prototype._before = function before(done) {
+	Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
 	this.tick(function() {
 		rimraf.sync(this.testdir);
 		fs.mkdirSync(this.testdir);
@@ -25,6 +28,7 @@ TestHelper.prototype._before = function before(done) {
 TestHelper.prototype._after = function after(done) {
 	this.tick(function() {
 		rimraf.sync(this.testdir);
+		Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
 		done();
 	}.bind(this));
 };
