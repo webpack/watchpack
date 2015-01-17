@@ -2,6 +2,8 @@
 
 Wrapper library for directory and file watching.
 
+[![Build Status](https://travis-ci.org/webpack/watchpack.svg?branch=master)](https://travis-ci.org/webpack/watchpack) [![Build status](https://ci.appveyor.com/api/projects/status/e5u2qvmugtv0r647/branch/master?svg=true)](https://ci.appveyor.com/project/sokra/watchpack/branch/master)
+
 ## Concept
 
 watchpack high level API don't map directly to watchers. Instead a three level architecture ensures that for each directory only a single watcher exists.
