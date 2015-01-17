@@ -7,7 +7,7 @@ var fixtures = path.join(__dirname, "fixtures");
 var testHelper = new TestHelper(fixtures);
 
 describe("DirectoryWatcher", function() {
-	this.timeout(5000);
+	this.timeout(10000);
 	beforeEach(testHelper.before);
 	afterEach(testHelper.after);
 
@@ -23,7 +23,7 @@ describe("DirectoryWatcher", function() {
 			testHelper.file("a");
 		});
 	});
-	
+
 	it("should detect a file change", function(done) {
 		var d = new DirectoryWatcher(fixtures);
 		testHelper.file("a");
@@ -37,7 +37,7 @@ describe("DirectoryWatcher", function() {
 			testHelper.file("a");
 		});
 	});
-	
+
 	it("should not detect a file change in initial scan", function(done) {
 		testHelper.file("a");
 		testHelper.tick(function() {
@@ -52,7 +52,7 @@ describe("DirectoryWatcher", function() {
 			});
 		});
 	});
-	
+
 	it("should detect a file change in initial scan with start date", function(done) {
 		var start = new Date();
 		testHelper.file("a");
@@ -65,7 +65,7 @@ describe("DirectoryWatcher", function() {
 			});
 		});
 	});
-	
+
 	it("should detect a file change in initial scan without start date", function(done) {
 		testHelper.file("a");
 		testHelper.tick(function() {
@@ -80,7 +80,7 @@ describe("DirectoryWatcher", function() {
 			});
 		});
 	});
-	
+
 	it("should detect multiple file changes", function(done) {
 		var d = new DirectoryWatcher(fixtures);
 		testHelper.file("a");

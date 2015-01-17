@@ -20,13 +20,13 @@
   },
   "homepage": "https://github.com/webpack/watchpack",
   "devDependencies": {
-    "mocha": "^1.20.1",
+    "mocha": "^2.1.0",
     "rimraf": "^2.2.8",
-    "should": "^4.0.4"
+    "should": "^4.6.0"
   },
   "dependencies": {
     "async": "^0.9.0",
-    "chokidar": "^0.11.0",
+    "chokidar": "^0.12.0",
     "graceful-fs": "^3.0.2"
   }
 }

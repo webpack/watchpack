@@ -50,10 +50,12 @@ TestHelper.prototype.remove = function remove(name) {
 	rimraf.sync(path.join(this.testdir, name));
 };
 
-TestHelper.prototype.tick = function tick(fn) {
-	// setTimeout(fn, 100);
+TestHelper.prototype.tick = function tick(arg, fn) {
+	if(typeof arg === "function") {
+		fn = arg;
+		arg = 100;
+	}
 	setTimeout(function() {
-		// console.log("tick");
 		fn();
-	}, 100);
+	}, arg);
 };
