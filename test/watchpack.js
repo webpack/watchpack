@@ -1,7 +1,7 @@
 var should = require("should");
 var path = require("path");
 var TestHelper = require("./helpers/TestHelper");
-var Watchpack = require("../lib/Watchpack");
+var Watchpack = require("../lib/watchpack");
 
 var fixtures = path.join(__dirname, "fixtures");
 var testHelper = new TestHelper(fixtures);
