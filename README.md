@@ -9,10 +9,12 @@ Wrapper library for directory and file watching.
 watchpack high level API don't map directly to watchers. Instead a three level architecture ensures that for each directory only a single watcher exists.
 
 * The high level API requests `DirectoryWatchers` from a `WatcherManager`, which ensures that only a single `DirectoryWatcher` per directory is created.
-* A `FileWatcher` can be obtained from a `DirectoryWatcher` and provides a filtered view on the `DirectoryWatcher`.
-* Reference-counting is used on the `DirectoryWatcher` and `FileWatcher` to decide when to close them.
+* A user-faced `Watcher` can be obtained from a `DirectoryWatcher` and provides a filtered view on the `DirectoryWatcher`.
+* Reference-counting is used on the `DirectoryWatcher` and `Watcher` to decide when to close them.
 * The real watchers (currently chokidar) are created by the `DirectoryWatcher`.
 * Files are never watched directly. This should keep the watcher count low.
+* Watching can be started in the past. This way watching can start after file reading.
+* Symlinks are not followed, instead the symlink is watched.
 
 ## API
 
