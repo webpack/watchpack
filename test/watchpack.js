@@ -43,7 +43,7 @@ describe("Watchpack", function() {
 			changeEvents.push(file);
 		});
 		w.on("aggregated", function(changes) {
-			changes.should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
+			changes.sort().should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
 			changeEvents.should.be.eql([
 				path.join(fixtures, "a"),
 				path.join(fixtures, "b"),

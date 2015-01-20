@@ -1,15 +1,37 @@
 var should = require("should");
 var path = require("path");
 var TestHelper = require("./helpers/TestHelper");
-var DirectoryWatcher = require("../lib/DirectoryWatcher");
+var OrgDirectoryWatcher = require("../lib/DirectoryWatcher");
 
 var fixtures = path.join(__dirname, "fixtures");
 var testHelper = new TestHelper(fixtures);
+
+var openWatchers = [];
+
+DirectoryWatcher = function(p) {
+	var d = new OrgDirectoryWatcher(p);
+	openWatchers.push(d);
+	var orgClose = d.close;
+	d.close = function() {
+		orgClose.call(this);
+		var idx = openWatchers.indexOf(d);
+		if(idx < 0)
+			throw new Error("DirectoryWatcher was already closed");
+		openWatchers.splice(idx, 1);
+	}
+	return d;
+}
 
 describe("DirectoryWatcher", function() {
 	this.timeout(10000);
 	beforeEach(testHelper.before);
 	afterEach(testHelper.after);
+	afterEach(function() {
+		openWatchers.forEach(function(d) {
+			console.log("DirectoryWatcher (" + d.path + ") was not closed.");
+			d.close();
+		})
+	})
 
 	it("should detect a file creation", function(done) {
 		var d = new DirectoryWatcher(fixtures);
@@ -82,9 +104,9 @@ describe("DirectoryWatcher", function() {
 	});
 
 	var timings = {
-		fast: 1,
+		slow: 300,
 		middle: 50,
-		slow: 300
+		fast: 1,
 	};
 	Object.keys(timings).forEach(function(name) {
 		var time = timings[name];
