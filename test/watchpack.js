@@ -193,7 +193,7 @@ describe("Watchpack", function() {
 		});
 		w.on("aggregated", function(changes) {
 			changes.should.be.eql([path.join(fixtures, "a")]);
-			changeEvents.should.be.eql(1);
+			changeEvents.should.be.greaterThan(0);
 			w.close();
 			done();
 		});

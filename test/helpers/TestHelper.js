@@ -26,10 +26,10 @@ TestHelper.prototype._before = function before(done) {
 };
 
 TestHelper.prototype._after = function after(done) {
-	this.tick(function() {
+	this.tick(300, function() {
 		rimraf.sync(this.testdir);
 		Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
-		done();
+		this.tick(300, done);
 	}.bind(this));
 };
 

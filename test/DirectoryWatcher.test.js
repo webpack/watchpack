@@ -81,30 +81,38 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
-	it("should detect multiple file changes", function(done) {
-		var d = new DirectoryWatcher(fixtures);
-		testHelper.file("a");
-		testHelper.tick(function() {
-			var a = d.watch(path.join(fixtures, "a"));
-			var count = 20;
-			var wasChanged = false;
-			a.on("change", function(mtime) {
-				mtime.should.be.type("number");
-				if(!wasChanged) return;
-				wasChanged = false;
-				if(count-- <= 0) {
-					a.close();
-					done();
-				} else {
-					testHelper.tick(function() {
-						wasChanged = true;
-						testHelper.file("a");
-					});
-				}
-			});
+	var timings = {
+		fast: 1,
+		middle: 50,
+		slow: 300
+	};
+	Object.keys(timings).forEach(function(name) {
+		var time = timings[name];
+		it("should detect multiple file changes (" + name + ")", function(done) {
+			var d = new DirectoryWatcher(fixtures);
+			testHelper.file("a");
 			testHelper.tick(function() {
-				wasChanged = true;
-				testHelper.file("a");
+				var a = d.watch(path.join(fixtures, "a"));
+				var count = 20;
+				var wasChanged = false;
+				a.on("change", function(mtime) {
+					mtime.should.be.type("number");
+					if(!wasChanged) return;
+					wasChanged = false;
+					if(count-- <= 0) {
+						a.close();
+						done();
+					} else {
+						testHelper.tick(time, function() {
+							wasChanged = true;
+							testHelper.file("a");
+						});
+					}
+				});
+				testHelper.tick(function() {
+					wasChanged = true;
+					testHelper.file("a");
+				});
 			});
 		});
 	});
