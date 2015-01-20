@@ -105,8 +105,8 @@ describe("DirectoryWatcher", function() {
 
 	var timings = {
 		slow: 300,
-		middle: 50,
-		fast: 1,
+		fast: 50,
+		// reallyFast: 5,
 	};
 	Object.keys(timings).forEach(function(name) {
 		var time = timings[name];
