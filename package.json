@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "async": "^0.9.0",
-    "chokidar": "paulmillr/chokidar#f4c49296b708c6901429a6497b31a8b907bdd8c0",
+    "chokidar": "^1.0.0-rc2",
     "graceful-fs": "^3.0.2"
   }
 }
