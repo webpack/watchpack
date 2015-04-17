@@ -60,6 +60,24 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
+	it("should detect a file change with different case on windows", function(done) {
+		if(process.platform === "win32") {
+			var d = new DirectoryWatcher(fixtures);
+			testHelper.file("A");
+			var a = d.watch(path.join(fixtures, "a"));
+			a.on("change", function(mtime) {
+				mtime.should.be.type("number");
+				a.close();
+				done();
+			});
+			testHelper.tick(function() {
+				testHelper.file("a");
+			});
+		}else {
+			done();
+		}
+	});
+
 	it("should not detect a file change in initial scan", function(done) {
 		testHelper.file("a");
 		testHelper.tick(function() {
