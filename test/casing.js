@@ -7,7 +7,12 @@ var Watchpack = require("../lib/watchpack");
 var fixtures = path.join(__dirname, "fixtures");
 var testHelper = new TestHelper(fixtures);
 
-var fsIsCaseInsensitive = require("fs").realpathSync(path.join(__dirname, "..", "PACKAGE.JSON"));
+var fsIsCaseInsensitive;
+try {
+	fsIsCaseInsensitive = require("fs").realpathSync(path.join(__dirname, "..", "PACKAGE.JSON")) === path.join(__dirname, "..", "package.json");
+} catch(e) {
+	fsIsCaseInsensitive = false;
+}
 
 if(fsIsCaseInsensitive) {
 
