@@ -1,4 +1,5 @@
-var should = require("should");
+/*globals describe it beforeEach afterEach */
+require("should");
 var path = require("path");
 var TestHelper = require("./helpers/TestHelper");
 var Watchpack = require("../lib/watchpack");
@@ -16,7 +17,7 @@ describe("Watchpack", function() {
 			aggregateTimeout: 1000
 		});
 		var changeEvents = 0;
-		w.on("change", function(file, mtime) {
+		w.on("change", function(file) {
 			file.should.be.eql(path.join(fixtures, "a"));
 			changeEvents++;
 		});
@@ -37,8 +38,8 @@ describe("Watchpack", function() {
 			aggregateTimeout: 1000
 		});
 		var changeEvents = [];
-		w.on("change", function(file, mtime) {
-			if(changeEvents[changeEvents.length-1] === file)
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
 				return;
 			changeEvents.push(file);
 		});
@@ -77,8 +78,8 @@ describe("Watchpack", function() {
 			aggregateTimeout: 1000
 		});
 		var changeEvents = [];
-		w.on("change", function(file, mtime) {
-			if(changeEvents[changeEvents.length-1] === file)
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
 				return;
 			changeEvents.push(file);
 		});
@@ -102,8 +103,8 @@ describe("Watchpack", function() {
 			aggregateTimeout: 1000
 		});
 		var changeEvents = [];
-		w.on("change", function(file, mtime) {
-			if(changeEvents[changeEvents.length-1] === file)
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
 				return;
 			changeEvents.push(file);
 		});
@@ -128,8 +129,8 @@ describe("Watchpack", function() {
 			aggregateTimeout: 1000
 		});
 		var changeEvents = [];
-		w.on("change", function(file, mtime) {
-			if(changeEvents[changeEvents.length-1] === file)
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
 				return;
 			changeEvents.push(file);
 		});
@@ -157,10 +158,10 @@ describe("Watchpack", function() {
 		var w2 = new Watchpack({
 			aggregateTimeout: 1000
 		});
-		w.on("change", function(file, mtime) {
+		w.on("change", function() {
 			throw new Error("should not report change event");
 		});
-		w.on("aggregated", function(changes) {
+		w.on("aggregated", function() {
 			throw new Error("should not report aggregated event");
 		});
 		testHelper.file("a");
@@ -187,7 +188,7 @@ describe("Watchpack", function() {
 			aggregateTimeout: 1000
 		});
 		var changeEvents = 0;
-		w.on("change", function(file, mtime) {
+		w.on("change", function(file) {
 			file.should.be.eql(path.join(fixtures, "a"));
 			changeEvents++;
 		});
@@ -209,12 +210,12 @@ describe("Watchpack", function() {
 	it("should not detect a past change to a file (watched)", function(done) {
 		var w2 = new Watchpack();
 		var w = new Watchpack();
-		w.on("change", function(file, mtime) {
+		w.on("change", function() {
 			throw new Error("Should not be detected");
 		});
 		testHelper.tick(function() {
 			testHelper.file("b");
-			w2.watch([path.join(fixtures, "b")], [])
+			w2.watch([path.join(fixtures, "b")], []);
 			testHelper.tick(1000, function() { // wait for stable state
 				testHelper.file("a");
 				testHelper.tick(function() {
@@ -236,7 +237,7 @@ describe("Watchpack", function() {
 		var w2 = new Watchpack();
 		var w = new Watchpack();
 		var changeEvents = 0;
-		w.on("change", function(file, mtime) {
+		w.on("change", function(file) {
 			file.should.be.eql(path.join(fixtures, "a"));
 			changeEvents++;
 		});
@@ -249,7 +250,7 @@ describe("Watchpack", function() {
 		});
 		testHelper.tick(function() {
 			testHelper.file("b");
-			w2.watch([path.join(fixtures, "b")], [])
+			w2.watch([path.join(fixtures, "b")], []);
 			testHelper.tick(function() {
 				var startTime = Date.now();
 				testHelper.tick(function() {

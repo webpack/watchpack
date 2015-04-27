@@ -1,4 +1,5 @@
-var should = require("should");
+/*globals describe it beforeEach afterEach */
+require("should");
 var path = require("path");
 var TestHelper = require("./helpers/TestHelper");
 var OrgDirectoryWatcher = require("../lib/DirectoryWatcher");
@@ -8,7 +9,7 @@ var testHelper = new TestHelper(fixtures);
 
 var openWatchers = [];
 
-DirectoryWatcher = function(p) {
+var DirectoryWatcher = function(p) {
 	var d = new OrgDirectoryWatcher(p);
 	openWatchers.push(d);
 	var orgClose = d.close;
@@ -18,9 +19,9 @@ DirectoryWatcher = function(p) {
 		if(idx < 0)
 			throw new Error("DirectoryWatcher was already closed");
 		openWatchers.splice(idx, 1);
-	}
+	};
 	return d;
-}
+};
 
 describe("DirectoryWatcher", function() {
 	this.timeout(10000);
@@ -30,8 +31,8 @@ describe("DirectoryWatcher", function() {
 		openWatchers.forEach(function(d) {
 			console.log("DirectoryWatcher (" + d.path + ") was not closed.");
 			d.close();
-		})
-	})
+		});
+	});
 
 	it("should detect a file creation", function(done) {
 		var d = new DirectoryWatcher(fixtures);
@@ -65,7 +66,7 @@ describe("DirectoryWatcher", function() {
 		testHelper.tick(function() {
 			var d = new DirectoryWatcher(fixtures);
 			var a = d.watch(path.join(fixtures, "a"));
-			a.on("change", function(mtime) {
+			a.on("change", function() {
 				throw new Error("should not be detected");
 			});
 			testHelper.tick(function() {
@@ -81,7 +82,7 @@ describe("DirectoryWatcher", function() {
 		testHelper.tick(function() {
 			var d = new DirectoryWatcher(fixtures);
 			var a = d.watch(path.join(fixtures, "a"), start);
-			a.on("change", function(mtime) {
+			a.on("change", function() {
 				a.close();
 				done();
 			});
@@ -93,7 +94,7 @@ describe("DirectoryWatcher", function() {
 		testHelper.tick(function() {
 			var d = new DirectoryWatcher(fixtures);
 			var a = d.watch(path.join(fixtures, "a"));
-			a.on("change", function(mtime) {
+			a.on("change", function() {
 				throw new Error("should not be detected");
 			});
 			testHelper.tick(function() {
@@ -105,8 +106,7 @@ describe("DirectoryWatcher", function() {
 
 	var timings = {
 		slow: 300,
-		fast: 50,
-		// reallyFast: 5,
+		fast: 50
 	};
 	Object.keys(timings).forEach(function(name) {
 		var time = timings[name];

@@ -7,7 +7,12 @@
     "test": "test"
   },
   "scripts": {
-    "test": "mocha -R spec"
+    "pretest": "npm run lint",
+    "test": "mocha",
+    "travis": "npm run cover -- --report lcovonly",
+    "lint": "eslint lib",
+    "precover": "npm run lint",
+    "cover": "istanbul cover node_modules/mocha/bin/_mocha"
   },
   "repository": {
     "type": "git",
@@ -20,6 +25,9 @@
   },
   "homepage": "https://github.com/webpack/watchpack",
   "devDependencies": {
+    "coveralls": "^2.11.2",
+    "eslint": "^0.20.0",
+    "istanbul": "^0.3.13",
     "mocha": "^2.1.0",
     "rimraf": "^2.2.8",
     "should": "^4.6.0"
