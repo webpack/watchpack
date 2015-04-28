@@ -78,18 +78,20 @@ describe("DirectoryWatcher", function() {
 
 	it("should detect a file change in initial scan with start date", function(done) {
 		var start = new Date();
-		testHelper.file("a");
-		testHelper.tick(function() {
-			var d = new DirectoryWatcher(fixtures);
-			var a = d.watch(path.join(fixtures, "a"), start);
-			a.on("change", function() {
-				a.close();
-				done();
+		testHelper.tick(1000, function() {
+			testHelper.file("a");
+			testHelper.tick(1000, function() {
+				var d = new DirectoryWatcher(fixtures);
+				var a = d.watch(path.join(fixtures, "a"), start);
+				a.on("change", function() {
+					a.close();
+					done();
+				});
 			});
 		});
 	});
 
-	it("should detect a file change in initial scan without start date", function(done) {
+	it("should not detect a file change in initial scan without start date", function(done) {
 		testHelper.file("a");
 		testHelper.tick(function() {
 			var d = new DirectoryWatcher(fixtures);
