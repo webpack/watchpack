@@ -2,7 +2,7 @@
 
 Wrapper library for directory and file watching.
 
-[![Build Status](https://travis-ci.org/webpack/watchpack.svg?branch=master)](https://travis-ci.org/webpack/watchpack) [![Build status](https://ci.appveyor.com/api/projects/status/e5u2qvmugtv0r647/branch/master?svg=true)](https://ci.appveyor.com/project/sokra/watchpack/branch/master)
+[![Build Status](https://travis-ci.org/webpack/watchpack.svg?branch=master)](https://travis-ci.org/webpack/watchpack) [![Build status](https://ci.appveyor.com/api/projects/status/e5u2qvmugtv0r647/branch/master?svg=true)](https://ci.appveyor.com/project/sokra/watchpack/branch/master) [![Test coverage][coveralls-image]][coveralls-url]
 
 ## Concept
 
@@ -56,3 +56,5 @@ var fileTimes = wp.getTimes();
 // key: absolute path, value: timestamp as number
 ```
 
+[coveralls-url]: https://coveralls.io/r/webpack/webpack/
+[coveralls-image]: https://img.shields.io/coveralls/webpack/webpack.svg

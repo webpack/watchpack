@@ -52,6 +52,11 @@ describe("Watchpack", function() {
 				path.join(fixtures, "b"),
 				path.join(fixtures, "a")
 			]);
+			Object.keys(w.getTimes()).sort().should.be.eql([
+				fixtures,
+				path.join(fixtures, "a"),
+				path.join(fixtures, "b")
+			]);
 			w.close();
 			done();
 		});
@@ -98,6 +103,113 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should watch a directory (delete file)", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
+				return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			changes.should.be.eql([path.join(fixtures, "dir")]);
+			changeEvents.should.be.eql([path.join(fixtures, "dir", "a")]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.file(path.join("dir", "a"));
+		testHelper.tick(function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(function() {
+				testHelper.remove(path.join("dir", "a"));
+			});
+		});
+	});
+
+	it("should watch a directory (delete directory)", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
+				return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			changes.should.be.eql([path.join(fixtures, "dir")]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.dir(path.join("dir", "sub"));
+		testHelper.file(path.join("dir", "sub", "a"));
+		testHelper.tick(function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(function() {
+				testHelper.remove(path.join("dir", "sub"));
+			});
+		});
+	});
+
+	it("should watch a directory (delete directory2)", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
+				return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			changes.should.be.eql([path.join(fixtures, "dir")]);
+			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub")]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.dir(path.join("dir", "sub"));
+		testHelper.tick(function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(function() {
+				testHelper.remove(path.join("dir", "sub"));
+			});
+		});
+	});
+
+	it("should watch already watched directory", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
+				return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			changes.should.be.eql([path.join(fixtures, "dir")]);
+			changeEvents.should.be.eql([path.join(fixtures, "dir", "a")]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.file(path.join("dir", "a"));
+		testHelper.tick(function() {
+			w.watch([path.join(fixtures, "dir", "a")], []);
+			testHelper.tick(function() {
+				w.watch([], [path.join(fixtures, "dir")]);
+				testHelper.tick(function() {
+					testHelper.remove(path.join("dir", "a"));
+				});
+			});
+		});
+	});
+
 	it("should watch file in a sub directory", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
@@ -137,6 +249,12 @@ describe("Watchpack", function() {
 		w.on("aggregated", function(changes) {
 			changes.should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub", "sub", "a")]);
+			Object.keys(w.getTimes()).sort().should.be.eql([
+				path.join(fixtures, "dir"),
+				path.join(fixtures, "dir", "sub"),
+				path.join(fixtures, "dir", "sub", "sub"),
+				path.join(fixtures, "dir", "sub", "sub", "a")
+			]);
 			w.close();
 			done();
 		});
