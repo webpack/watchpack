@@ -44,6 +44,7 @@ wp.on("aggregated", function(changes) {
 // Watchpack.prototype.pause()
 wp.pause();
 // stops emitting events, but keeps watchers open
+// next "watch" call can reuse the watchers
 
 // Watchpack.prototype.close()
 wp.close();
@@ -56,5 +57,5 @@ var fileTimes = wp.getTimes();
 // key: absolute path, value: timestamp as number
 ```
 
-[coveralls-url]: https://coveralls.io/r/webpack/webpack/
-[coveralls-image]: https://img.shields.io/coveralls/webpack/webpack.svg
+[coveralls-url]: https://coveralls.io/r/webpack/watchpack/
+[coveralls-image]: https://img.shields.io/coveralls/webpack/watchpack.svg
