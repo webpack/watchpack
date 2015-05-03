@@ -40,7 +40,6 @@ describe("DirectoryWatcher", function() {
 		a.on("change", function(mtime) {
 			mtime.should.be.type("number");
 			Object.keys(d.getTimes()).sort().should.be.eql([
-				fixtures,
 				path.join(fixtures, "a")
 			]);
 			a.close();
