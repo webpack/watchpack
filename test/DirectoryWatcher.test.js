@@ -9,8 +9,8 @@ var testHelper = new TestHelper(fixtures);
 
 var openWatchers = [];
 
-var DirectoryWatcher = function(p) {
-	var d = new OrgDirectoryWatcher(p);
+var DirectoryWatcher = function(p, options) {
+	var d = new OrgDirectoryWatcher(p, options);
 	openWatchers.push(d);
 	var orgClose = d.close;
 	d.close = function() {
@@ -35,7 +35,7 @@ describe("DirectoryWatcher", function() {
 	});
 
 	it("should detect a file creation", function(done) {
-		var d = new DirectoryWatcher(fixtures);
+		var d = new DirectoryWatcher(fixtures, {});
 		var a = d.watch(path.join(fixtures, "a"));
 		a.on("change", function(mtime) {
 			mtime.should.be.type("number");
@@ -51,7 +51,7 @@ describe("DirectoryWatcher", function() {
 	});
 
 	it("should detect a file change", function(done) {
-		var d = new DirectoryWatcher(fixtures);
+		var d = new DirectoryWatcher(fixtures, {});
 		testHelper.file("a");
 		var a = d.watch(path.join(fixtures, "a"));
 		a.on("change", function(mtime) {
@@ -67,7 +67,7 @@ describe("DirectoryWatcher", function() {
 	it("should not detect a file change in initial scan", function(done) {
 		testHelper.file("a");
 		testHelper.tick(function() {
-			var d = new DirectoryWatcher(fixtures);
+			var d = new DirectoryWatcher(fixtures, {});
 			var a = d.watch(path.join(fixtures, "a"));
 			a.on("change", function() {
 				throw new Error("should not be detected");
@@ -84,7 +84,7 @@ describe("DirectoryWatcher", function() {
 		testHelper.tick(1000, function() {
 			testHelper.file("a");
 			testHelper.tick(1000, function() {
-				var d = new DirectoryWatcher(fixtures);
+				var d = new DirectoryWatcher(fixtures, {});
 				var a = d.watch(path.join(fixtures, "a"), start);
 				a.on("change", function() {
 					a.close();
@@ -97,7 +97,7 @@ describe("DirectoryWatcher", function() {
 	it("should not detect a file change in initial scan without start date", function(done) {
 		testHelper.file("a");
 		testHelper.tick(function() {
-			var d = new DirectoryWatcher(fixtures);
+			var d = new DirectoryWatcher(fixtures, {});
 			var a = d.watch(path.join(fixtures, "a"));
 			a.on("change", function() {
 				throw new Error("should not be detected");
@@ -116,7 +116,7 @@ describe("DirectoryWatcher", function() {
 	Object.keys(timings).forEach(function(name) {
 		var time = timings[name];
 		it("should detect multiple file changes (" + name + ")", function(done) {
-			var d = new DirectoryWatcher(fixtures);
+			var d = new DirectoryWatcher(fixtures, {});
 			testHelper.file("a");
 			testHelper.tick(function() {
 				var a = d.watch(path.join(fixtures, "a"));

@@ -25,6 +25,13 @@ var wp = new Watchpack({
 	// options:
 	aggregateTimeout: 1000
 	// fire "aggregated" event when after a change for 1000ms no additonal change occured
+	// aggregated defaults to undefined, which doesn't fire an "aggregated" event
+
+	poll: true
+	// poll: true - use polling with the default interval
+	// poll: 10000 - use polling with an interval of 10s
+	// poll defaults to undefined, which prefer native watching methods
+	// Note: enable polling when watching on a network path
 });
 
 // Watchpack.prototype.watch(string[] files, string[] directories, [number startTime])

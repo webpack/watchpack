@@ -119,6 +119,7 @@ describe("Watchpack", function() {
 			done();
 		});
 		testHelper.dir("dir");
+		testHelper.dir(path.join("dir", "subdir"));
 		testHelper.file(path.join("dir", "a"));
 		testHelper.tick(function() {
 			w.watch([path.join(fixtures, "dir", "a")], []);
