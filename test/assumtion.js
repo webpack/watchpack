@@ -20,7 +20,7 @@ describe("Assumtion", function() {
 			testHelper.file("a");
 			var after = Date.now();
 			var s = fs.statSync(path.join(fixtures, "a"));
-			(+s.mtime).should.be.aboveOrEqual(before);
+			(+s.mtime).should.be.aboveOrEqual(before - 2000);
 			(+s.mtime).should.be.below(after + 2000);
 			if(i-- === 0)
 				done();
