@@ -26,15 +26,15 @@
   "homepage": "https://github.com/webpack/watchpack",
   "devDependencies": {
     "coveralls": "^2.11.2",
-    "eslint": "^0.20.0",
-    "istanbul": "^0.3.13",
+    "eslint": "^2.9.0",
+    "istanbul": "^0.4.3",
     "mocha": "^2.1.0",
     "rimraf": "^2.2.8",
-    "should": "^6.0.1"
+    "should": "^8.3.1"
   },
   "dependencies": {
-    "async": "^0.9.0",
-    "chokidar": "^1.0.0",
+    "async": "2.0.0-rc.4",
+    "chokidar": "^1.4.3",
     "graceful-fs": "^4.1.2"
   }
 }
