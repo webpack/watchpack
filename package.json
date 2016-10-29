@@ -6,6 +6,9 @@
   "directories": {
     "test": "test"
   },
+  "files": [
+    "lib/"
+  ],
   "scripts": {
     "pretest": "npm run lint",
     "test": "mocha",
