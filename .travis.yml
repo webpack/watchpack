@@ -4,10 +4,10 @@ os:
   - linux
   - osx
 node_js:
-  - node
-  - "5"
+  - "7"
+  - "6"
   - "4"
-  - "0.12"
+  - "v0.12.17"
 script: npm run travis
 
 after_success:
