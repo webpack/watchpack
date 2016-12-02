@@ -325,7 +325,9 @@ class DirectoryWatcher extends EventEmitter {
         });
     }
 
-    getTimes() {
+    getTimes(): {
+        [path: string]: number;
+    } {
         const obj = {};
         let selfTime = 0;
         Object.keys(this.files).forEach(function (file) {

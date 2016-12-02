@@ -22,7 +22,9 @@ declare class Watchpack extends EventEmitter {
 
     pause(): void;
 
-    getTimes(): {};
+    getTimes(): {
+        [path: string]: number;
+    };
 
     _fileWatcher(file: string, watcher: Watcher): Watcher;
 

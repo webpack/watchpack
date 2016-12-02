@@ -82,7 +82,9 @@ class Watchpack extends EventEmitter {
         }
     }
 
-    getTimes() {
+    getTimes(): {
+        [path: string]: number;
+    } {
         const directoryWatchers: DirectoryWatcher[] = [];
         addWatchersToArray(this.fileWatchers.concat(this.dirWatchers), directoryWatchers);
         const obj = {};

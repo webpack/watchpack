@@ -32,11 +32,11 @@
     "coveralls": "^2.11.2",
     "eslint": "^2.9.0",
     "istanbul": "^0.4.3",
-    "mocha": "^3.0.0",
+    "mocha": "^2.1.0",
     "rimraf": "^2.2.8",
     "should": "^8.3.1",
     "tslint": "^4.0.0",
-    "typescript": "next"
+    "typescript": "^2.0.0"
   },
   "dependencies": {
     "@types/async": "^2.0.34",

@@ -49,7 +49,9 @@ declare class DirectoryWatcher extends EventEmitter {
 
     doInitialScan(): void;
 
-    getTimes(): {};
+    getTimes(): {
+        [path: string]: number;
+    };
 
     close(): void;
 }
