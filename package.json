@@ -15,7 +15,8 @@
     "travis": "npm run cover -- --report lcovonly",
     "lint": "eslint lib",
     "precover": "npm run lint",
-    "cover": "istanbul cover node_modules/mocha/bin/_mocha"
+    "cover": "istanbul cover node_modules/mocha/bin/_mocha",
+    "build": "tsc || true"
   },
   "repository": {
     "type": "git",
@@ -31,11 +32,17 @@
     "coveralls": "^2.11.2",
     "eslint": "^2.9.0",
     "istanbul": "^0.4.3",
-    "mocha": "^2.1.0",
+    "mocha": "^3.0.0",
     "rimraf": "^2.2.8",
-    "should": "^8.3.1"
+    "should": "^8.3.1",
+    "tslint": "^4.0.0",
+    "typescript": "next"
   },
   "dependencies": {
+    "@types/async": "^2.0.34",
+    "@types/chokidar": "^1.4.29",
+    "@types/graceful-fs": "^2.0.29",
+    "@types/node": "^0.0.2",
     "async": "^2.1.2",
     "chokidar": "^1.4.3",
     "graceful-fs": "^4.1.2"
