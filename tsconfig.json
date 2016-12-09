@@ -1,0 +1,24 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "noEmit": false,
+    "sourceMap": true,
+    "lib": [
+      "es2016",
+      "dom"
+    ],
+    "declaration": true,
+    "declarationDir": "./typings",
+    "noImplicitAny": true,
+    "noImplicitThis": false,
+    "suppressImplicitAnyIndexErrors": true,
+    "pretty": true,
+    "noImplicitReturns": false,
+    "strictNullChecks": false
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
