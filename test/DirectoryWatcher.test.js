@@ -143,4 +143,18 @@ describe("DirectoryWatcher", function() {
 			});
 		});
 	});
+
+	it("should detect a file removal", function(done) {
+		testHelper.file("a");
+		var d = new DirectoryWatcher(fixtures, {});
+		var a = d.watch(path.join(fixtures, "a"));
+		a.on("remove", function(mtime) {
+			(typeof mtime === 'undefined').should.be.true;
+			a.close();
+			done();
+		});
+		testHelper.tick(function() {
+			testHelper.remove("a");
+		});
+	});
 });
