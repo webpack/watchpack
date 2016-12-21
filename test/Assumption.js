@@ -2,6 +2,7 @@
 require("should");
 var path = require("path");
 var fs = require("fs");
+var chokidar = require("chokidar");
 var TestHelper = require("./helpers/TestHelper");
 var Watchpack = require("../lib/watchpack");
 
@@ -52,5 +53,38 @@ describe("Assumption", function() {
 			done();
 		}
 	});
+
+	it("should fire events not after start", function(done) {
+		testHelper.dir("watch-test-directory");
+		testHelper.file("watch-test-file");
+		var watcher = chokidar.watch(fixtures, {
+			ignoreInitial: true,
+			persistent: true,
+			followSymlinks: false,
+			depth: 0,
+			atomic: false,
+			alwaysStat: true,
+			ignorePermissionErrors: true
+		});
+		watcher.on("add", function(arg) {
+			done(new Error("should not be emitted " + arg));
+			done = function() {};
+		});
+		watcher.on("change", function(arg) {
+			done(new Error("should not be emitted " + arg));
+			done = function() {};
+		});
+		watcher.on("error", function(err) {
+			done(err);
+			done = function() {};
+		});
+		testHelper.tick(500, function() {
+			testHelper.file("watch-test-directory/watch-test-file");
+			testHelper.tick(500, function() {
+				watcher.close();
+				done();
+			});
+		});
+	})
 });
 
