@@ -14,19 +14,43 @@ describe("Assumption", function() {
 	afterEach(testHelper.after);
 
 	it("should have a file system with correct mtime behavior", function(done) {
-		var i = 10;
+		var i = 60;
+		var count = 60;
+		var minDiffBefore = +Infinity;
+		var maxDiffBefore = -Infinity;
+		var sumDiffBefore = 0;
+		var minDiffAfter = +Infinity;
+		var maxDiffAfter = -Infinity;
+		var sumDiffAfter = 0;
 		testHelper.tick(100, function checkMtime() {
 			var before = Date.now();
 			testHelper.file("a");
 			var after = Date.now();
 			var s = fs.statSync(path.join(fixtures, "a"));
-			(+s.mtime).should.be.aboveOrEqual(before - 2000);
-			(+s.mtime).should.be.below(after + 2000);
-			if(i-- === 0)
-				done();
-			else
+			var diffBefore = +s.mtime - before;
+			if(diffBefore < minDiffBefore) minDiffBefore = diffBefore;
+			if(diffBefore > maxDiffBefore) maxDiffBefore = diffBefore;
+			sumDiffBefore += diffBefore;
+			var diffAfter = +s.mtime - after;
+			if(diffAfter < minDiffAfter) minDiffAfter = diffAfter;
+			if(diffAfter > maxDiffAfter) maxDiffAfter = diffAfter;
+			sumDiffAfter += diffAfter;
+			if(i-- === 0) {
+				afterMeassure();
+			} else {
 				testHelper.tick(100, checkMtime);
+			}
 		});
+
+		function afterMeassure() {
+			console.log("mtime accuracy (before): [" + minDiffBefore + " ; " + maxDiffBefore + "] avg " + Math.round(sumDiffBefore / count));
+			console.log("mtime accuracy (after): [" + minDiffAfter + " ; " + maxDiffAfter + "] avg " + Math.round(sumDiffAfter / count));
+			minDiffBefore.should.be.aboveOrEqual(-2000);
+			maxDiffBefore.should.be.below(2000);
+			minDiffAfter.should.be.aboveOrEqual(-2000);
+			maxDiffAfter.should.be.below(2000);
+			done();
+		}
 	});
 });
 
