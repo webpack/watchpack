@@ -115,8 +115,35 @@ describe("Assumption", function() {
 	});
 
 	it("should fire events not after start", function(done) {
+		testHelper.file("watch-test-file-a");
+		var watcher = chokidar.watch(fixtures, {
+			ignoreInitial: true,
+			persistent: true,
+			followSymlinks: false,
+			depth: 0,
+			atomic: false,
+			alwaysStat: true,
+			ignorePermissionErrors: true
+		});
+		watcher.on("add", function(arg) {
+			done(new Error("should not be emitted " + arg));
+			done = function() {};
+		});
+		watcher.on("change", function(arg) {
+			done(new Error("should not be emitted " + arg));
+			done = function() {};
+		});
+		watcher.on("error", function(err) {
+			done(err);
+			done = function() {};
+		});
+		testHelper.tick(500, function() {
+			watcher.close();
+			done();
+		});
+	});
+	it("should fire events in subdirectories", function(done) {
 		testHelper.dir("watch-test-directory");
-		testHelper.file("watch-test-file");
 		var watcher = chokidar.watch(fixtures, {
 			ignoreInitial: true,
 			persistent: true,
@@ -145,6 +172,39 @@ describe("Assumption", function() {
 				done();
 			});
 		});
-	})
+	});
+
+	[0, 1, 5, 10, 20, 50, 100, 200, 300, 500, 700, 1000].forEach(function(delay) {
+		it("should fire events not after start and " + delay + "ms delay", function(done) {
+			testHelper.file("watch-test-file-" + delay);
+			testHelper.tick(delay, function() {
+				var watcher = chokidar.watch(fixtures, {
+					ignoreInitial: true,
+					persistent: true,
+					followSymlinks: false,
+					depth: 0,
+					atomic: false,
+					alwaysStat: true,
+					ignorePermissionErrors: true
+				});
+				watcher.on("add", function(arg) {
+					done(new Error("should not be emitted " + arg));
+					done = function() {};
+				});
+				watcher.on("change", function(arg) {
+					done(new Error("should not be emitted " + arg));
+					done = function() {};
+				});
+				watcher.on("error", function(err) {
+					done(err);
+					done = function() {};
+				});
+				testHelper.tick(500, function() {
+					watcher.close();
+					done();
+				});
+			});
+		});
+	});
 });
 
