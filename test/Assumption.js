@@ -11,13 +11,13 @@ var testHelper = new TestHelper(fixtures);
 
 describe("Assumption", function() {
 	this.timeout(10000);
-	var watcher = null;
+	var watcherToClose = null;
 
 	beforeEach(testHelper.before);
 	afterEach(function(done) {
-		if(watcher) {
-			watcher.close();
-			watcher = null;
+		if(watcherToClose) {
+			watcherToClose.close();
+			watcherToClose = null;
 		}
 		testHelper.after(done);
 	});
@@ -74,7 +74,7 @@ describe("Assumption", function() {
 		var minDiffAfter = +Infinity;
 		var maxDiffAfter = -Infinity;
 		var sumDiffAfter = 0;
-		var watcher = chokidar.watch(fixtures, {
+		var watcher = watcherToClose = chokidar.watch(fixtures, {
 			ignoreInitial: true,
 			persistent: true,
 			followSymlinks: false,
@@ -124,7 +124,7 @@ describe("Assumption", function() {
 
 	it("should not fire events in subdirectories", function(done) {
 		testHelper.dir("watch-test-directory");
-		watcher = chokidar.watch(fixtures, {
+		var watcher = watcherToClose = chokidar.watch(fixtures, {
 			ignoreInitial: true,
 			persistent: true,
 			followSymlinks: false,
@@ -148,8 +148,6 @@ describe("Assumption", function() {
 		testHelper.tick(500, function() {
 			testHelper.file("watch-test-directory/watch-test-file");
 			testHelper.tick(500, function() {
-				watcher.close();
-				watcher = null;
 				done();
 			});
 		});
@@ -159,7 +157,7 @@ describe("Assumption", function() {
 		it("should fire events not after start and " + delay + "ms delay", function(done) {
 			testHelper.file("watch-test-file-" + delay);
 			testHelper.tick(delay, function() {
-				watcher = chokidar.watch(fixtures, {
+				var watcher = watcherToClose = chokidar.watch(fixtures, {
 					ignoreInitial: true,
 					persistent: true,
 					followSymlinks: false,
@@ -181,8 +179,6 @@ describe("Assumption", function() {
 					done = function() {};
 				});
 				testHelper.tick(500, function() {
-					watcher.close();
-					watcher = null;
 					done();
 				});
 			});
@@ -191,7 +187,7 @@ describe("Assumption", function() {
 
 	it("should not fire events after start", function(done) {
 		testHelper.file("watch-test-file-a");
-		watcher = chokidar.watch(fixtures, {
+		var watcher = watcherToClose = chokidar.watch(fixtures, {
 			ignoreInitial: true,
 			persistent: true,
 			followSymlinks: false,
@@ -213,8 +209,6 @@ describe("Assumption", function() {
 			done = function() {};
 		});
 		testHelper.tick(500, function() {
-			watcher.close();
-			watcher = null;
 			done();
 		});
 	});
