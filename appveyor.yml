@@ -8,11 +8,12 @@ init:
 environment:
   matrix:
     - nodejs_version: 0.12
-    - nodejs_version: 4.4
-    - nodejs_version: 6.1
+    - nodejs_version: 4
+    - nodejs_version: 6
+    - nodejs_version: 7
 
 install:
-  - ps: Install-Product node $env:nodejs_version
+  - ps: Install-Product node (Get-NodeJsLatestBuild $env:nodejs_version) x64
   - npm install
 
 build: off
