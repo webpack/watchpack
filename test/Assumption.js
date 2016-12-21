@@ -8,7 +8,7 @@ var Watchpack = require("../lib/watchpack");
 var fixtures = path.join(__dirname, "fixtures");
 var testHelper = new TestHelper(fixtures);
 
-describe("Assumtion", function() {
+describe("Assumption", function() {
 	this.timeout(10000);
 	beforeEach(testHelper.before);
 	afterEach(testHelper.after);
