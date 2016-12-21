@@ -23,6 +23,7 @@ describe("Assumption", function() {
 	});
 
 	it("should have a file system with correct mtime behavior (stats)", function(done) {
+		this.timeout(20000);
 		var i = 60;
 		var count = 60;
 		var minDiffBefore = +Infinity;
@@ -63,6 +64,7 @@ describe("Assumption", function() {
 	});
 
 	it("should have a file system with correct mtime behavior (chokidar)", function(done) {
+		this.timeout(20000);
 		testHelper.file("a");
 		var i = 60;
 		var count = 60;
