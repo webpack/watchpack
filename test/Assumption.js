@@ -11,8 +11,16 @@ var testHelper = new TestHelper(fixtures);
 
 describe("Assumption", function() {
 	this.timeout(10000);
+	var watcher = null;
+
 	beforeEach(testHelper.before);
-	afterEach(testHelper.after);
+	afterEach(function(done) {
+		if(watcher) {
+			watcher.close();
+			watcher = null;
+		}
+		testHelper.after(done);
+	});
 
 	it("should have a file system with correct mtime behavior (stats)", function(done) {
 		var i = 60;
@@ -114,37 +122,9 @@ describe("Assumption", function() {
 		}
 	});
 
-	it("should fire events not after start", function(done) {
-		testHelper.file("watch-test-file-a");
-		var watcher = chokidar.watch(fixtures, {
-			ignoreInitial: true,
-			persistent: true,
-			followSymlinks: false,
-			depth: 0,
-			atomic: false,
-			alwaysStat: true,
-			ignorePermissionErrors: true
-		});
-		watcher.on("add", function(arg) {
-			done(new Error("should not be emitted " + arg));
-			done = function() {};
-		});
-		watcher.on("change", function(arg) {
-			done(new Error("should not be emitted " + arg));
-			done = function() {};
-		});
-		watcher.on("error", function(err) {
-			done(err);
-			done = function() {};
-		});
-		testHelper.tick(500, function() {
-			watcher.close();
-			done();
-		});
-	});
-	it("should fire events in subdirectories", function(done) {
+	it("should not fire events in subdirectories", function(done) {
 		testHelper.dir("watch-test-directory");
-		var watcher = chokidar.watch(fixtures, {
+		watcher = chokidar.watch(fixtures, {
 			ignoreInitial: true,
 			persistent: true,
 			followSymlinks: false,
@@ -169,16 +149,17 @@ describe("Assumption", function() {
 			testHelper.file("watch-test-directory/watch-test-file");
 			testHelper.tick(500, function() {
 				watcher.close();
+				watcher = null;
 				done();
 			});
 		});
 	});
 
-	[0, 1, 5, 10, 20, 50, 100, 200, 300, 500, 700, 1000].forEach(function(delay) {
+	[0, 1, 5, 10, 20, 50, 100, 200, 300, 500, 700, 1000].reverse().forEach(function(delay) {
 		it("should fire events not after start and " + delay + "ms delay", function(done) {
 			testHelper.file("watch-test-file-" + delay);
 			testHelper.tick(delay, function() {
-				var watcher = chokidar.watch(fixtures, {
+				watcher = chokidar.watch(fixtures, {
 					ignoreInitial: true,
 					persistent: true,
 					followSymlinks: false,
@@ -201,9 +182,40 @@ describe("Assumption", function() {
 				});
 				testHelper.tick(500, function() {
 					watcher.close();
+					watcher = null;
 					done();
 				});
 			});
+		});
+	});
+
+	it("should not fire events after start", function(done) {
+		testHelper.file("watch-test-file-a");
+		watcher = chokidar.watch(fixtures, {
+			ignoreInitial: true,
+			persistent: true,
+			followSymlinks: false,
+			depth: 0,
+			atomic: false,
+			alwaysStat: true,
+			ignorePermissionErrors: true
+		});
+		watcher.on("add", function(arg) {
+			done(new Error("should not be emitted " + arg));
+			done = function() {};
+		});
+		watcher.on("change", function(arg) {
+			done(new Error("should not be emitted " + arg));
+			done = function() {};
+		});
+		watcher.on("error", function(err) {
+			done(err);
+			done = function() {};
+		});
+		testHelper.tick(500, function() {
+			watcher.close();
+			watcher = null;
+			done();
 		});
 	});
 });
