@@ -38,6 +38,6 @@
   "dependencies": {
     "async": "^2.1.2",
     "graceful-fs": "^4.1.2",
-    "sane": "^1.4.1"
+    "sane": "^1.5.0"
   }
 }
