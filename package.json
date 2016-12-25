@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/webpack/watchpack",
   "devDependencies": {
+    "chokidar": "^1.4.3",
     "coveralls": "^2.11.2",
     "eslint": "^2.9.0",
     "istanbul": "^0.4.3",
