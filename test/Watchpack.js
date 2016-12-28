@@ -94,15 +94,15 @@ describe("Watchpack", function() {
 			done();
 		});
 		testHelper.dir("dir");
-		testHelper.tick(function() {
+		testHelper.tick(200, function() {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(200, function() {
 				testHelper.file(path.join("dir", "a"));
 			});
 		});
 	});
 
-	it("should watch a file than a directory", function(done) {
+	it("should watch a file then a directory", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
 		});
