@@ -60,7 +60,7 @@ TestHelper.prototype.remove = function remove(name) {
 TestHelper.prototype.tick = function tick(arg, fn) {
 	if(typeof arg === "function") {
 		fn = arg;
-		arg = 100;
+		arg = 400;
 	}
 	setTimeout(function() {
 		fn();
