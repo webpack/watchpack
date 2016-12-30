@@ -94,15 +94,15 @@ describe("Watchpack", function() {
 			done();
 		});
 		testHelper.dir("dir");
-		testHelper.tick(function() {
+		testHelper.tick(200, function() {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(200, function() {
 				testHelper.file(path.join("dir", "a"));
 			});
 		});
 	});
 
-	it("should watch a file than a directory", function(done) {
+	it("should watch a file then a directory", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
 		});
@@ -444,6 +444,71 @@ describe("Watchpack", function() {
 					testHelper.file("a");
 					testHelper.tick(function() {
 						w.watch([path.join(fixtures, "a")], [], startTime);
+					});
+				});
+			});
+		});
+	});
+
+	it("should watch a single file removal", function(done) {
+		testHelper.file("a");
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var removeEvents = 0;
+		w.on("remove", function(file) {
+			file.should.be.eql(path.join(fixtures, "a"));
+			removeEvents++;
+		});
+		w.on("aggregated", function(changes, removals) {
+			removals.should.be.eql([path.join(fixtures, "a")]);
+			removeEvents.should.be.eql(1);
+			w.close();
+			done();
+		});
+		w.watch([path.join(fixtures, "a")], []);
+		testHelper.tick(function() {
+			testHelper.remove("a");
+		});
+	});
+
+	it("should watch multiple file removals", function(done) {
+		testHelper.file("a");
+		testHelper.file("b");
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var removeEvents = [];
+		w.on("remove", function(file) {
+			if(removeEvents[removeEvents.length - 1] === file)
+				return;
+			removeEvents.push(file);
+		});
+		w.on("aggregated", function(changes, removals) {
+			removals.sort().should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
+			removeEvents.should.be.eql([
+				path.join(fixtures, "a"),
+				path.join(fixtures, "b"),
+				path.join(fixtures, "a"),
+				path.join(fixtures, "b"),
+			]);
+			Object.keys(w.getTimes()).sort().should.be.eql([]);
+			w.close();
+			done();
+		});
+		w.watch([path.join(fixtures, "a"), path.join(fixtures, "b")], []);
+		testHelper.tick(function() {
+			testHelper.remove("a");
+			testHelper.tick(function() {
+				testHelper.remove("b");
+				testHelper.tick(function() {
+					testHelper.file("a");
+					testHelper.file("b");
+					testHelper.tick(function() {
+						testHelper.remove("a");
+						testHelper.tick(function() {
+							testHelper.remove("b");
+						});
 					});
 				});
 			});
