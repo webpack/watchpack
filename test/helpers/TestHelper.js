@@ -18,7 +18,7 @@ module.exports = TestHelper;
 
 TestHelper.prototype._before = function before(done) {
 	Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
-	this.tick(function() {
+	this.tick(400, function() {
 		rimraf.sync(this.testdir);
 		fs.mkdirSync(this.testdir);
 		done();

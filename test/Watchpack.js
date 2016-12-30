@@ -60,15 +60,15 @@ describe("Watchpack", function() {
 			done();
 		});
 		w.watch([path.join(fixtures, "a"), path.join(fixtures, "b")], []);
-		testHelper.tick(function() {
+		testHelper.tick(400, function() {
 			testHelper.file("a");
-			testHelper.tick(function() {
+			testHelper.tick(400, function() {
 				testHelper.file("b");
-				testHelper.tick(function() {
+				testHelper.tick(400, function() {
 					testHelper.file("a");
-					testHelper.tick(function() {
+					testHelper.tick(400, function() {
 						testHelper.file("b");
-						testHelper.tick(function() {
+						testHelper.tick(400, function() {
 							testHelper.file("a");
 						});
 					});
@@ -405,9 +405,9 @@ describe("Watchpack", function() {
 				testHelper.file("a");
 				testHelper.tick(function() {
 					var startTime = Date.now();
-					testHelper.tick(function() {
+					testHelper.tick(400, function() {
 						w.watch([path.join(fixtures, "a")], [], startTime);
-						testHelper.tick(function() {
+						testHelper.tick(1000, function() {
 							w.close();
 							w2.close();
 							done();
