@@ -264,11 +264,11 @@ describe("Watchpack", function() {
 		});
 		testHelper.dir("dir");
 		testHelper.file(path.join("dir", "a"));
-		testHelper.tick(function() {
+		testHelper.tick(400, function() {
 			w.watch([path.join(fixtures, "dir", "a")], []);
-			testHelper.tick(function() {
+			testHelper.tick(1000, function() {
 				w.watch([], [path.join(fixtures, "dir")]);
-				testHelper.tick(function() {
+				testHelper.tick(400, function() {
 					testHelper.remove(path.join("dir", "a"));
 				});
 			});
