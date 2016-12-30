@@ -352,18 +352,16 @@ describe("Watchpack", function() {
 			throw new Error("should not report aggregated event");
 		});
 		testHelper.file("a");
-		testHelper.tick(function() {
+		testHelper.tick(400, function() {
 			w2.watch([path.join(fixtures, "a")], []);
 			testHelper.tick(1000, function() { // wait for initial scan
 				testHelper.mtime("a", Date.now() + 1000000);
-				testHelper.tick(function() {
+				testHelper.tick(400, function() {
 					w.watch([path.join(fixtures, "a")], []);
-					testHelper.tick(function() {
-						testHelper.tick(function() {
-							w2.close();
-							w.close();
-							done();
-						});
+					testHelper.tick(1000, function() {
+						w2.close();
+						w.close();
+						done();
 					});
 				});
 			});
@@ -442,7 +440,7 @@ describe("Watchpack", function() {
 				var startTime = Date.now();
 				testHelper.tick(function() {
 					testHelper.file("a");
-					testHelper.tick(function() {
+					testHelper.tick(400, function() {
 						w.watch([path.join(fixtures, "a")], [], startTime);
 					});
 				});
@@ -466,9 +464,11 @@ describe("Watchpack", function() {
 			w.close();
 			done();
 		});
-		w.watch([path.join(fixtures, "a")], []);
-		testHelper.tick(function() {
-			testHelper.remove("a");
+		testHelper.tick(400, function() {
+			w.watch([path.join(fixtures, "a")], []);
+			testHelper.tick(function() {
+				testHelper.remove("a");
+			});
 		});
 	});
 
@@ -496,18 +496,20 @@ describe("Watchpack", function() {
 			w.close();
 			done();
 		});
-		w.watch([path.join(fixtures, "a"), path.join(fixtures, "b")], []);
-		testHelper.tick(function() {
-			testHelper.remove("a");
+		testHelper.tick(400, function() {
+			w.watch([path.join(fixtures, "a"), path.join(fixtures, "b")], []);
 			testHelper.tick(function() {
-				testHelper.remove("b");
+				testHelper.remove("a");
 				testHelper.tick(function() {
-					testHelper.file("a");
-					testHelper.file("b");
+					testHelper.remove("b");
 					testHelper.tick(function() {
-						testHelper.remove("a");
+						testHelper.file("a");
+						testHelper.file("b");
 						testHelper.tick(function() {
-							testHelper.remove("b");
+							testHelper.remove("a");
+							testHelper.tick(function() {
+								testHelper.remove("b");
+							});
 						});
 					});
 				});
