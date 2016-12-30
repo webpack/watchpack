@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/webpack/watchpack",
   "devDependencies": {
+    "codecov.io": "^0.1.6",
     "coveralls": "^2.11.2",
     "eslint": "^2.9.0",
     "istanbul": "^0.4.3",
