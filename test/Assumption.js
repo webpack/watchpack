@@ -187,4 +187,3 @@ describe("Assumption", function() {
 		});
 	});
 });
-
