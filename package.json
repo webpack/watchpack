@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/webpack/watchpack",
   "devDependencies": {
+    "chokidar": "^1.4.3",
     "codecov.io": "^0.1.6",
     "coveralls": "^2.11.2",
     "eslint": "^2.9.0",
@@ -38,7 +39,7 @@
   },
   "dependencies": {
     "async": "^2.1.2",
-    "chokidar": "^1.4.3",
-    "graceful-fs": "^4.1.2"
+    "graceful-fs": "^4.1.2",
+    "sane": "^1.5.0"
   }
 }
