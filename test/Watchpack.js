@@ -356,7 +356,7 @@ describe("Watchpack", function() {
 			w2.watch([path.join(fixtures, "a")], []);
 			testHelper.tick(1000, function() { // wait for initial scan
 				testHelper.mtime("a", Date.now() + 1000000);
-				testHelper.tick(1000, function() {
+				testHelper.tick(400, function() {
 					w.watch([path.join(fixtures, "a")], []);
 					testHelper.tick(1000, function() {
 						w2.close();
