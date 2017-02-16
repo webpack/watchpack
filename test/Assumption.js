@@ -3,6 +3,7 @@ require("should");
 var path = require("path");
 var fs = require("fs");
 var chokidar = require("chokidar");
+var sane = require("sane");
 var TestHelper = require("./helpers/TestHelper");
 var Watchpack = require("../lib/watchpack");
 
@@ -116,6 +117,59 @@ describe("Assumption", function() {
 		function afterMeassure() {
 			console.log("mtime chokidar accuracy (before): [" + minDiffBefore + " ; " + maxDiffBefore + "] avg " + Math.round(sumDiffBefore / count));
 			console.log("mtime chokidar accuracy (after): [" + minDiffAfter + " ; " + maxDiffAfter + "] avg " + Math.round(sumDiffAfter / count));
+			minDiffBefore.should.be.aboveOrEqual(-2000);
+			maxDiffBefore.should.be.below(2000);
+			minDiffAfter.should.be.aboveOrEqual(-2000);
+			maxDiffAfter.should.be.below(2000);
+			done();
+		}
+	});
+
+	it("should have a file system with correct mtime behavior (sane)", function(done) {
+		this.timeout(20000);
+		testHelper.file("a");
+		var i = 60;
+		var count = 60;
+		var before;
+		var after;
+		var minDiffBefore = +Infinity;
+		var maxDiffBefore = -Infinity;
+		var sumDiffBefore = 0;
+		var minDiffAfter = +Infinity;
+		var maxDiffAfter = -Infinity;
+		var sumDiffAfter = 0;
+		var watcher = watcherToClose = sane(fixtures);
+		testHelper.tick(100, function() {
+			watcher.on("change", function(path, root, s) {
+				if(before && after) {
+					var diffBefore = +s.mtime - before;
+					if(diffBefore < minDiffBefore) minDiffBefore = diffBefore;
+					if(diffBefore > maxDiffBefore) maxDiffBefore = diffBefore;
+					sumDiffBefore += diffBefore;
+					var diffAfter = +s.mtime - after;
+					if(diffAfter < minDiffAfter) minDiffAfter = diffAfter;
+					if(diffAfter > maxDiffAfter) maxDiffAfter = diffAfter;
+					sumDiffAfter += diffAfter;
+					before = after = undefined;
+					if(i-- === 0) {
+						afterMeassure();
+					} else {
+						testHelper.tick(100, checkMtime);
+					}
+				}
+			});
+			testHelper.tick(100, checkMtime);
+		});
+
+		function checkMtime() {
+			before = Date.now();
+			testHelper.file("a");
+			after = Date.now();
+		}
+
+		function afterMeassure() {
+			console.log("mtime sane accuracy (before): [" + minDiffBefore + " ; " + maxDiffBefore + "] avg " + Math.round(sumDiffBefore / count));
+			console.log("mtime sane accuracy (after): [" + minDiffAfter + " ; " + maxDiffAfter + "] avg " + Math.round(sumDiffAfter / count));
 			minDiffBefore.should.be.aboveOrEqual(-2000);
 			maxDiffBefore.should.be.below(2000);
 			minDiffAfter.should.be.aboveOrEqual(-2000);
