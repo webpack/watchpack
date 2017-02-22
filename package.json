@@ -33,7 +33,7 @@
     "eslint": "^2.9.0",
     "istanbul": "^0.4.3",
     "mocha": "^2.1.0",
-    "rimraf": "^2.2.8",
+    "rimraf": "~2.5.0",
     "should": "^8.3.1"
   },
   "dependencies": {
