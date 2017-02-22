@@ -492,7 +492,10 @@ describe("Watchpack", function() {
 				path.join(fixtures, "a"),
 				path.join(fixtures, "b"),
 			]);
-			Object.keys(w.getTimes()).sort().should.be.eql([]);
+			Object.keys(w.getTimes()).sort().should.be.eql([
+				path.join(fixtures, "a"),
+				path.join(fixtures, "b")
+			]);
 			w.close();
 			done();
 		});
