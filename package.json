@@ -34,7 +34,8 @@
     "istanbul": "^0.4.3",
     "mocha": "^2.1.0",
     "rimraf": "~2.5.0",
-    "should": "^8.3.1"
+    "should": "^8.3.1",
+    "standard-version": "^4.0.0"
   },
   "dependencies": {
     "async": "^2.1.2",
