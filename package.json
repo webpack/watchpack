@@ -15,7 +15,8 @@
     "travis": "npm run cover -- --report lcovonly",
     "lint": "eslint lib",
     "precover": "npm run lint",
-    "cover": "istanbul cover node_modules/mocha/bin/_mocha"
+    "cover": "istanbul cover node_modules/mocha/bin/_mocha",
+    "release": "standard-version"
   },
   "repository": {
     "type": "git",
