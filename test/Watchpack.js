@@ -338,6 +338,36 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should watch file in a directory that contains special glob characters", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
+				return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			changes.should.be.eql([path.join(fixtures, "dir")]);
+			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub()", "a")]);
+			var times = w.getTimes();
+			times[path.join(fixtures, "dir")].should.be.type("number");
+			times[path.join(fixtures, "dir")].should.be.eql(times[path.join(fixtures, "dir", "sub()", "a")]);
+						times[path.join(fixtures, "dir", "sub()")].should.be.eql(times[path.join(fixtures, "dir", "sub()", "a")]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.dir(path.join("dir", "sub()"));
+		testHelper.tick(function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(function() {
+				testHelper.file(path.join("dir", "sub()", "a"));
+			});
+		});
+	});
+
 	it("should detect a single change to future timestamps", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
