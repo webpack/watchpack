@@ -194,6 +194,56 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should watch a missing directory", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
+				return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			changes.should.be.eql([path.join(fixtures, "dir", "sub")]);
+			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub")]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.tick(function() {
+			w.watch([], [path.join(fixtures, "dir", "sub")]);
+			testHelper.tick(function() {
+				testHelper.dir(path.join("dir", "sub"));
+			});
+		});
+	});
+
+	it("should watch a directory (add directory)", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
+				return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			changes.should.be.eql([path.join(fixtures, "dir")]);
+			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub")]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.tick(function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(function() {
+				testHelper.dir(path.join("dir", "sub"));
+			});
+		});
+	});
+
 	it("should watch a directory (delete directory)", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
