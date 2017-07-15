@@ -7,10 +7,9 @@ init:
 # what combinations to test
 environment:
   matrix:
-    - nodejs_version: 7
+    - nodejs_version: 8
     - nodejs_version: 6
     - nodejs_version: 4
-    - nodejs_version: 0.12
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
