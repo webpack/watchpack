@@ -4,13 +4,11 @@ os:
   - linux
   - osx
 node_js:
-  - "7"
+  - "8"
   - "6"
   - "4"
-  - "v0.12.17"
 matrix:
   allow_failures:
-    - node_js: "v0.12.17"
     - os: osx
   fast_finish: true
 
