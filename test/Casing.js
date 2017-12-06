@@ -1,45 +1,47 @@
-/*globals describe it beforeEach afterEach */
-require("should");
-var path = require("path");
-var TestHelper = require("./helpers/TestHelper");
-var Watchpack = require("../lib/watchpack");
+'use strict';
 
-var fixtures = path.join(__dirname, "fixtures");
-var testHelper = new TestHelper(fixtures);
+/* globals describe it beforeEach afterEach */
+require('should');
+const fs = require('fs');
+const path = require('path');
+const Watchpack = require('../lib/watchpack');
+const TestHelper = require('./helpers/TestHelper');
 
-var fsIsCaseInsensitive;
+const fixtures = path.join(__dirname, 'fixtures');
+const testHelper = new TestHelper(fixtures);
+
+let fsIsCaseInsensitive;
 try {
-	fsIsCaseInsensitive = require("fs").existsSync(path.join(__dirname, "..", "PACKAGE.JSON"));
-} catch(e) {
-	fsIsCaseInsensitive = false;
+  fsIsCaseInsensitive = fs.existsSync(path.join(__dirname, '..', 'PACKAGE.JSON'));
+} catch (e) {
+  fsIsCaseInsensitive = false;
 }
 
-if(fsIsCaseInsensitive) {
+if (fsIsCaseInsensitive) {
+  describe('Casing', function d() {
+    this.timeout(10000);
+    beforeEach(testHelper.before);
+    afterEach(testHelper.after);
 
-	describe("Casing", function() {
-		this.timeout(10000);
-		beforeEach(testHelper.before);
-		afterEach(testHelper.after);
-
-		it("should watch a file with the wrong casing", function(done) {
-			var w = new Watchpack({
-				aggregateTimeout: 1000
-			});
-			var changeEvents = 0;
-			w.on("change", function(file) {
-				file.should.be.eql(path.join(fixtures, "a"));
-				changeEvents++;
-			});
-			w.on("aggregated", function(changes) {
-				changes.should.be.eql([path.join(fixtures, "a")]);
-				changeEvents.should.be.eql(1);
-				w.close();
-				done();
-			});
-			w.watch([path.join(fixtures, "a")], []);
-			testHelper.tick(function() {
-				testHelper.file("A");
-			});
-		});
-	});
+    it('should watch a file with the wrong casing', (done) => {
+      const w = new Watchpack({
+        aggregateTimeout: 1000
+      });
+      let changeEvents = 0;
+      w.on('change', (file) => {
+        file.should.be.eql(path.join(fixtures, 'a'));
+        changeEvents += 1;
+      });
+      w.on('aggregated', (changes) => {
+        changes.should.be.eql([path.join(fixtures, 'a')]);
+        changeEvents.should.be.eql(1);
+        w.close();
+        done();
+      });
+      w.watch([path.join(fixtures, 'a')], []);
+      testHelper.tick(() => {
+        testHelper.file('A');
+      });
+    });
+  });
 }
