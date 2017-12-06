@@ -1,14 +1,22 @@
 {
   "name": "watchpack",
   "version": "1.4.0",
-  "description": "",
-  "main": "./lib/watchpack.js",
-  "directories": {
-    "test": "test"
-  },
-  "files": [
-    "lib/"
+  "description": "A wrapper library for directory and file watching within webpack",
+  "license": "MIT",
+  "repository": "webpack/webpack-dev-server",
+  "author": "Tobias Koppers @sokra",
+  "homepage": "https://github.com/webpack/watchpack",
+  "maintainers": [
+    {
+      "name": "Andrew Powell",
+      "email": "andrew@shellscape.org",
+      "url": "shellscape.org"
+    }
   ],
+  "main": "./lib/watchpack.js",
+  "engines": {
+    "node": ">=6"
+  },
   "scripts": {
     "pretest": "npm run lint",
     "test": "mocha",
@@ -17,28 +25,23 @@
     "precover": "npm run lint",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/webpack/watchpack.git"
-  },
-  "author": "Tobias Koppers @sokra",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/webpack/watchpack/issues"
-  },
-  "homepage": "https://github.com/webpack/watchpack",
-  "devDependencies": {
-    "codecov.io": "^0.1.6",
-    "coveralls": "^2.11.2",
-    "eslint": "^2.9.0",
-    "istanbul": "^0.4.3",
-    "mocha": "^2.1.0",
-    "rimraf": "~2.5.0",
-    "should": "^8.3.1"
-  },
+  "files": [
+    "lib/"
+  ],
   "dependencies": {
     "async": "^2.1.2",
     "chokidar": "^1.7.0",
+    "eslint-config-webpack": "^1.2.5",
+    "eslint-plugin-import": "^2.8.0",
     "graceful-fs": "^4.1.2"
+  },
+  "devDependencies": {
+    "codecov.io": "^0.1.6",
+    "coveralls": "^3.0.0",
+    "eslint": "^4.12.1",
+    "istanbul": "^0.4.3",
+    "mocha": "^4.0.1",
+    "rimraf": "^2.6.2",
+    "should": "^13.1.3"
   }
 }

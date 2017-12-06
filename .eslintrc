@@ -1,10 +1,16 @@
 {
-	"env": {
-		"node": true
-	},
-	"rules": {
-		"strict": 0,
-		"curly": 0,
-		"no-underscore-dangle": 0
-	}
+  "extends": "webpack",
+  "parserOptions": {
+    "sourceType": "script"
+  },
+  "rules": {
+    "comma-dangle": ["error", "never"],
+    "curly": ["error"],
+    "consistent-return": "off",
+    "no-param-reassign": "off",
+    "no-underscore-dangle": "off",
+    "prefer-destructuring": ["error", {"object": false, "array": false}],
+    "prefer-rest-params": "off",
+    "strict": ["error", "safe"]
+  }
 }
