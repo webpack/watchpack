@@ -19,7 +19,7 @@
   },
   "scripts": {
     "pretest": "npm run lint",
-    "test": "mocha",
+    "test": "mocha --full-trace --check-leaks",
     "travis": "npm run cover -- --report lcovonly",
     "lint": "eslint lib",
     "precover": "npm run lint",
@@ -33,15 +33,16 @@
     "chokidar": "^1.7.0",
     "eslint-config-webpack": "^1.2.5",
     "eslint-plugin-import": "^2.8.0",
-    "graceful-fs": "^4.1.2"
+    "graceful-fs": "^4.1.2",
+    "webpack-dev-server": "^3.0.0-alpha2"
   },
   "devDependencies": {
+    "assert": "^1.4.1",
     "codecov.io": "^0.1.6",
     "coveralls": "^3.0.0",
+    "del": "^3.0.0",
     "eslint": "^4.12.1",
     "istanbul": "^0.4.3",
-    "mocha": "^4.0.1",
-    "rimraf": "^2.6.2",
-    "should": "^13.1.3"
+    "mocha": "^4.0.1"
   }
 }

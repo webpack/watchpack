@@ -2,68 +2,72 @@
 
 const fs = require('fs');
 const path = require('path');
-const rimraf = require('rimraf');
-const watcherManager = require('../../lib/watcherManager');
+const assert = require('assert');
+const del = require('del');
+const manager = require('../../lib/manager');
 
-function TestHelper(testdir) {
-  this.testdir = testdir;
-  const self = this;
-  this.before = function before(done) {
-    self._before(done);
-  };
-  this.after = function after(done) {
-    self._after(done);
-  };
-}
-module.exports = TestHelper;
-
-TestHelper.prototype._before = function before(done) {
-  Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
-  this.tick(400, () => {
-    rimraf.sync(this.testdir);
-    fs.mkdirSync(this.testdir);
-    done();
-  });
-};
-
-TestHelper.prototype._after = function after(done) {
-  let i = 0;
-  this.tick(300, function del() {
-    try {
-      rimraf.sync(this.testdir);
-    } catch (e) {
-      if (i++ > 20) throw e; // eslint-disable-line no-plusplus
-      this.tick(100, del.bind(this));
-      return;
-    }
-    Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
-    this.tick(300, done);
-  }.bind(this));
-};
-
-TestHelper.prototype.dir = function dir(name) {
-  fs.mkdirSync(path.join(this.testdir, name));
-};
-
-TestHelper.prototype.file = function file(name) {
-  fs.writeFileSync(path.join(this.testdir, name), `${Math.random()}`, 'utf-8');
-};
-
-TestHelper.prototype.mtime = function mtime(name, time) {
-  const stats = fs.statSync(path.join(this.testdir, name));
-  fs.utimesSync(path.join(this.testdir, name), stats.atime, new Date(time));
-};
-
-TestHelper.prototype.remove = function remove(name) {
-  rimraf.sync(path.join(this.testdir, name));
-};
-
-TestHelper.prototype.tick = function tick(arg, fn) {
-  if (typeof arg === 'function') {
-    fn = arg;
-    arg = 100;
+function tick(timeout, fn) {
+  if (typeof timeout === 'function') {
+    fn = timeout;
+    timeout = 100;
   }
   setTimeout(() => {
     fn();
-  }, arg);
+  }, timeout);
+}
+
+module.exports = class TestHelper {
+  constructor(targetPath) {
+    this.targetPath = targetPath;
+
+    this.before = this.beforeHook.bind(this);
+    this.after = this.afterHook.bind(this);
+    this.tick = tick;
+  }
+
+  beforeHook(done) {
+    assert(Object.keys(manager.watchers), []);
+
+    tick(400, () => {
+      if (fs.existsSync(this.targetPath)) {
+        del.sync(this.targetPath);
+      }
+
+      fs.mkdirSync(this.targetPath);
+      done();
+    });
+  }
+
+  afterHook(done) {
+    let i = 0;
+    tick(300, () => {
+      try {
+        del.sync(this.targetPath);
+      } catch (e) {
+        if (i++ > 20) throw e; // eslint-disable-line no-plusplus
+        tick(100, del.bind(this));
+        return;
+      }
+
+      assert(Object.keys(manager.watchers), []);
+      tick(300, done);
+    });
+  }
+
+  dir(name) {
+    fs.mkdirSync(path.join(this.targetPath, name));
+  }
+
+  file(name) {
+    fs.writeFileSync(path.join(this.targetPath, name), `${Math.random()}`, 'utf-8');
+  }
+
+  mtime(name, time) {
+    const stats = fs.statSync(path.join(this.targetPath, name));
+    fs.utimesSync(path.join(this.targetPath, name), stats.atime, new Date(time));
+  }
+
+  remove(name) {
+    del.sync(path.join(this.targetPath, name));
+  }
 };

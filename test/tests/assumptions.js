@@ -2,11 +2,10 @@
 
 /* globals describe it beforeEach afterEach */
 /* eslint no-plusplus: off, no-undefined: off */
-require('should');
 const path = require('path');
 const fs = require('fs');
 const chokidar = require('chokidar');
-const TestHelper = require('./helpers/TestHelper');
+const TestHelper = require('../helpers/TestHelper');
 
 const fixtures = path.join(__dirname, 'fixtures');
 const testHelper = new TestHelper(fixtures);

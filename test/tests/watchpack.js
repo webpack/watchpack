@@ -2,10 +2,9 @@
 
 /* globals describe it beforeEach afterEach */
 /* eslint no-plusplus: off */
-require('should');
 const path = require('path');
-const Watchpack = require('../lib/watchpack');
-const TestHelper = require('./helpers/TestHelper');
+const Watchpack = require('../../lib/Watchpack');
+const TestHelper = require('../helpers/TestHelper');
 
 const fixtures = path.join(__dirname, 'fixtures');
 const testHelper = new TestHelper(fixtures);

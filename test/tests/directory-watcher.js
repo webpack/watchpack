@@ -1,47 +1,56 @@
 'use strict';
 
 /* globals describe it beforeEach afterEach */
-require('should');
 const path = require('path');
-const OrgDirectoryWatcher = require('../lib/DirectoryWatcher');
-const TestHelper = require('./helpers/TestHelper');
-
+const assert = require('assert');
+const DirectoryWatcher = require('../../lib/DirectoryWatcher');
+const TestHelper = require('../helpers/TestHelper');
 
 const fixtures = path.join(__dirname, 'fixtures');
 const testHelper = new TestHelper(fixtures);
-
 const openWatchers = [];
-
-const DirectoryWatcher = function dw(p, options) {
-  const d = new OrgDirectoryWatcher(p, options);
-  openWatchers.push(d);
-  const orgClose = d.close;
-  d.close = function close() {
-    orgClose.call(this);
-    const idx = openWatchers.indexOf(d);
-    if (idx < 0) { throw new Error('DirectoryWatcher was already closed'); }
-    openWatchers.splice(idx, 1);
-  };
-  return d;
+const timings = {
+  slow: 300,
+  fast: 50
 };
 
-describe('DirectoryWatcher', function desc() {
-  this.timeout(10000);
+const TestWatcher = function dw(p, options) {
+  const watcher = new DirectoryWatcher(p, options);
+  const proxyClose = watcher.close;
+
+  openWatchers.push(watcher);
+
+  watcher.close = function close() {
+    proxyClose.call(this);
+
+    const index = openWatchers.indexOf(watcher);
+
+    if (index < 0) {
+      throw new Error('DirectoryWatcher was already closed');
+    }
+
+    openWatchers.splice(index, 1);
+  };
+
+  return watcher;
+};
+
+describe('DirectoryWatcher', () => {
   beforeEach(testHelper.before);
   afterEach(testHelper.after);
   afterEach(() => {
-    openWatchers.forEach((d) => {
-      console.log(`DirectoryWatcher (${d.path}) was not closed.`);
-      d.close();
+    openWatchers.forEach((watcher) => {
+      console.log(`DirectoryWatcher (${watcher.path}) was not closed.`);
+      watcher.close();
     });
   });
 
   it('should detect a file creation', (done) => {
-    const d = new DirectoryWatcher(fixtures, {});
-    const a = d.watch(path.join(fixtures, 'a'));
+    const watcher = new TestWatcher(fixtures, {});
+    const a = watcher.watch(path.join(fixtures, 'a'));
     a.on('change', (mtime) => {
-      mtime.should.be.type('number');
-      Object.keys(d.getTimes()).sort().should.be.eql([
+      assert(mtime, 'number');
+      assert(Object.keys(watcher.getTimes()).sort(), [
         path.join(fixtures, 'a')
       ]);
       a.close();
@@ -53,11 +62,11 @@ describe('DirectoryWatcher', function desc() {
   });
 
   it('should detect a file change', (done) => {
-    const d = new DirectoryWatcher(fixtures, {});
+    const watcher = new TestWatcher(fixtures, {});
     testHelper.file('a');
-    const a = d.watch(path.join(fixtures, 'a'));
+    const a = watcher.watch(path.join(fixtures, 'a'));
     a.on('change', (mtime) => {
-      mtime.should.be.type('number');
+      assert(mtime, 'number');
       a.close();
       done();
     });
@@ -69,8 +78,8 @@ describe('DirectoryWatcher', function desc() {
   it('should not detect a file change in initial scan', (done) => {
     testHelper.file('a');
     testHelper.tick(() => {
-      const d = new DirectoryWatcher(fixtures, {});
-      const a = d.watch(path.join(fixtures, 'a'));
+      const watcher = new TestWatcher(fixtures, {});
+      const a = watcher.watch(path.join(fixtures, 'a'));
       a.on('change', () => {
         throw new Error('should not be detected');
       });
@@ -86,20 +95,20 @@ describe('DirectoryWatcher', function desc() {
     testHelper.tick(1000, () => {
       testHelper.file('a');
       testHelper.tick(1000, () => {
-        const d = new DirectoryWatcher(fixtures, {});
-        const a = d.watch(path.join(fixtures, 'a'), start);
+        const watcher = new TestWatcher(fixtures, {});
+        const a = watcher.watch(path.join(fixtures, 'a'), start);
         a.on('change', () => {
           a.close();
           done();
         });
       });
     });
-  });
+  }).timeout(4000);
 
   it('should not detect a file change in initial scan without start date', (done) => {
     testHelper.file('a');
     testHelper.tick(200, () => {
-      const d = new DirectoryWatcher(fixtures, {});
+      const d = new TestWatcher(fixtures, {});
       const a = d.watch(path.join(fixtures, 'a'));
       a.on('change', (mtime, type) => {
         throw new Error(`should not be detected (${type} mtime=${mtime} now=${Date.now()})`);
@@ -111,21 +120,17 @@ describe('DirectoryWatcher', function desc() {
     });
   });
 
-  const timings = {
-    slow: 300,
-    fast: 50
-  };
   Object.keys(timings).forEach((name) => {
     const time = timings[name];
     it(`should detect multiple file changes (${name})`, (done) => {
-      const d = new DirectoryWatcher(fixtures, {});
+      const watcher = new TestWatcher(fixtures, {});
       testHelper.file('a');
       testHelper.tick(() => {
-        const a = d.watch(path.join(fixtures, 'a'));
+        const a = watcher.watch(path.join(fixtures, 'a'));
         let count = 20;
         let wasChanged = false;
         a.on('change', (mtime) => {
-          mtime.should.be.type('number');
+          assert(mtime, 'number');
           if (!wasChanged) return;
           wasChanged = false;
           if (count-- <= 0) { // eslint-disable-line no-plusplus
@@ -143,15 +148,20 @@ describe('DirectoryWatcher', function desc() {
           testHelper.file('a');
         });
       });
-    });
+    }).timeout(10000);
   });
 
   it('should detect a file removal', (done) => {
     testHelper.file('a');
-    const d = new DirectoryWatcher(fixtures, {});
-    const a = d.watch(path.join(fixtures, 'a'));
+    const watcher = new TestWatcher(fixtures, {});
+    const a = watcher.watch(path.join(fixtures, 'a'));
     a.on('remove', (mtime) => {
-      (typeof mtime === 'undefined').should.be.true; // eslint-disable-line
+      if (process.platform === 'darwin') {
+        assert(mtime, 'unlink');
+      } else {
+        assert((typeof mtime === 'undefined'), true);
+      }
+
       a.close();
       done();
     });
@@ -159,4 +169,4 @@ describe('DirectoryWatcher', function desc() {
       testHelper.remove('a');
     });
   });
-});
+}).timeout(10000);
