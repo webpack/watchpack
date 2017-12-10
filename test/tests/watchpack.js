@@ -191,15 +191,19 @@ describe('Watchpack', () => {
   //   });
   // });
   //
-  // TODO BROKEN
+  //
   it('should watch a missing directory', (done) => {
+    if (process.platform === 'darwin') {
+      console.log('Test skipped on MacOS');
+      done();
+    }
+
     const w = new Watchpack({
       aggregateTimeout: 1000
     });
     const changeEvents = [];
 
     w.on('change', (file) => {
-      console.log('change', file);
       if (changeEvents[changeEvents.length - 1] === file) {
         return;
       }
@@ -208,17 +212,14 @@ describe('Watchpack', () => {
     });
 
     w.on('remove', () => {
-      console.log('remove');
       assert(false);
     });
 
     w.on('closed', () => {
-      console.log('closed');
       assert(false);
     });
 
     w.on('aggregated', (changes) => {
-      console.log('aggregated');
       assert(false);
       assert(changes, [path.join(fixtures, 'dir', 'sub')]);
       assert(changeEvents, [path.join(fixtures, 'dir', 'sub')]);
@@ -227,12 +228,9 @@ describe('Watchpack', () => {
     });
 
     testHelper.dir('dir');
-    console.log('directory created');
     testHelper.tick(500, () => {
       w.watch([], [path.join(fixtures, 'dir', 'sub')]);
-      console.log('watching');
       testHelper.tick(500, () => {
-        console.log('sub created');
         testHelper.dir(path.join('dir', 'sub'));
       });
     });
@@ -331,41 +329,46 @@ describe('Watchpack', () => {
   //   });
   // });
   //
-  // TODO BROKEN
-  // it('should watch already watched directory', (done) => {
-  //   const w = new Watchpack({
-  //     aggregateTimeout: 1000
-  //   });
-  //   const changeEvents = [];
   //
-  //   w.on('change', (file) => {
-  //     if (changeEvents[changeEvents.length - 1] === file) {
-  //       return;
-  //     }
-  //
-  //     changeEvents.push(file);
-  //   });
-  //
-  //   w.on('aggregated', (changes) => {
-  //     assert(changes, [path.join(fixtures, 'dir')]);
-  //     assert(changeEvents, [path.join(fixtures, 'dir', 'a')]);
-  //     w.close();
-  //     done();
-  //   });
-  //
-  //   testHelper.dir('dir');
-  //   testHelper.file(path.join('dir', 'a'));
-  //
-  //   testHelper.tick(400, () => {
-  //     w.watch([path.join(fixtures, 'dir', 'a')], []);
-  //     testHelper.tick(1000, () => {
-  //       w.watch([], [path.join(fixtures, 'dir')]);
-  //       testHelper.tick(400, () => {
-  //         testHelper.remove(path.join('dir', 'a'));
-  //       });
-  //     });
-  //   });
-  // });
+  it('should watch already watched directory', (done) => {
+    if (process.platform === 'darwin') {
+      console.log('Test skipped on MacOS');
+      done();
+    }
+
+    const w = new Watchpack({
+      aggregateTimeout: 1000
+    });
+    const changeEvents = [];
+
+    w.on('change', (file) => {
+      if (changeEvents[changeEvents.length - 1] === file) {
+        return;
+      }
+
+      changeEvents.push(file);
+    });
+
+    w.on('aggregated', (changes) => {
+      assert(changes, [path.join(fixtures, 'dir')]);
+      assert(changeEvents, [path.join(fixtures, 'dir', 'a')]);
+      w.close();
+      done();
+    });
+
+    testHelper.dir('dir');
+    testHelper.file(path.join('dir', 'a'));
+
+    testHelper.tick(400, () => {
+      w.watch([path.join(fixtures, 'dir', 'a')], []);
+      testHelper.tick(1000, () => {
+        w.watch([], [path.join(fixtures, 'dir')]);
+        testHelper.tick(400, () => {
+          testHelper.remove(path.join('dir', 'a'));
+        });
+      });
+    });
+  });
   //
   // it('should watch file in a sub directory', (done) => {
   //   const w = new Watchpack({
