@@ -5,6 +5,7 @@ const path = require('path');
 const assert = require('assert');
 const DirectoryWatcher = require('../../lib/DirectoryWatcher');
 const TestHelper = require('../helpers/TestHelper');
+const manager = require('../../lib/manager');
 
 const fixtures = path.join(__dirname, 'fixtures');
 const testHelper = new TestHelper(fixtures);
@@ -14,8 +15,8 @@ const timings = {
   fast: 50
 };
 
-const TestWatcher = function dw(p, options) {
-  const watcher = new DirectoryWatcher(p, options);
+function TestWatcher(p, options) {
+  const watcher = new DirectoryWatcher(p, manager, options);
   const proxyClose = watcher.close;
 
   openWatchers.push(watcher);
@@ -33,7 +34,7 @@ const TestWatcher = function dw(p, options) {
   };
 
   return watcher;
-};
+}
 
 describe('DirectoryWatcher', () => {
   beforeEach(testHelper.before);
