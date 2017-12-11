@@ -50,8 +50,8 @@ describe('DirectoryWatcher', () => {
     const watcher = new TestWatcher(fixtures, {});
     const a = watcher.watch(path.join(fixtures, 'a'));
     a.on('change', (mtime) => {
-      assert(mtime, 'number');
-      assert(Object.keys(watcher.getTimes()).sort(), [
+      assert.equal(typeof mtime, 'number');
+      assert.deepEqual(Object.keys(watcher.getTimes()).sort(), [
         path.join(fixtures, 'a')
       ]);
       a.close();
@@ -67,7 +67,7 @@ describe('DirectoryWatcher', () => {
     testHelper.file('a');
     const a = watcher.watch(path.join(fixtures, 'a'));
     a.on('change', (mtime) => {
-      assert(mtime, 'number');
+      assert.equal(typeof mtime, 'number');
       a.close();
       done();
     });
@@ -131,7 +131,7 @@ describe('DirectoryWatcher', () => {
         let count = 20;
         let wasChanged = false;
         a.on('change', (mtime) => {
-          assert(mtime, 'number');
+          assert.equal(typeof mtime, 'number');
           if (!wasChanged) return;
           wasChanged = false;
           if (count-- <= 0) { // eslint-disable-line no-plusplus
@@ -158,9 +158,9 @@ describe('DirectoryWatcher', () => {
     const a = watcher.watch(path.join(fixtures, 'a'));
     a.on('remove', (mtime) => {
       if (process.platform === 'darwin') {
-        assert(mtime, 'unlink');
+        assert.equal(mtime, 'unlink');
       } else {
-        assert((typeof mtime === 'undefined'), true);
+        assert.equal((typeof mtime === 'undefined'), true);
       }
 
       a.close();

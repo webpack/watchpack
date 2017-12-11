@@ -27,12 +27,12 @@ describe('Case Sentitivity', () => {
     let changeEvents = 0;
 
     watchpack.on('change', (file) => {
-      assert(file, path.join(fixturePath, 'a'));
+      assert.equal(file, path.join(fixturePath, 'a'));
       changeEvents += 1;
     });
 
     watchpack.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixturePath, 'a')]);
+      assert.deepEqual(changes, [path.join(fixturePath, 'a')]);
       assert(changeEvents, 1);
       watchpack.close();
       done();

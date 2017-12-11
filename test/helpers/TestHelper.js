@@ -40,18 +40,23 @@ module.exports = class TestHelper {
 
   afterHook(done) {
     let i = 0;
-    tick(300, () => {
+    const remove = () => {
       try {
         del.sync(this.targetPath);
       } catch (e) {
-        if (i++ > 20) throw e; // eslint-disable-line no-plusplus
-        tick(100, del.bind(this));
+        if (i++ > 20) { // eslint-disable-line no-plusplus
+          throw e;
+        }
+
+        tick(100, remove);
         return;
       }
 
-      assert(Object.keys(manager.watchers), []);
+      assert.deepEqual(Object.keys(manager.watchers), []);
       tick(300, done);
-    });
+    };
+
+    tick(300, remove);
   }
 
   dir(name) {

@@ -20,12 +20,12 @@ describe('Watchpack', () => {
     });
     let changeEvents = 0;
     w.on('change', (file) => {
-      assert(file, path.join(fixtures, 'a'));
+      assert.equal(file, path.join(fixtures, 'a'));
       changeEvents++;
     });
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'a')]);
-      assert(changeEvents, 1);
+      assert.deepEqual(changes, [path.join(fixtures, 'a')]);
+      assert.equal(changeEvents, 1);
       w.close();
       done();
     });
@@ -45,15 +45,15 @@ describe('Watchpack', () => {
       changeEvents.push(file);
     });
     w.on('aggregated', (changes) => {
-      assert(changes.sort(), [path.join(fixtures, 'a'), path.join(fixtures, 'b')]);
-      assert(changeEvents, [
+      assert.deepEqual(changes.sort(), [path.join(fixtures, 'a'), path.join(fixtures, 'b')]);
+      assert.deepEqual(changeEvents, [
         path.join(fixtures, 'a'),
         path.join(fixtures, 'b'),
         path.join(fixtures, 'a'),
         path.join(fixtures, 'b'),
         path.join(fixtures, 'a')
       ]);
-      assert(Object.keys(w.getTimes()).sort(), [
+      assert.deepEqual(Object.keys(w.getTimes()).sort(), [
         path.join(fixtures, 'a'),
         path.join(fixtures, 'b')
       ]);
@@ -88,8 +88,8 @@ describe('Watchpack', () => {
       changeEvents.push(file);
     });
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'a')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'a')]);
       w.close();
       done();
     });
@@ -112,8 +112,8 @@ describe('Watchpack', () => {
       changeEvents.push(file);
     });
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'a')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'a')]);
       w.close();
       done();
     });
@@ -141,8 +141,8 @@ describe('Watchpack', () => {
       changeEvents.push(file);
     });
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'a')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'a')]);
       w.close();
       done();
     });
@@ -166,8 +166,8 @@ describe('Watchpack', () => {
       changeEvents.push(file);
     });
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [
         path.join(fixtures, 'dir', 'a'),
         path.join(fixtures, 'dir', 'b'),
         path.join(fixtures, 'dir', 'a')
@@ -220,9 +220,8 @@ describe('Watchpack', () => {
     });
 
     w.on('aggregated', (changes) => {
-      assert(false);
-      assert(changes, [path.join(fixtures, 'dir', 'sub')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'sub')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir', 'sub')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'sub')]);
       w.close();
       done();
     });
@@ -251,8 +250,8 @@ describe('Watchpack', () => {
     });
 
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'sub')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'sub')]);
       w.close();
       done();
     });
@@ -280,7 +279,7 @@ describe('Watchpack', () => {
     });
 
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
       w.close();
       done();
     });
@@ -312,8 +311,8 @@ describe('Watchpack', () => {
     });
 
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'sub')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'sub')]);
       w.close();
       done();
     });
@@ -350,8 +349,8 @@ describe('Watchpack', () => {
     });
 
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'a')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'a')]);
       w.close();
       done();
     });
@@ -380,12 +379,12 @@ describe('Watchpack', () => {
       changeEvents.push(file);
     });
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'sub', 'a')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'sub', 'a')]);
       const times = w.getTimes();
       assert(typeof times[path.join(fixtures, 'dir')] === 'number');
-      assert(times[path.join(fixtures, 'dir')], times[path.join(fixtures, 'dir', 'sub', 'a')]);
-      assert(times[path.join(fixtures, 'dir', 'sub')], times[path.join(fixtures, 'dir', 'sub', 'a')]);
+      assert.equal(times[path.join(fixtures, 'dir')], times[path.join(fixtures, 'dir', 'sub', 'a')]);
+      assert.equal(times[path.join(fixtures, 'dir', 'sub')], times[path.join(fixtures, 'dir', 'sub', 'a')]);
       w.close();
       done();
     });
@@ -414,9 +413,9 @@ describe('Watchpack', () => {
     });
 
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'sub', 'sub', 'a')]);
-      assert(Object.keys(w.getTimes()).sort(), [
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'sub', 'sub', 'a')]);
+      assert.deepEqual(Object.keys(w.getTimes()).sort(), [
         path.join(fixtures, 'dir'),
         path.join(fixtures, 'dir', 'sub'),
         path.join(fixtures, 'dir', 'sub', 'sub'),
@@ -453,14 +452,14 @@ describe('Watchpack', () => {
     });
 
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'dir')]);
-      assert(changeEvents, [path.join(fixtures, 'dir', 'sub()', 'a')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'dir')]);
+      assert.deepEqual(changeEvents, [path.join(fixtures, 'dir', 'sub()', 'a')]);
 
       const times = w.getTimes();
 
       assert(typeof times[path.join(fixtures, 'dir')] === 'number');
-      assert(times[path.join(fixtures, 'dir')], times[path.join(fixtures, 'dir', 'sub()', 'a')]);
-      assert(times[path.join(fixtures, 'dir', 'sub()')], times[path.join(fixtures, 'dir', 'sub()', 'a')]);
+      assert.equal(times[path.join(fixtures, 'dir')], times[path.join(fixtures, 'dir', 'sub()', 'a')]);
+      assert.equal(times[path.join(fixtures, 'dir', 'sub()')], times[path.join(fixtures, 'dir', 'sub()', 'a')]);
       w.close();
       done();
     });
@@ -517,12 +516,12 @@ describe('Watchpack', () => {
     let changeEvents = 0;
 
     w.on('change', (file) => {
-      assert(file, path.join(fixtures, 'a'));
+      assert.equal(file, path.join(fixtures, 'a'));
       changeEvents++;
     });
 
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'a')]);
+      assert.deepEqual(changes, [path.join(fixtures, 'a')]);
       assert(changeEvents > 0);
       w.close();
       done();
@@ -575,12 +574,12 @@ describe('Watchpack', () => {
     const w = new Watchpack();
     let changeEvents = 0;
     w.on('change', (file) => {
-      assert(file, path.join(fixtures, 'a'));
+      assert.equal(file, path.join(fixtures, 'a'));
       changeEvents++;
     });
     w.on('aggregated', (changes) => {
-      assert(changes, [path.join(fixtures, 'a')]);
-      assert(changeEvents, 1);
+      assert.deepEqual(changes, [path.join(fixtures, 'a')]);
+      assert.deepEqual(changeEvents, 1);
       w.close();
       w2.close();
       done();
@@ -607,12 +606,12 @@ describe('Watchpack', () => {
     });
     let removeEvents = 0;
     w.on('remove', (file) => {
-      assert(file, path.join(fixtures, 'a'));
+      assert.equal(file, path.join(fixtures, 'a'));
       removeEvents++;
     });
     w.on('aggregated', (changes, removals) => {
-      assert(removals, [path.join(fixtures, 'a')]);
-      assert(removeEvents, 1);
+      assert.deepEqual(removals, [path.join(fixtures, 'a')]);
+      assert.equal(removeEvents, 1);
       w.close();
       done();
     });
@@ -628,12 +627,15 @@ describe('Watchpack', () => {
     testHelper.file('a');
     testHelper.file('b');
     const w = new Watchpack({
-      aggregateTimeout: 1000
+      aggregateTimeout: 2000
     });
     const removeEvents = [];
 
     w.on('remove', (file) => {
+      // console.log('remove event:', removeEvents);
+      // console.log('  file:', file);
       if (removeEvents[removeEvents.length - 1] === file) {
+        // console.log('  bailing');
         return;
       }
 
@@ -641,14 +643,14 @@ describe('Watchpack', () => {
     });
 
     w.on('aggregated', (changes, removals) => {
-      assert(removals.sort(), [path.join(fixtures, 'a'), path.join(fixtures, 'b')]);
-      assert(removeEvents, [
+      assert.deepEqual(removals.sort(), [path.join(fixtures, 'a'), path.join(fixtures, 'b')]);
+      assert.deepEqual(removeEvents, [
         path.join(fixtures, 'a'),
         path.join(fixtures, 'b'),
         path.join(fixtures, 'a'),
         path.join(fixtures, 'b')
       ]);
-      assert(Object.keys(w.getTimes()).sort(), [
+      assert.deepEqual(Object.keys(w.getTimes()).sort(), [
         path.join(fixtures, 'a'),
         path.join(fixtures, 'b')
       ]);
@@ -657,24 +659,33 @@ describe('Watchpack', () => {
       done();
     });
 
+    // the timeouts here have to be 200ms, otherwise about once of every 10 runs,
+    // the 'remove' event isn't triggered for the removal of the recreated files.
+    // resulting in a removeEvents length of 2.
     testHelper.tick(400, () => {
       w.watch([path.join(fixtures, 'a'), path.join(fixtures, 'b')], []);
-      testHelper.tick(() => {
+      testHelper.tick(200, () => {
         testHelper.remove('a');
-        testHelper.tick(() => {
+        // console.log('a removed');
+        testHelper.tick(200, () => {
           testHelper.remove('b');
-          testHelper.tick(() => {
+          // console.log('b removed');
+          testHelper.tick(200, () => {
             testHelper.file('a');
+            // console.log('a created');
             testHelper.file('b');
-            testHelper.tick(() => {
+            // console.log('b created');
+            testHelper.tick(200, () => {
               testHelper.remove('a');
-              testHelper.tick(() => {
+              // console.log('a removed');
+              testHelper.tick(200, () => {
                 testHelper.remove('b');
+                // console.log('b removed');
               });
             });
           });
         });
       });
     });
-  }).timeout(3000);
+  }).timeout(4000);
 }).timeout(10000);
