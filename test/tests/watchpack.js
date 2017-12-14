@@ -129,7 +129,7 @@ describe('Watchpack', () => {
         });
       });
     });
-  });
+  }).timeout(4000);
 
   it('should watch a directory (delete file)', (done) => {
     const w = new Watchpack({
