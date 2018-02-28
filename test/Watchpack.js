@@ -483,7 +483,7 @@ describe("Watchpack", function() {
 			w2.watch([path.join(fixtures, "b")], []);
 			testHelper.tick(1000, function() { // wait for stable state
 				testHelper.file("a");
-				testHelper.tick(function() {
+				testHelper.tick(1000, function() {
 					var startTime = Date.now();
 					testHelper.tick(400, function() {
 						w.watch([path.join(fixtures, "a")], [], startTime);
