@@ -1,4 +1,6 @@
 /*globals describe it beforeEach afterEach */
+"use strict";
+
 require("should");
 var path = require("path");
 var fs = require("fs");
@@ -187,4 +189,3 @@ describe("Assumption", function() {
 		});
 	});
 });
-
