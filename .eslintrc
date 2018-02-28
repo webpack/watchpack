@@ -1,14 +1,17 @@
 {
-	"env": {
-		"node": true,
-		"es6": true
-	},
-	"parserOptions": {
-		"ecmaVersion": 2018
-	},
-	"rules": {
-		"strict": 0,
-		"curly": 0,
-		"no-underscore-dangle": 0
-	}
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "strict": 0,
+    "curly": 0,
+    "no-underscore-dangle": 0
+  }
 }

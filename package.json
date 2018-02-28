@@ -14,6 +14,7 @@
     "test": "mocha",
     "lint": "eslint lib",
     "precover": "yarn lint",
+    "pretty-files": "prettier \"lib/**.*\" \"test/**/*.js\" --write",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha"
   },
   "repository": {
@@ -29,8 +30,10 @@
   "devDependencies": {
     "coveralls": "^3.0.0",
     "eslint": "^5.11.1",
+    "eslint-plugin-prettier": "^2.6.0",
     "istanbul": "^0.4.3",
     "mocha": "^5.0.1",
+    "prettier": "^1.11.0",
     "rimraf": "^2.6.2",
     "should": "^8.3.1"
   },
