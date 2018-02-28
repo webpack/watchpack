@@ -553,10 +553,11 @@ describe("Watchpack", function() {
 	});
 
 	it("should watch multiple file removals", function(done) {
+		var step = 0;
 		testHelper.file("a");
 		testHelper.file("b");
 		var w = new Watchpack({
-			aggregateTimeout: 1000
+			aggregateTimeout: 1500
 		});
 		var removeEvents = [];
 		w.on("remove", function(file) {
@@ -565,6 +566,7 @@ describe("Watchpack", function() {
 			removeEvents.push(file);
 		});
 		w.on("aggregated", function(changes, removals) {
+			step.should.be.eql(6);
 			removals.sort().should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
 			removeEvents.should.be.eql([
 				path.join(fixtures, "a"),
@@ -581,17 +583,23 @@ describe("Watchpack", function() {
 		});
 		testHelper.tick(400, function() {
 			w.watch([path.join(fixtures, "a"), path.join(fixtures, "b")], []);
-			testHelper.tick(function() {
+			step = 1;
+			testHelper.tick(1000, function() {
 				testHelper.remove("a");
+				step = 2;
 				testHelper.tick(function() {
 					testHelper.remove("b");
-					testHelper.tick(function() {
+					step = 3;
+					testHelper.tick(1000, function() {
 						testHelper.file("a");
 						testHelper.file("b");
-						testHelper.tick(function() {
+						step = 4;
+						testHelper.tick(1000, function() {
 							testHelper.remove("a");
+							step = 5;
 							testHelper.tick(function() {
 								testHelper.remove("b");
+								step = 6;
 							});
 						});
 					});
