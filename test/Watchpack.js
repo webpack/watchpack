@@ -1,11 +1,11 @@
 /*globals describe it beforeEach afterEach */
 require("should");
-var path = require("path");
-var TestHelper = require("./helpers/TestHelper");
-var Watchpack = require("../lib/watchpack");
+var path = require("path"),
+ TestHelper = require("./helpers/TestHelper"),
+ Watchpack = require("../lib/watchpack"),
 
-var fixtures = path.join(__dirname, "fixtures");
-var testHelper = new TestHelper(fixtures);
+ fixtures = path.join(__dirname, "fixtures"),
+ testHelper = new TestHelper(fixtures);
 
 describe("Watchpack", function() {
 	this.timeout(10000);
@@ -19,7 +19,7 @@ describe("Watchpack", function() {
 		var changeEvents = 0;
 		w.on("change", function(file) {
 			file.should.be.eql(path.join(fixtures, "a"));
-			changeEvents++;
+			++changeEvents;
 		});
 		w.on("aggregated", function(changes) {
 			changes.should.be.eql([path.join(fixtures, "a")]);
