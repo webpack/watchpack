@@ -1,4 +1,6 @@
 /*globals describe it beforeEach afterEach */
+"use strict";
+
 require("should");
 var path = require("path");
 var TestHelper = require("./helpers/TestHelper");
