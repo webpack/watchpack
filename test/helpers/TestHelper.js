@@ -20,26 +20,32 @@ module.exports = TestHelper;
 
 TestHelper.prototype._before = function before(done) {
 	Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
-	this.tick(400, function() {
-		rimraf.sync(this.testdir);
-		fs.mkdirSync(this.testdir);
-		done();
-	}.bind(this));
+	this.tick(
+		400,
+		function() {
+			rimraf.sync(this.testdir);
+			fs.mkdirSync(this.testdir);
+			done();
+		}.bind(this)
+	);
 };
 
 TestHelper.prototype._after = function after(done) {
 	var i = 0;
-	this.tick(300, function del() {
-		try {
-			rimraf.sync(this.testdir);
-		} catch(e) {
-			if(i++ > 20) throw e;
-			this.tick(100, del.bind(this));
-			return;
-		}
-		Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
-		this.tick(300, done);
-	}.bind(this));
+	this.tick(
+		300,
+		function del() {
+			try {
+				rimraf.sync(this.testdir);
+			} catch (e) {
+				if (i++ > 20) throw e;
+				this.tick(100, del.bind(this));
+				return;
+			}
+			Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
+			this.tick(300, done);
+		}.bind(this)
+	);
 };
 
 TestHelper.prototype.dir = function dir(name) {
@@ -60,7 +66,7 @@ TestHelper.prototype.remove = function remove(name) {
 };
 
 TestHelper.prototype.tick = function tick(arg, fn) {
-	if(typeof arg === "function") {
+	if (typeof arg === "function") {
 		fn = arg;
 		arg = 100;
 	}

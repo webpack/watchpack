@@ -12,12 +12,11 @@ var testHelper = new TestHelper(fixtures);
 var fsIsCaseInsensitive;
 try {
 	fsIsCaseInsensitive = require("fs").existsSync(path.join(__dirname, "..", "PACKAGE.JSON"));
-} catch(e) {
+} catch (e) {
 	fsIsCaseInsensitive = false;
 }
 
-if(fsIsCaseInsensitive) {
-
+if (fsIsCaseInsensitive) {
 	describe("Casing", function() {
 		this.timeout(10000);
 		beforeEach(testHelper.before);
