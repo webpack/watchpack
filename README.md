@@ -23,11 +23,11 @@ var Watchpack = require("watchpack");
 
 var wp = new Watchpack({
 	// options:
-	aggregateTimeout: 1000
+	aggregateTimeout: 1000,
 	// fire "aggregated" event when after a change for 1000ms no additional change occurred
 	// aggregated defaults to undefined, which doesn't fire an "aggregated" event
 
-	poll: true
+	poll: true,
 	// poll: true - use polling with the default interval
 	// poll: 10000 - use polling with an interval of 10s
 	// poll defaults to undefined, which prefer native watching methods
@@ -36,6 +36,16 @@ var wp = new Watchpack({
 	ignored: /node_modules/,
 	// anymatch-compatible definition of files/paths to be ignored
 	// see https://github.com/paulmillr/chokidar#path-filtering
+
+	events: ["add", "addDir"],
+	// set the events that should be watched
+	// by default, watchpack will watch all these events: add, addDir, change, unlink, unlinkDir
+	// see https://github.com/paulmillr/chokidar#methods--events
+
+	eventsIgnored: ["change", "unlink", "unlinkDir"],
+	// set the events that should not be watched
+	// by default, watchpack will watch all these events: add, addDir, change, unlink, unlinkDir
+	// Note: use either "events" or "eventsIgnored"
 });
 
 // Watchpack.prototype.watch(string[] files, string[] directories, [number startTime])
