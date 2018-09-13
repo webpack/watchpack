@@ -37,7 +37,7 @@
     "should": "^8.3.1"
   },
   "dependencies": {
-    "chokidar": "^2.0.2",
+    "chokidar": "^2.0.4",
     "graceful-fs": "^4.1.2",
     "neo-async": "^2.5.0"
   }
