@@ -39,7 +39,7 @@ describe("DirectoryWatcher", function() {
 	it("should detect a file creation", function(done) {
 		var d = new DirectoryWatcher(fixtures, {});
 		var a = d.watch(path.join(fixtures, "a"));
-		a.on("change", function(mtime) {
+		a.on("change", function(filePath, mtime) {
 			mtime.should.be.type("number");
 			Object.keys(d.getTimes()).sort().should.be.eql([
 				path.join(fixtures, "a")
@@ -56,7 +56,7 @@ describe("DirectoryWatcher", function() {
 		var d = new DirectoryWatcher(fixtures, {});
 		testHelper.file("a");
 		var a = d.watch(path.join(fixtures, "a"));
-		a.on("change", function(mtime) {
+		a.on("change", function(filePath, mtime) {
 			mtime.should.be.type("number");
 			a.close();
 			done();
@@ -101,7 +101,7 @@ describe("DirectoryWatcher", function() {
 		testHelper.tick(200, function() {
 			var d = new DirectoryWatcher(fixtures, {});
 			var a = d.watch(path.join(fixtures, "a"));
-			a.on("change", function(mtime, type) {
+			a.on("change", function(filePath, mtime, type) {
 				throw new Error("should not be detected (" + type + " mtime=" + mtime + " now=" + Date.now() + ")");
 			});
 			testHelper.tick(function() {
@@ -124,7 +124,7 @@ describe("DirectoryWatcher", function() {
 				var a = d.watch(path.join(fixtures, "a"));
 				var count = 20;
 				var wasChanged = false;
-				a.on("change", function(mtime) {
+				a.on("change", function(filePath, mtime) {
 					mtime.should.be.type("number");
 					if(!wasChanged) return;
 					wasChanged = false;
