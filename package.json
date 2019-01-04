@@ -10,11 +10,11 @@
     "lib/"
   ],
   "scripts": {
-    "pretest": "npm run lint",
+    "pretest": "yarn lint",
     "test": "mocha",
-    "travis": "npm run cover -- --report lcovonly",
+    "travis": "yarn cover --report lcovonly",
     "lint": "eslint lib",
-    "precover": "npm run lint",
+    "precover": "yarn lint",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha"
   },
   "repository": {
@@ -28,16 +28,14 @@
   },
   "homepage": "https://github.com/webpack/watchpack",
   "devDependencies": {
-    "codecov.io": "^0.1.6",
     "coveralls": "^3.0.0",
-    "eslint": "^4.18.1",
+    "eslint": "^5.11.1",
     "istanbul": "^0.4.3",
     "mocha": "^5.0.1",
     "rimraf": "^2.6.2",
     "should": "^8.3.1"
   },
   "dependencies": {
-    "chokidar": "^2.0.2",
     "graceful-fs": "^4.1.2",
     "neo-async": "^2.5.0"
   },

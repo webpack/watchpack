@@ -272,6 +272,36 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should watch a directory (delete, restore and change directory)", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if(changeEvents[changeEvents.length - 1] === file)
+				return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(_, changes) {
+			changes.should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.dir(path.join("dir", "sub"));
+		testHelper.file(path.join("dir", "sub", "a"));
+		testHelper.tick(function() {
+			w.watch([path.join(fixtures, "dir", "sub", "a")], []);
+			testHelper.tick(function() {
+				testHelper.remove(path.join("dir", "sub"));
+				testHelper.tick(function() {
+					testHelper.dir(path.join("dir", "sub"));
+					testHelper.file(path.join("dir", "sub", "a"));
+				});
+			});
+		});
+	});
+
 	it("should watch a directory (delete directory2)", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
