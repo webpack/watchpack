@@ -114,8 +114,9 @@ describe("Watchpack", function() {
 				return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			changes.should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", function(changesDirs, changesFiles) {
+			changesDirs.should.be.eql([path.join(fixtures, "dir")]);
+			changesFiles.should.be.eql([]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "a")]);
 			w.close();
 			done();
@@ -126,7 +127,7 @@ describe("Watchpack", function() {
 		testHelper.tick(400, function() {
 			w.watch([path.join(fixtures, "dir", "a")], []);
 			testHelper.tick(function() {
-				w.watch([path.join(fixtures, "dir")], [path.join(fixtures, "dir")]);
+				w.watch([], [path.join(fixtures, "dir")]);
 				testHelper.tick(function() {
 					testHelper.file(path.join("dir", "a"));
 				});
