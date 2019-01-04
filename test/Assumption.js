@@ -138,7 +138,7 @@ describe("Assumption", function() {
 		});
 	});
 
-	it("should rewatch removed directory", function(done) {
+	it("should detect removed directory", function(done) {
 		testHelper.dir("watch-test-dir");
 		testHelper.tick(() => {
 			var watcher = watcherToClose = fs.watch(path.join(fixtures, "watch-test-dir"));
@@ -147,14 +147,16 @@ describe("Assumption", function() {
 			watcher.on("change", function(type, filename) {
 				if(type === "rename" && filename === "watch-test-dir")
 					gotSelfRename = true;
+				console.log(type, filename);
 			});
 			watcher.on("error", function(err) {
 				if(err && err.code === "EPERM")
 					gotPermError = true;
+				console.log("error", err);
 			});
 			testHelper.tick(500, function() {
 				testHelper.remove("watch-test-dir");
-				testHelper.tick(500, function() {
+				testHelper.tick(3000, function() {
 					if(gotPermError || gotSelfRename)
 						done();
 					else
