@@ -119,19 +119,21 @@ describe("Assumption", function() {
 
 	it("should not fire events in subdirectories", function(done) {
 		testHelper.dir("watch-test-directory");
-		var watcher = watcherToClose = fs.watch(fixtures);
-		watcher.on("change", function(arg) {
-			done(new Error("should not be emitted " + arg));
-			done = function() {};
-		});
-		watcher.on("error", function(err) {
-			done(err);
-			done = function() {};
-		});
-		testHelper.tick(500, function() {
-			testHelper.file("watch-test-directory/watch-test-file");
+		testHelper.tick(() => {
+			var watcher = watcherToClose = fs.watch(fixtures);
+			watcher.on("change", function(arg, arg2) {
+				done(new Error("should not be emitted " + arg + " " + arg2));
+				done = function() {};
+			});
+			watcher.on("error", function(err) {
+				done(err);
+				done = function() {};
+			});
 			testHelper.tick(500, function() {
-				done();
+				testHelper.file("watch-test-directory/watch-test-file");
+				testHelper.tick(500, function() {
+					done();
+				});
 			});
 		});
 	});
