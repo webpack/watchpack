@@ -1,8 +1,11 @@
 sudo: false
+dist: trusty
 language: node_js
+
 os:
   - linux
   - osx
+
 node_js:
   - "10"
   - "8"
