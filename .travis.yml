@@ -11,7 +11,8 @@ node_js:
   - "8"
   - "6"
 
-script: npm run travis
+script:
+  - yarn cover --report lcovonly
 
 after_success:
   - cat ./coverage/lcov.info | node_modules/.bin/coveralls --verbose

@@ -33,7 +33,7 @@ jobs:
       - script: |
           set -e
           export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-          yarn cover
+          yarn cover --report lcovonly
         displayName: "Run tests with coverage"
 
   - job: macOS
@@ -70,7 +70,7 @@ jobs:
       - script: |
           set -e
           export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-          yarn cover
+          yarn cover --report lcovonly
         displayName: "Run tests with coverage"
 
   - job: Windows
@@ -104,5 +104,5 @@ jobs:
         displayName: "Install dependencies"
       - script: |
           set -e
-          yarn cover
+          yarn cover --report lcovonly
         displayName: "Run tests with coverage"

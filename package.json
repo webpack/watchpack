@@ -12,7 +12,6 @@
   "scripts": {
     "pretest": "yarn lint",
     "test": "mocha",
-    "travis": "yarn cover --report lcovonly",
     "lint": "eslint lib",
     "precover": "yarn lint",
     "cover": "istanbul cover node_modules/mocha/bin/_mocha"
