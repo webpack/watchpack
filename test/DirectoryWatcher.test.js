@@ -159,4 +159,24 @@ describe("DirectoryWatcher", function() {
 			testHelper.remove("a");
 		});
 	});
+
+	it("should log errors emitted from chokidar to stderr", function(done) {
+		var error_logged = false;
+		var old_stderr = process.stderr.write
+		process.stderr.write = function(a){ 
+			console.log(a);
+			error_logged = true; 
+		} 
+		var d = new DirectoryWatcher(fixtures, {});
+		var a = d.watch(path.join(fixtures, "a"));
+		d.watcher._emit("error", "error_message");
+		
+		testHelper.tick(function(){
+			a.close();
+			process.stderr.write = old_stderr;
+			error_logged.should.be.true();
+			done();
+		})
+
+	})
 });
