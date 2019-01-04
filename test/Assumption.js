@@ -138,6 +138,34 @@ describe("Assumption", function() {
 		});
 	});
 
+	it("should rewatch removed directory", function(done) {
+		testHelper.dir("watch-test-dir");
+		testHelper.tick(() => {
+			var watcher = watcherToClose = fs.watch(path.join(fixtures, "watch-test-dir"));
+			watcher.on("change", function(arg, arg2) {
+				console.log("change", arg, arg2);
+			});
+			watcher.on("error", function(err) {
+				console.log("error", err);
+			});
+			testHelper.tick(500, function() {
+				console.log("remove watched directory");
+				testHelper.remove("watch-test-dir");
+				testHelper.tick(500, function() {
+					console.log("restore watched directory");
+					testHelper.dir("watch-test-dir");
+					testHelper.tick(500, function() {
+						console.log("change file in watched directory");
+						testHelper.file("watch-test-dir/watch-test-file");
+						testHelper.tick(500, function() {
+							done();
+						});
+					});
+				});
+			});
+		});
+	});
+
 	[100, 200, 300, 500, 700, 1000].reverse().forEach(function(delay) {
 		it("should fire events not after start and " + delay + "ms delay", function(done) {
 			testHelper.file("watch-test-file-" + delay);
