@@ -148,12 +148,10 @@ describe("Assumption", function() {
 				watcher.on("change", function(type, filename) {
 					if(type === "rename" && filename === "watch-test-dir")
 						gotSelfRename = true;
-					console.log(type, filename);
 				});
 				watcher.on("error", function(err) {
 					if(err && err.code === "EPERM")
 						gotPermError = true;
-					console.log("error", err);
 				});
 				testHelper.tick(500, function() {
 					testHelper.remove("watch-test-dir");
