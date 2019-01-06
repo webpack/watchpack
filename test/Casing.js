@@ -33,7 +33,7 @@ if(fsIsCaseInsensitive) {
 				changeEvents++;
 			});
 			w.on("aggregated", function(changes) {
-				changes.should.be.eql([path.join(fixtures, "a")]);
+				Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
 				changeEvents.should.be.greaterThan(0);
 				w.close();
 				done();
