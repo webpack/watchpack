@@ -119,7 +119,7 @@ describe("Assumption", function() {
 
 	it("should not fire events in subdirectories", function(done) {
 		testHelper.dir("watch-test-directory");
-		testHelper.tick(() => {
+		testHelper.tick(500, () => {
 			var watcher = watcherToClose = fs.watch(fixtures);
 			watcher.on("change", function(arg, arg2) {
 				done(new Error("should not be emitted " + arg + " " + arg2));
