@@ -25,7 +25,7 @@ describe("Watchpack", function() {
 		});
 		w.on("aggregated", function(changes) {
 			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
-			changeEvents.should.be.eql(1);
+			changeEvents.should.be.greaterThan(0);
 			w.close();
 			done();
 		});
@@ -375,7 +375,7 @@ describe("Watchpack", function() {
 			var times = w.getTimes();
 			times[path.join(fixtures, "dir")].should.be.type("number");
 			times[path.join(fixtures, "dir")].should.be.eql(times[path.join(fixtures, "dir", "sub", "a")]);
-						times[path.join(fixtures, "dir", "sub")].should.be.eql(times[path.join(fixtures, "dir", "sub", "a")]);
+			times[path.join(fixtures, "dir", "sub")].should.be.eql(times[path.join(fixtures, "dir", "sub", "a")]);
 			w.close();
 			done();
 		});
@@ -401,7 +401,9 @@ describe("Watchpack", function() {
 		});
 		w.on("aggregated", function(changes) {
 			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
-			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub", "sub", "a")]);
+			changeEvents.should.be.eql([
+				path.join(fixtures, "dir", "sub", "sub", "a")
+			]);
 			Object.keys(w.getTimes()).sort().should.be.eql([
 				path.join(fixtures, "dir"),
 				path.join(fixtures, "dir", "sub"),
@@ -414,8 +416,8 @@ describe("Watchpack", function() {
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
 		testHelper.dir(path.join("dir", "sub", "sub"));
-		testHelper.tick(function() {
-			w.watch([], [path.join(fixtures, "dir")]);
+		testHelper.tick(2000, function() {
+			w.watch([], [path.join(fixtures, "dir")], Date.now());
 			testHelper.tick(function() {
 				testHelper.file(path.join("dir", "sub", "sub", "a"));
 			});
@@ -444,7 +446,7 @@ describe("Watchpack", function() {
 		});
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub()"));
-		testHelper.tick(function() {
+		testHelper.tick(2000, function() {
 			w.watch([], [path.join(fixtures, "dir")]);
 			testHelper.tick(function() {
 				testHelper.file(path.join("dir", "sub()", "a"));
