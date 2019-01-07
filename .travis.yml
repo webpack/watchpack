@@ -11,6 +11,10 @@ node_js:
   - "8"
   - "6"
 
+env:
+  - NORMAL=1
+  - WATCHPACK_POLLING=200
+
 script:
   - yarn cover --report lcovonly
 

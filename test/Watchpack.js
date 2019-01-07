@@ -189,7 +189,7 @@ describe("Watchpack", function() {
 				testHelper.remove(path.join("dir", "a"));
 				testHelper.tick(function() {
 					testHelper.file(path.join("dir", "b"));
-					testHelper.tick(function() {
+					testHelper.tick(500, function() {
 						testHelper.file(path.join("dir", "a"));
 					});
 				});
@@ -372,10 +372,14 @@ describe("Watchpack", function() {
 		w.on("aggregated", function(changes) {
 			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
-			var times = w.getTimes();
-			times[path.join(fixtures, "dir")].should.be.type("number");
-			times[path.join(fixtures, "dir")].should.be.eql(times[path.join(fixtures, "dir", "sub", "a")]);
-			times[path.join(fixtures, "dir", "sub")].should.be.eql(times[path.join(fixtures, "dir", "sub", "a")]);
+			var times = w.getTimeInfoEntries();
+			const dir = times.get(path.join(fixtures, "dir"));
+			const sub = times.get(path.join(fixtures, "dir", "sub"));
+			const a = times.get(path.join(fixtures, "dir", "sub", "a"));
+			dir.should.be.type("object");
+			dir.should.have.property("safeTime");
+			sub.safeTime.should.be.aboveOrEqual(a.safeTime);
+			dir.safeTime.should.be.aboveOrEqual(sub.safeTime);
 			w.close();
 			done();
 		});
@@ -437,10 +441,12 @@ describe("Watchpack", function() {
 		w.on("aggregated", function(changes) {
 			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub()", "a")]);
-			var times = w.getTimes();
-			times[path.join(fixtures, "dir")].should.be.type("number");
-			times[path.join(fixtures, "dir")].should.be.eql(times[path.join(fixtures, "dir", "sub()", "a")]);
-						times[path.join(fixtures, "dir", "sub()")].should.be.eql(times[path.join(fixtures, "dir", "sub()", "a")]);
+			var times = w.getTimeInfoEntries();
+			const dir = times.get(path.join(fixtures, "dir"));
+			const sub = times.get(path.join(fixtures, "dir", "sub()"));
+			const a = times.get(path.join(fixtures, "dir", "sub()", "a"));
+			sub.safeTime.should.be.aboveOrEqual(a.safeTime);
+			dir.safeTime.should.be.aboveOrEqual(sub.safeTime);
 			w.close();
 			done();
 		});
