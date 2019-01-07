@@ -2,18 +2,42 @@ sudo: false
 dist: trusty
 language: node_js
 
-os:
-  - linux
-  - osx
+stages:
+  - basic
+  - advanced
 
-node_js:
-  - "10"
-  - "8"
-  - "6"
-
-env:
-  - NORMAL=1
-  - WATCHPACK_POLLING=200
+matrix:
+  include:
+    - os: linux
+      node_js: "10"
+      stage: basic
+    - os: osx
+      node_js: "10"
+      stage: basic
+    - os: linux
+      node_js: "10"
+      env: WATCHPACK_POLLING=200
+      stage: advanced
+    - os: linux
+      node_js: "8"
+      stage: advanced
+    - os: linux
+      node_js: "8"
+      env: WATCHPACK_POLLING=200
+      stage: advanced
+    - os: linux
+      node_js: "6"
+      stage: advanced
+    - os: linux
+      node_js: "6"
+      env: WATCHPACK_POLLING=200
+      stage: advanced
+    - os: osx
+      node_js: "8"
+      stage: advanced
+    - os: osx
+      node_js: "6"
+      stage: advanced
 
 script:
   - yarn cover --report lcovonly
