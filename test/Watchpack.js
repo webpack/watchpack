@@ -599,7 +599,7 @@ describe("Watchpack", function() {
 		testHelper.file("a");
 		testHelper.file("b");
 		var w = new Watchpack({
-			aggregateTimeout: 1500
+			aggregateTimeout: 3000
 		});
 		var removeEvents = [];
 		w.on("remove", function(file) {

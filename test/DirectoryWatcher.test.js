@@ -55,7 +55,7 @@ describe("DirectoryWatcher", function() {
 	it("should detect a file change", function(done) {
 		var d = new DirectoryWatcher(fixtures, {});
 		testHelper.file("a");
-		testHelper.tick(function() {
+		testHelper.tick(1000, function() {
 			var a = d.watch(path.join(fixtures, "a"));
 			a.on("change", function(mtime) {
 				mtime.should.be.type("number");
