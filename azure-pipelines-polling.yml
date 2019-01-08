@@ -1,0 +1,75 @@
+jobs:
+  - job: Linux
+    pool:
+      vmImage: ubuntu-16.04
+    strategy:
+      maxParallel: 3
+      matrix:
+        node-10:
+          node_version: ^10.10.0
+        node-8:
+          node_version: ^8.12.0
+        node-6:
+          node_version: ^6.16.0
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: $(node_version)
+        displayName: "Install Node.js $(node_version)"
+      - script: |
+          curl -o- -L https://yarnpkg.com/install.sh | bash
+        displayName: "Install Yarn"
+      - script: |
+          set -e
+          export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+          node -v
+          yarn -v
+        displayName: "Print versions"
+      - script: |
+          set -e
+          export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+          yarn
+        displayName: "Install dependencies"
+      - script: |
+          set -e
+          export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+          yarn cover --report lcovonly
+        env:
+          WATCHPACK_POLLING: 200
+        displayName: "Run tests with coverage"
+
+  - job: Windows
+    pool:
+      vmImage: vs2017-win2016
+    strategy:
+      maxParallel: 3
+      matrix:
+        node-10:
+          node_version: ^10.10.0
+        node-8:
+          node_version: ^8.12.0
+        node-6:
+          node_version: ^6.16.0
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: $(node_version)
+        displayName: "Install Node.js $(node_version)"
+      - script: |
+          npm install --global yarn
+        displayName: "Install Yarn"
+      - script: |
+          set -e
+          node -v
+          yarn -v
+        displayName: "Print versions"
+      - script: |
+          set -e
+          yarn
+        displayName: "Install dependencies"
+      - script: |
+          set -e
+          yarn cover --report lcovonly
+        env:
+          WATCHPACK_POLLING: 200
+        displayName: "Run tests with coverage"

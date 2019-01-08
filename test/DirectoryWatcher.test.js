@@ -55,14 +55,16 @@ describe("DirectoryWatcher", function() {
 	it("should detect a file change", function(done) {
 		var d = new DirectoryWatcher(fixtures, {});
 		testHelper.file("a");
-		var a = d.watch(path.join(fixtures, "a"));
-		a.on("change", function(mtime) {
-			mtime.should.be.type("number");
-			a.close();
-			done();
-		});
-		testHelper.tick(function() {
-			testHelper.file("a");
+		testHelper.tick(1000, function() {
+			var a = d.watch(path.join(fixtures, "a"));
+			a.on("change", function(mtime) {
+				mtime.should.be.type("number");
+				a.close();
+				done();
+			});
+			testHelper.tick(function() {
+				testHelper.file("a");
+			});
 		});
 	});
 
@@ -150,8 +152,7 @@ describe("DirectoryWatcher", function() {
 		testHelper.file("a");
 		var d = new DirectoryWatcher(fixtures, {});
 		var a = d.watch(path.join(fixtures, "a"));
-		a.on("remove", function(type) {
-			(type === 'unlink').should.be.true();
+		a.on("remove", function() {
 			a.close();
 			done();
 		});
@@ -160,23 +161,23 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
-	it("should log errors emitted from chokidar to stderr", function(done) {
-		var error_logged = false;
-		var old_stderr = process.stderr.write
-		process.stderr.write = function(a){ 
-			console.log(a);
-			error_logged = true; 
-		} 
-		var d = new DirectoryWatcher(fixtures, {});
-		var a = d.watch(path.join(fixtures, "a"));
-		d.watcher._emit("error", "error_message");
-		
-		testHelper.tick(function(){
-			a.close();
-			process.stderr.write = old_stderr;
-			error_logged.should.be.true();
-			done();
-		})
+	if(!+process.env.WATCHPACK_POLLING) {
+		it("should log errors emitted from watcher to stderr", function(done) {
+			var error_logged = false;
+			var old_stderr = process.stderr.write
+			process.stderr.write = function(a){
+				error_logged = true;
+			}
+			var d = new DirectoryWatcher(fixtures, {});
+			var a = d.watch(path.join(fixtures, "a"));
+			d.watcher.emit("error", "error_message");
 
-	})
+			testHelper.tick(function(){
+				a.close();
+				process.stderr.write = old_stderr;
+				error_logged.should.be.true();
+				done();
+			});
+		});
+	}
 });

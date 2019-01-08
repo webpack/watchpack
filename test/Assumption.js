@@ -4,9 +4,7 @@
 require("should");
 var path = require("path");
 var fs = require("fs");
-var chokidar = require("chokidar");
 var TestHelper = require("./helpers/TestHelper");
-var Watchpack = require("../lib/watchpack");
 
 var fixtures = path.join(__dirname, "fixtures");
 var testHelper = new TestHelper(fixtures);
@@ -65,7 +63,7 @@ describe("Assumption", function() {
 		}
 	});
 
-	it("should have a file system with correct mtime behavior (chokidar)", function(done) {
+	it("should have a file system with correct mtime behavior (fs.watch)", function(done) {
 		this.timeout(20000);
 		testHelper.file("a");
 		var i = 60;
@@ -78,17 +76,10 @@ describe("Assumption", function() {
 		var minDiffAfter = +Infinity;
 		var maxDiffAfter = -Infinity;
 		var sumDiffAfter = 0;
-		var watcher = watcherToClose = chokidar.watch(fixtures, {
-			ignoreInitial: true,
-			persistent: true,
-			followSymlinks: false,
-			depth: 0,
-			atomic: false,
-			alwaysStat: true,
-			ignorePermissionErrors: true
-		});
+		var watcher = watcherToClose = fs.watch(fixtures);
 		testHelper.tick(100, function() {
-			watcher.on("change", function(path, s) {
+			watcher.on("change", function(type, filename) {
+				const s = fs.statSync(path.join(fixtures, filename));
 				if(before && after) {
 					var diffBefore = +s.mtime - before;
 					if(diffBefore < minDiffBefore) minDiffBefore = diffBefore;
@@ -116,8 +107,8 @@ describe("Assumption", function() {
 		}
 
 		function afterMeasure() {
-			console.log("mtime chokidar accuracy (before): [" + minDiffBefore + " ; " + maxDiffBefore + "] avg " + Math.round(sumDiffBefore / count));
-			console.log("mtime chokidar accuracy (after): [" + minDiffAfter + " ; " + maxDiffAfter + "] avg " + Math.round(sumDiffAfter / count));
+			console.log("mtime fs.watch accuracy (before): [" + minDiffBefore + " ; " + maxDiffBefore + "] avg " + Math.round(sumDiffBefore / count));
+			console.log("mtime fs.watch accuracy (after): [" + minDiffAfter + " ; " + maxDiffAfter + "] avg " + Math.round(sumDiffAfter / count));
 			minDiffBefore.should.be.aboveOrEqual(-2000);
 			maxDiffBefore.should.be.below(2000);
 			minDiffAfter.should.be.aboveOrEqual(-2000);
@@ -128,52 +119,58 @@ describe("Assumption", function() {
 
 	it("should not fire events in subdirectories", function(done) {
 		testHelper.dir("watch-test-directory");
-		var watcher = watcherToClose = chokidar.watch(fixtures, {
-			ignoreInitial: true,
-			persistent: true,
-			followSymlinks: false,
-			depth: 0,
-			atomic: false,
-			alwaysStat: true,
-			ignorePermissionErrors: true
-		});
-		watcher.on("add", function(arg) {
-			done(new Error("should not be emitted " + arg));
-			done = function() {};
-		});
-		watcher.on("change", function(arg) {
-			done(new Error("should not be emitted " + arg));
-			done = function() {};
-		});
-		watcher.on("error", function(err) {
-			done(err);
-			done = function() {};
-		});
-		testHelper.tick(500, function() {
-			testHelper.file("watch-test-directory/watch-test-file");
+		testHelper.tick(500, () => {
+			var watcher = watcherToClose = fs.watch(fixtures);
+			watcher.on("change", function(arg, arg2) {
+				done(new Error("should not be emitted " + arg + " " + arg2));
+				done = function() {};
+			});
+			watcher.on("error", function(err) {
+				done(err);
+				done = function() {};
+			});
 			testHelper.tick(500, function() {
-				done();
+				testHelper.file("watch-test-directory/watch-test-file");
+				testHelper.tick(500, function() {
+					done();
+				});
 			});
 		});
 	});
+
+	if(require("os").platform() !== "darwin") {
+		it("should detect removed directory", function(done) {
+			testHelper.dir("watch-test-dir");
+			testHelper.tick(() => {
+				var watcher = watcherToClose = fs.watch(path.join(fixtures, "watch-test-dir"));
+				let gotSelfRename = false;
+				let gotPermError = false;
+				watcher.on("change", function(type, filename) {
+					if(type === "rename" && filename === "watch-test-dir")
+						gotSelfRename = true;
+				});
+				watcher.on("error", function(err) {
+					if(err && err.code === "EPERM")
+						gotPermError = true;
+				});
+				testHelper.tick(500, function() {
+					testHelper.remove("watch-test-dir");
+					testHelper.tick(3000, function() {
+						if(gotPermError || gotSelfRename)
+							done();
+						else
+							done(new Error("Didn't receive a event about removed directory"));
+					});
+				});
+			});
+		});
+	}
 
 	[100, 200, 300, 500, 700, 1000].reverse().forEach(function(delay) {
 		it("should fire events not after start and " + delay + "ms delay", function(done) {
 			testHelper.file("watch-test-file-" + delay);
 			testHelper.tick(delay, function() {
-				var watcher = watcherToClose = chokidar.watch(fixtures, {
-					ignoreInitial: true,
-					persistent: true,
-					followSymlinks: false,
-					depth: 0,
-					atomic: false,
-					alwaysStat: true,
-					ignorePermissionErrors: true
-				});
-				watcher.on("add", function(arg) {
-					done(new Error("should not be emitted " + arg));
-					done = function() {};
-				});
+				var watcher = watcherToClose = fs.watch(fixtures);
 				watcher.on("change", function(arg) {
 					done(new Error("should not be emitted " + arg));
 					done = function() {};
