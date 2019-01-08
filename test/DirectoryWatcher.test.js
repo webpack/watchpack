@@ -161,7 +161,7 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
-	if(!process.env.WATCHPACK_POLLING) {
+	if(!+process.env.WATCHPACK_POLLING) {
 		it("should log errors emitted from watcher to stderr", function(done) {
 			var error_logged = false;
 			var old_stderr = process.stderr.write

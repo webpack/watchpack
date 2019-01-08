@@ -17,6 +17,12 @@ jobs:
         node-10-poll:
           node_version: ^10.10.0
           polling: 200
+        node-8-poll:
+          node_version: ^8.12.0
+          polling: 200
+        node-6-poll:
+          node_version: ^6.16.0
+          polling: 200
     steps:
       - task: NodeTool@0
         inputs:
@@ -98,6 +104,12 @@ jobs:
           polling: 0
         node-10-poll:
           node_version: ^10.10.0
+          polling: 200
+        node-8-poll:
+          node_version: ^8.12.0
+          polling: 200
+        node-6-poll:
+          node_version: ^6.16.0
           polling: 200
     steps:
       - task: NodeTool@0

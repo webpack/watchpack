@@ -610,12 +610,14 @@ describe("Watchpack", function() {
 		w.on("aggregated", function(changes, removals) {
 			step.should.be.eql(6);
 			Array.from(removals).sort().should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
-			removeEvents.should.be.eql([
-				path.join(fixtures, "a"),
-				path.join(fixtures, "b"),
-				path.join(fixtures, "a"),
-				path.join(fixtures, "b"),
-			]);
+			if(!+process.env.WATCHPACK_POLLING) {
+				removeEvents.should.be.eql([
+					path.join(fixtures, "a"),
+					path.join(fixtures, "b"),
+					path.join(fixtures, "a"),
+					path.join(fixtures, "b"),
+				]);
+			}
 			Object.keys(w.getTimes()).sort().should.be.eql([
 				path.join(fixtures, "a"),
 				path.join(fixtures, "b")
