@@ -54,7 +54,7 @@ describe("Watchpack", function() {
 				path.join(fixtures, "b"),
 				path.join(fixtures, "a")
 			]);
-			Object.keys(w.getTimes()).sort().should.be.eql([
+			[...w.getTimes().keys()].sort().should.be.eql([
 				path.join(fixtures, "a"),
 				path.join(fixtures, "b")
 			]);
@@ -408,7 +408,7 @@ describe("Watchpack", function() {
 			changeEvents.should.be.eql([
 				path.join(fixtures, "dir", "sub", "sub", "a")
 			]);
-			Object.keys(w.getTimes()).sort().should.be.eql([
+			[...w.getTimes().keys()].sort().should.be.eql([
 				path.join(fixtures, "dir"),
 				path.join(fixtures, "dir", "sub"),
 				path.join(fixtures, "dir", "sub", "sub"),
@@ -618,7 +618,7 @@ describe("Watchpack", function() {
 					path.join(fixtures, "b"),
 				]);
 			}
-			Object.keys(w.getTimes()).sort().should.be.eql([
+			[...w.getTimes().keys()].sort().should.be.eql([
 				path.join(fixtures, "a"),
 				path.join(fixtures, "b")
 			]);
