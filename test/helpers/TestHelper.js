@@ -4,7 +4,8 @@ var fs = require("fs");
 var path = require("path");
 var rimraf = require("rimraf");
 
-var watcherManager = require("../../lib/watcherManager");
+var WatcherManager = require("../../lib/watcherManager");
+var watcherManager = new WatcherManager();
 
 function TestHelper(testdir) {
 	this.testdir = testdir;

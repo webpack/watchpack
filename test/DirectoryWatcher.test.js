@@ -5,6 +5,7 @@ require("should");
 var path = require("path");
 var TestHelper = require("./helpers/TestHelper");
 var OrgDirectoryWatcher = require("../lib/DirectoryWatcher");
+var WatcherManager = require("../lib/watcherManager");
 
 var fixtures = path.join(__dirname, "fixtures");
 var testHelper = new TestHelper(fixtures);
@@ -12,7 +13,7 @@ var testHelper = new TestHelper(fixtures);
 var openWatchers = [];
 
 var DirectoryWatcher = function(p, options) {
-	var d = new OrgDirectoryWatcher(p, options);
+	var d = new OrgDirectoryWatcher(p, options, new WatcherManager());
 	openWatchers.push(d);
 	var orgClose = d.close;
 	d.close = function() {
