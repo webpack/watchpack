@@ -393,6 +393,30 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should watch 2 files in a not-existing directory", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		w.on("aggregated", function(changes) {
+			Array.from(changes).should.be.eql([
+				path.join(fixtures, "dir", "sub", "a"),
+				path.join(fixtures, "dir", "sub", "b")
+			]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		w.watch([
+			path.join(fixtures, "dir", "sub", "a"),
+			path.join(fixtures, "dir", "sub", "b")
+		], []);
+		testHelper.tick(function() {
+			testHelper.dir(path.join("dir", "sub"));
+			testHelper.file(path.join("dir", "sub", "a"));
+			testHelper.file(path.join("dir", "sub", "b"));
+		});
+	});
+
 	it("should watch file in a sub sub directory", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
