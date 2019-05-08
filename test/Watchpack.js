@@ -398,7 +398,7 @@ describe("Watchpack", function() {
 			aggregateTimeout: 1000
 		});
 		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([
+			Array.from(changes).sort().should.be.eql([
 				path.join(fixtures, "dir", "sub", "a"),
 				path.join(fixtures, "dir", "sub", "b")
 			]);
