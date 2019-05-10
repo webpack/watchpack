@@ -16,12 +16,17 @@ function startWatcher(name, files, folders) {
 
 	w.on("aggregated", function(changes) {
 		var times = w.getTimes();
-		console.log(name, "aggregated", changes.map(function(file) {
-			return path.relative(folder, file);
-		}), Object.keys(times).reduce(function(obj, file) {
-			obj[path.relative(folder, file)] = times[file];
-			return obj
-		}, {}));
+		console.log(
+			name,
+			"aggregated",
+			changes.map(function(file) {
+				return path.relative(folder, file);
+			}),
+			Object.keys(times).reduce(function(obj, file) {
+				obj[path.relative(folder, file)] = times[file];
+				return obj;
+			}, {})
+		);
 	});
 
 	var startTime = Date.now() - 10000;
@@ -30,11 +35,8 @@ function startWatcher(name, files, folders) {
 }
 
 startWatcher("folder", [], [folder]);
-startWatcher("sub+files", [
-	path.join(folder, "a.txt"),
-	path.join(folder, "b.txt"),
-	path.join(folder, "c.txt"),
-	path.join(folder, "d.txt"),
-], [
-	path.join(folder, "subfolder")
-]);
+startWatcher(
+	"sub+files",
+	[path.join(folder, "a.txt"), path.join(folder, "b.txt"), path.join(folder, "c.txt"), path.join(folder, "d.txt")],
+	[path.join(folder, "subfolder")]
+);
