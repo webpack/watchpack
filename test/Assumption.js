@@ -53,8 +53,22 @@ describe("Assumption", function() {
 		});
 
 		function afterMeasure() {
-			console.log("mtime stats accuracy (before): [" + minDiffBefore + " ; " + maxDiffBefore + "] avg " + Math.round(sumDiffBefore / count));
-			console.log("mtime stats accuracy (after): [" + minDiffAfter + " ; " + maxDiffAfter + "] avg " + Math.round(sumDiffAfter / count));
+			console.log(
+				"mtime stats accuracy (before): [" +
+					minDiffBefore +
+					" ; " +
+					maxDiffBefore +
+					"] avg " +
+					Math.round(sumDiffBefore / count)
+			);
+			console.log(
+				"mtime stats accuracy (after): [" +
+					minDiffAfter +
+					" ; " +
+					maxDiffAfter +
+					"] avg " +
+					Math.round(sumDiffAfter / count)
+			);
 			minDiffBefore.should.be.aboveOrEqual(-2000);
 			maxDiffBefore.should.be.below(2000);
 			minDiffAfter.should.be.aboveOrEqual(-2000);
@@ -107,8 +121,22 @@ describe("Assumption", function() {
 		}
 
 		function afterMeasure() {
-			console.log("mtime fs.watch accuracy (before): [" + minDiffBefore + " ; " + maxDiffBefore + "] avg " + Math.round(sumDiffBefore / count));
-			console.log("mtime fs.watch accuracy (after): [" + minDiffAfter + " ; " + maxDiffAfter + "] avg " + Math.round(sumDiffAfter / count));
+			console.log(
+				"mtime fs.watch accuracy (before): [" +
+					minDiffBefore +
+					" ; " +
+					maxDiffBefore +
+					"] avg " +
+					Math.round(sumDiffBefore / count)
+			);
+			console.log(
+				"mtime fs.watch accuracy (after): [" +
+					minDiffAfter +
+					" ; " +
+					maxDiffAfter +
+					"] avg " +
+					Math.round(sumDiffAfter / count)
+			);
 			minDiffBefore.should.be.aboveOrEqual(-2000);
 			maxDiffBefore.should.be.below(2000);
 			minDiffAfter.should.be.aboveOrEqual(-2000);
@@ -142,11 +170,14 @@ describe("Assumption", function() {
 		it("should detect removed directory", function(done) {
 			testHelper.dir("watch-test-dir");
 			testHelper.tick(() => {
-				var watcher = (watcherToClose = fs.watch(path.join(fixtures, "watch-test-dir")));
+				var watcher = (watcherToClose = fs.watch(
+					path.join(fixtures, "watch-test-dir")
+				));
 				let gotSelfRename = false;
 				let gotPermError = false;
 				watcher.on("change", function(type, filename) {
-					if (type === "rename" && filename === "watch-test-dir") gotSelfRename = true;
+					if (type === "rename" && filename === "watch-test-dir")
+						gotSelfRename = true;
 				});
 				watcher.on("error", function(err) {
 					if (err && err.code === "EPERM") gotPermError = true;
@@ -155,7 +186,8 @@ describe("Assumption", function() {
 					testHelper.remove("watch-test-dir");
 					testHelper.tick(3000, function() {
 						if (gotPermError || gotSelfRename) done();
-						else done(new Error("Didn't receive a event about removed directory"));
+						else
+							done(new Error("Didn't receive a event about removed directory"));
 					});
 				});
 			});
@@ -163,7 +195,9 @@ describe("Assumption", function() {
 	}
 
 	[100, 200, 300, 500, 700, 1000].reverse().forEach(function(delay) {
-		it("should fire events not after start and " + delay + "ms delay", function(done) {
+		it("should fire events not after start and " + delay + "ms delay", function(
+			done
+		) {
 			testHelper.file("watch-test-file-" + delay);
 			testHelper.tick(delay, function() {
 				var watcher = (watcherToClose = fs.watch(fixtures));

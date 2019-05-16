@@ -74,7 +74,13 @@ describe("Watchpack", function() {
 			Array.from(changes)
 				.sort()
 				.should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
-			changeEvents.should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b"), path.join(fixtures, "a"), path.join(fixtures, "b"), path.join(fixtures, "a")]);
+			changeEvents.should.be.eql([
+				path.join(fixtures, "a"),
+				path.join(fixtures, "b"),
+				path.join(fixtures, "a"),
+				path.join(fixtures, "b"),
+				path.join(fixtures, "a")
+			]);
 			Object.keys(w.getTimes())
 				.sort()
 				.should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
@@ -246,7 +252,11 @@ describe("Watchpack", function() {
 		});
 		w.on("aggregated", function(changes) {
 			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
-			changeEvents.should.be.eql([path.join(fixtures, "dir", "a"), path.join(fixtures, "dir", "b"), path.join(fixtures, "dir", "a")]);
+			changeEvents.should.be.eql([
+				path.join(fixtures, "dir", "a"),
+				path.join(fixtures, "dir", "b"),
+				path.join(fixtures, "dir", "a")
+			]);
 			w.close();
 			done();
 		});
@@ -349,8 +359,12 @@ describe("Watchpack", function() {
 			changeEvents.push(file);
 		});
 		w.on("aggregated", function(changes, removals) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
-			Array.from(removals).should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
+			Array.from(changes).should.be.eql([
+				path.join(fixtures, "dir", "sub", "a")
+			]);
+			Array.from(removals).should.be.eql([
+				path.join(fixtures, "dir", "sub", "a")
+			]);
 			w.close();
 			done();
 		});
@@ -462,12 +476,21 @@ describe("Watchpack", function() {
 		w.on("aggregated", function(changes) {
 			Array.from(changes)
 				.sort()
-				.should.be.eql([path.join(fixtures, "dir", "sub", "a"), path.join(fixtures, "dir", "sub", "b")]);
+				.should.be.eql([
+					path.join(fixtures, "dir", "sub", "a"),
+					path.join(fixtures, "dir", "sub", "b")
+				]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
-		w.watch([path.join(fixtures, "dir", "sub", "a"), path.join(fixtures, "dir", "sub", "b")], []);
+		w.watch(
+			[
+				path.join(fixtures, "dir", "sub", "a"),
+				path.join(fixtures, "dir", "sub", "b")
+			],
+			[]
+		);
 		testHelper.tick(function() {
 			testHelper.dir(path.join("dir", "sub"));
 			testHelper.file(path.join("dir", "sub", "a"));
@@ -486,10 +509,17 @@ describe("Watchpack", function() {
 		});
 		w.on("aggregated", function(changes) {
 			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
-			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub", "sub", "a")]);
+			changeEvents.should.be.eql([
+				path.join(fixtures, "dir", "sub", "sub", "a")
+			]);
 			Object.keys(w.getTimes())
 				.sort()
-				.should.be.eql([path.join(fixtures, "dir"), path.join(fixtures, "dir", "sub"), path.join(fixtures, "dir", "sub", "sub"), path.join(fixtures, "dir", "sub", "sub", "a")]);
+				.should.be.eql([
+					path.join(fixtures, "dir"),
+					path.join(fixtures, "dir", "sub"),
+					path.join(fixtures, "dir", "sub", "sub"),
+					path.join(fixtures, "dir", "sub", "sub", "a")
+				]);
 			w.close();
 			done();
 		});
@@ -689,7 +719,12 @@ describe("Watchpack", function() {
 				.sort()
 				.should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
 			if (!+process.env.WATCHPACK_POLLING) {
-				removeEvents.should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b"), path.join(fixtures, "a"), path.join(fixtures, "b")]);
+				removeEvents.should.be.eql([
+					path.join(fixtures, "a"),
+					path.join(fixtures, "b"),
+					path.join(fixtures, "a"),
+					path.join(fixtures, "b")
+				]);
 			}
 			Object.keys(w.getTimes())
 				.sort()

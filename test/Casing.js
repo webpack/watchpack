@@ -11,7 +11,9 @@ var testHelper = new TestHelper(fixtures);
 
 var fsIsCaseInsensitive;
 try {
-	fsIsCaseInsensitive = require("fs").existsSync(path.join(__dirname, "..", "PACKAGE.JSON"));
+	fsIsCaseInsensitive = require("fs").existsSync(
+		path.join(__dirname, "..", "PACKAGE.JSON")
+	);
 } catch (e) {
 	fsIsCaseInsensitive = false;
 }

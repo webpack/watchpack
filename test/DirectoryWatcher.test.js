@@ -103,7 +103,15 @@ describe("DirectoryWatcher", function() {
 			var d = new DirectoryWatcher(fixtures, {});
 			var a = d.watch(path.join(fixtures, "a"));
 			a.on("change", function(mtime, type) {
-				throw new Error("should not be detected (" + type + " mtime=" + mtime + " now=" + Date.now() + ")");
+				throw new Error(
+					"should not be detected (" +
+						type +
+						" mtime=" +
+						mtime +
+						" now=" +
+						Date.now() +
+						")"
+				);
 			});
 			testHelper.tick(function() {
 				a.close();
