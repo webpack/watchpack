@@ -15,7 +15,7 @@ describe("Assumption", function() {
 
 	beforeEach(testHelper.before);
 	afterEach(function(done) {
-		if(watcherToClose) {
+		if (watcherToClose) {
 			watcherToClose.close();
 			watcherToClose = null;
 		}
@@ -38,14 +38,14 @@ describe("Assumption", function() {
 			var after = Date.now();
 			var s = fs.statSync(path.join(fixtures, "a"));
 			var diffBefore = +s.mtime - before;
-			if(diffBefore < minDiffBefore) minDiffBefore = diffBefore;
-			if(diffBefore > maxDiffBefore) maxDiffBefore = diffBefore;
+			if (diffBefore < minDiffBefore) minDiffBefore = diffBefore;
+			if (diffBefore > maxDiffBefore) maxDiffBefore = diffBefore;
 			sumDiffBefore += diffBefore;
 			var diffAfter = +s.mtime - after;
-			if(diffAfter < minDiffAfter) minDiffAfter = diffAfter;
-			if(diffAfter > maxDiffAfter) maxDiffAfter = diffAfter;
+			if (diffAfter < minDiffAfter) minDiffAfter = diffAfter;
+			if (diffAfter > maxDiffAfter) maxDiffAfter = diffAfter;
 			sumDiffAfter += diffAfter;
-			if(i-- === 0) {
+			if (i-- === 0) {
 				afterMeasure();
 			} else {
 				testHelper.tick(100, checkMtime);
@@ -53,8 +53,22 @@ describe("Assumption", function() {
 		});
 
 		function afterMeasure() {
-			console.log("mtime stats accuracy (before): [" + minDiffBefore + " ; " + maxDiffBefore + "] avg " + Math.round(sumDiffBefore / count));
-			console.log("mtime stats accuracy (after): [" + minDiffAfter + " ; " + maxDiffAfter + "] avg " + Math.round(sumDiffAfter / count));
+			console.log(
+				"mtime stats accuracy (before): [" +
+					minDiffBefore +
+					" ; " +
+					maxDiffBefore +
+					"] avg " +
+					Math.round(sumDiffBefore / count)
+			);
+			console.log(
+				"mtime stats accuracy (after): [" +
+					minDiffAfter +
+					" ; " +
+					maxDiffAfter +
+					"] avg " +
+					Math.round(sumDiffAfter / count)
+			);
 			minDiffBefore.should.be.aboveOrEqual(-2000);
 			maxDiffBefore.should.be.below(2000);
 			minDiffAfter.should.be.aboveOrEqual(-2000);
@@ -76,21 +90,21 @@ describe("Assumption", function() {
 		var minDiffAfter = +Infinity;
 		var maxDiffAfter = -Infinity;
 		var sumDiffAfter = 0;
-		var watcher = watcherToClose = fs.watch(fixtures);
+		var watcher = (watcherToClose = fs.watch(fixtures));
 		testHelper.tick(100, function() {
 			watcher.on("change", function(type, filename) {
 				const s = fs.statSync(path.join(fixtures, filename));
-				if(before && after) {
+				if (before && after) {
 					var diffBefore = +s.mtime - before;
-					if(diffBefore < minDiffBefore) minDiffBefore = diffBefore;
-					if(diffBefore > maxDiffBefore) maxDiffBefore = diffBefore;
+					if (diffBefore < minDiffBefore) minDiffBefore = diffBefore;
+					if (diffBefore > maxDiffBefore) maxDiffBefore = diffBefore;
 					sumDiffBefore += diffBefore;
 					var diffAfter = +s.mtime - after;
-					if(diffAfter < minDiffAfter) minDiffAfter = diffAfter;
-					if(diffAfter > maxDiffAfter) maxDiffAfter = diffAfter;
+					if (diffAfter < minDiffAfter) minDiffAfter = diffAfter;
+					if (diffAfter > maxDiffAfter) maxDiffAfter = diffAfter;
 					sumDiffAfter += diffAfter;
 					before = after = undefined;
-					if(i-- === 0) {
+					if (i-- === 0) {
 						afterMeasure();
 					} else {
 						testHelper.tick(100, checkMtime);
@@ -107,8 +121,22 @@ describe("Assumption", function() {
 		}
 
 		function afterMeasure() {
-			console.log("mtime fs.watch accuracy (before): [" + minDiffBefore + " ; " + maxDiffBefore + "] avg " + Math.round(sumDiffBefore / count));
-			console.log("mtime fs.watch accuracy (after): [" + minDiffAfter + " ; " + maxDiffAfter + "] avg " + Math.round(sumDiffAfter / count));
+			console.log(
+				"mtime fs.watch accuracy (before): [" +
+					minDiffBefore +
+					" ; " +
+					maxDiffBefore +
+					"] avg " +
+					Math.round(sumDiffBefore / count)
+			);
+			console.log(
+				"mtime fs.watch accuracy (after): [" +
+					minDiffAfter +
+					" ; " +
+					maxDiffAfter +
+					"] avg " +
+					Math.round(sumDiffAfter / count)
+			);
 			minDiffBefore.should.be.aboveOrEqual(-2000);
 			maxDiffBefore.should.be.below(2000);
 			minDiffAfter.should.be.aboveOrEqual(-2000);
@@ -120,7 +148,7 @@ describe("Assumption", function() {
 	it("should not fire events in subdirectories", function(done) {
 		testHelper.dir("watch-test-directory");
 		testHelper.tick(500, () => {
-			var watcher = watcherToClose = fs.watch(fixtures);
+			var watcher = (watcherToClose = fs.watch(fixtures));
 			watcher.on("change", function(arg, arg2) {
 				done(new Error("should not be emitted " + arg + " " + arg2));
 				done = function() {};
@@ -138,26 +166,26 @@ describe("Assumption", function() {
 		});
 	});
 
-	if(require("os").platform() !== "darwin") {
+	if (require("os").platform() !== "darwin") {
 		it("should detect removed directory", function(done) {
 			testHelper.dir("watch-test-dir");
 			testHelper.tick(() => {
-				var watcher = watcherToClose = fs.watch(path.join(fixtures, "watch-test-dir"));
+				var watcher = (watcherToClose = fs.watch(
+					path.join(fixtures, "watch-test-dir")
+				));
 				let gotSelfRename = false;
 				let gotPermError = false;
 				watcher.on("change", function(type, filename) {
-					if(type === "rename" && filename === "watch-test-dir")
+					if (type === "rename" && filename === "watch-test-dir")
 						gotSelfRename = true;
 				});
 				watcher.on("error", function(err) {
-					if(err && err.code === "EPERM")
-						gotPermError = true;
+					if (err && err.code === "EPERM") gotPermError = true;
 				});
 				testHelper.tick(500, function() {
 					testHelper.remove("watch-test-dir");
 					testHelper.tick(3000, function() {
-						if(gotPermError || gotSelfRename)
-							done();
+						if (gotPermError || gotSelfRename) done();
 						else
 							done(new Error("Didn't receive a event about removed directory"));
 					});
@@ -167,10 +195,12 @@ describe("Assumption", function() {
 	}
 
 	[100, 200, 300, 500, 700, 1000].reverse().forEach(function(delay) {
-		it("should fire events not after start and " + delay + "ms delay", function(done) {
+		it("should fire events not after start and " + delay + "ms delay", function(
+			done
+		) {
 			testHelper.file("watch-test-file-" + delay);
 			testHelper.tick(delay, function() {
-				var watcher = watcherToClose = fs.watch(fixtures);
+				var watcher = (watcherToClose = fs.watch(fixtures));
 				watcher.on("change", function(arg) {
 					done(new Error("should not be emitted " + arg));
 					done = function() {};

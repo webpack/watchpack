@@ -18,8 +18,7 @@ var DirectoryWatcher = function(p, options) {
 	d.close = function() {
 		orgClose.call(this);
 		var idx = openWatchers.indexOf(d);
-		if(idx < 0)
-			throw new Error("DirectoryWatcher was already closed");
+		if (idx < 0) throw new Error("DirectoryWatcher was already closed");
 		openWatchers.splice(idx, 1);
 	};
 	return d;
@@ -41,9 +40,9 @@ describe("DirectoryWatcher", function() {
 		var a = d.watch(path.join(fixtures, "a"));
 		a.on("change", function(mtime) {
 			mtime.should.be.type("number");
-			Object.keys(d.getTimes()).sort().should.be.eql([
-				path.join(fixtures, "a")
-			]);
+			Object.keys(d.getTimes())
+				.sort()
+				.should.be.eql([path.join(fixtures, "a")]);
 			a.close();
 			done();
 		});
@@ -104,7 +103,15 @@ describe("DirectoryWatcher", function() {
 			var d = new DirectoryWatcher(fixtures, {});
 			var a = d.watch(path.join(fixtures, "a"));
 			a.on("change", function(mtime, type) {
-				throw new Error("should not be detected (" + type + " mtime=" + mtime + " now=" + Date.now() + ")");
+				throw new Error(
+					"should not be detected (" +
+						type +
+						" mtime=" +
+						mtime +
+						" now=" +
+						Date.now() +
+						")"
+				);
 			});
 			testHelper.tick(function() {
 				a.close();
@@ -128,9 +135,9 @@ describe("DirectoryWatcher", function() {
 				var wasChanged = false;
 				a.on("change", function(mtime) {
 					mtime.should.be.type("number");
-					if(!wasChanged) return;
+					if (!wasChanged) return;
 					wasChanged = false;
-					if(count-- <= 0) {
+					if (count-- <= 0) {
 						a.close();
 						done();
 					} else {
@@ -161,18 +168,18 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
-	if(!+process.env.WATCHPACK_POLLING) {
+	if (!+process.env.WATCHPACK_POLLING) {
 		it("should log errors emitted from watcher to stderr", function(done) {
 			var error_logged = false;
-			var old_stderr = process.stderr.write
-			process.stderr.write = function(a){
+			var old_stderr = process.stderr.write;
+			process.stderr.write = function(a) {
 				error_logged = true;
-			}
+			};
 			var d = new DirectoryWatcher(fixtures, {});
 			var a = d.watch(path.join(fixtures, "a"));
 			d.watcher.emit("error", "error_message");
 
-			testHelper.tick(function(){
+			testHelper.tick(function() {
 				a.close();
 				process.stderr.write = old_stderr;
 				error_logged.should.be.true();
