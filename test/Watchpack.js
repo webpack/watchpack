@@ -35,6 +35,32 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should not watch a single ignored file", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 300,
+			ignored: "**/a"
+		});
+		var changeEvents = 0;
+		var aggregatedEvents = 0;
+		w.on("change", () => {
+			changeEvents++;
+		});
+		w.on("aggregated", () => {
+			aggregatedEvents++;
+		});
+		w.watch([path.join(fixtures, "a")], []);
+		testHelper.tick(() => {
+			testHelper.file("a");
+			testHelper.tick(1000, () => {
+				changeEvents.should.be.eql(0);
+				aggregatedEvents.should.be.eql(0);
+				testHelper.getNumberOfWatchers().should.be.eql(0);
+				w.close();
+				done();
+			});
+		});
+	});
+
 	it("should watch multiple files", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
@@ -100,6 +126,67 @@ describe("Watchpack", function() {
 			w.watch([], [path.join(fixtures, "dir")]);
 			testHelper.tick(200, function() {
 				testHelper.file(path.join("dir", "a"));
+			});
+		});
+	});
+
+	it("should not watch an ignored directory", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 300,
+			ignored: [
+				"**/dir"
+			]
+		});
+		var changeEvents = 0;
+		var aggregatedEvents = 0;
+		w.on("change", () => {
+			changeEvents++;
+		});
+		w.on("aggregated", () => {
+			aggregatedEvents++;
+		});
+		testHelper.dir("dir");
+		testHelper.tick(200, function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(200, function() {
+				testHelper.file(path.join("dir", "a"));
+				testHelper.tick(1000, function() {
+					changeEvents.should.be.eql(0);
+					aggregatedEvents.should.be.eql(0);
+					testHelper.getNumberOfWatchers().should.be.eql(0);
+					w.close();
+					done();
+				});
+			});
+		});
+	});
+
+	it("should not watch an ignored file in a directory", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 300,
+			ignored: [
+				"**/a"
+			]
+		});
+		var changeEvents = 0;
+		var aggregatedEvents = 0;
+		w.on("change", () => {
+			changeEvents++;
+		});
+		w.on("aggregated", () => {
+			aggregatedEvents++;
+		});
+		testHelper.dir("dir");
+		testHelper.tick(200, function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(200, function() {
+				testHelper.file(path.join("dir", "a"));
+				testHelper.tick(1000, function() {
+					changeEvents.should.be.eql(0);
+					aggregatedEvents.should.be.eql(0);
+					w.close();
+					done();
+				});
 			});
 		});
 	});

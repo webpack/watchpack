@@ -33,6 +33,11 @@ var wp = new Watchpack({
 	// poll defaults to undefined, which prefer native watching methods
 	// Note: enable polling when watching on a network path
 	// When WATCHPACK_POLLING environment variable is set it will override this option
+
+	ignored: "**/.git",
+	// ignored: "string" - a glob pattern for files or folders that should not be watched
+	// ignored: ["string", "string"] - multiple glob patterns that should be ignored
+	// All subdirectories are ignored too
 });
 
 // Watchpack.prototype.watch(files: string[], directories: string[], startTime?: number)
