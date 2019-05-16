@@ -68,3 +68,7 @@ TestHelper.prototype.tick = function tick(arg, fn) {
 		fn();
 	}, arg);
 };
+
+TestHelper.prototype.getNumberOfWatchers = function getNumberOfWatchers() {
+	return Object.keys(watcherManager.directoryWatchers).length;
+};
