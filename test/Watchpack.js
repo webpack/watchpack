@@ -758,4 +758,162 @@ describe("Watchpack", function() {
 			});
 		});
 	});
+
+	let symlinksSupported = false;
+	try {
+		const fs = require("fs");
+		fs.symlinkSync("helpers", path.join(__dirname, "fixtures"), "dir");
+		fs.unlinkSync(path.join(__dirname, "fixtures"));
+		symlinksSupported = true;
+	} catch (e) {
+		// ignore
+	}
+
+	if (symlinksSupported) {
+		describe("symlinks", () => {
+			beforeEach(done => {
+				testHelper.dir("a");
+				testHelper.dir(path.join("a", "b"));
+				testHelper.file(path.join("a", "b", "c"));
+				testHelper.file(path.join("a", "b", "d"));
+				testHelper.symlinkDir("link", "a");
+				testHelper.symlinkDir(path.join("a", "link"), "b");
+				testHelper.symlinkFile(path.join("a", "b", "link"), "c");
+				testHelper.symlinkFile(path.join("a", "b", "link2"), "link");
+				testHelper.symlinkFile("link2", "link/link/link2");
+
+				testHelper.tick(1000, done);
+			});
+
+			function expectWatchEvent(files, dirs, callback, ready) {
+				var w = new Watchpack({
+					aggregateTimeout: 500,
+					followSymlinks: true
+				});
+
+				w.watch([].concat(files), [].concat(dirs), Date.now());
+
+				let active = false;
+				let closed = false;
+
+				w.on("aggregated", changes => {
+					w.close();
+					closed = true;
+					if (!active) throw new Error("Events are not expected yet");
+					callback(changes);
+				});
+
+				testHelper.tick(1000, () => {
+					if (closed) return;
+					active = true;
+					ready();
+				});
+			}
+
+			it("should detect a change to the original file", function(done) {
+				expectWatchEvent(
+					path.join(fixtures, "link2"),
+					[],
+					changes => {
+						Array.from(changes).should.be.eql([path.join(fixtures, "link2")]);
+						done();
+					},
+					() => {
+						testHelper.file(path.join("a", "b", "c"));
+					}
+				);
+			});
+
+			it("should detect a change to the direct symlink", function(done) {
+				expectWatchEvent(
+					path.join(fixtures, "link2"),
+					[],
+					changes => {
+						Array.from(changes).should.be.eql([path.join(fixtures, "link2")]);
+						done();
+					},
+					() => {
+						testHelper.unlink("link2");
+						testHelper.symlinkFile("link2", path.join("a", "b", "d"));
+					}
+				);
+			});
+
+			it("should detect a change to the double symlink", function(done) {
+				expectWatchEvent(
+					path.join(fixtures, "link2"),
+					[],
+					changes => {
+						Array.from(changes).should.be.eql([path.join(fixtures, "link2")]);
+						done();
+					},
+					() => {
+						testHelper.unlink(path.join("a", "b", "link2"));
+						testHelper.symlinkFile(path.join("a", "b", "link2"), "d");
+					}
+				);
+			});
+
+			it("should detect a change to the directory symlink", function(done) {
+				expectWatchEvent(
+					path.join(fixtures, "link2"),
+					[],
+					changes => {
+						Array.from(changes).should.be.eql([path.join(fixtures, "link2")]);
+						done();
+					},
+					() => {
+						testHelper.unlink(path.join("a", "link"));
+						testHelper.symlinkDir(path.join("a", "link"), path.join("b", "d"));
+					}
+				);
+			});
+
+			it("should detect a file change in a watched symlinked directory", function(done) {
+				expectWatchEvent(
+					[],
+					path.join(fixtures, "link"),
+					changes => {
+						Array.from(changes).should.be.eql([path.join(fixtures, "link")]);
+						done();
+					},
+					() => {
+						testHelper.file(path.join("a", "b", "c"));
+					}
+				);
+			});
+
+			it("should detect a symlink file change in a watched symlinked directory", function(done) {
+				expectWatchEvent(
+					[],
+					path.join(fixtures, "link"),
+					changes => {
+						Array.from(changes).should.be.eql([path.join(fixtures, "link")]);
+						done();
+					},
+					() => {
+						testHelper.unlink(path.join("a", "b", "link2"));
+						testHelper.symlinkFile(path.join("a", "b", "link2"), "d");
+					}
+				);
+			});
+
+			it("should detect a symlink dir change in a watched symlinked directory", function(done) {
+				expectWatchEvent(
+					[],
+					path.join(fixtures, "link"),
+					changes => {
+						Array.from(changes).should.be.eql([path.join(fixtures, "link")]);
+						done();
+					},
+					() => {
+						testHelper.unlink(path.join("a", "link"));
+						testHelper.symlinkDir(path.join("a", "link"), path.join("b", "d"));
+					}
+				);
+			});
+		});
+	} else {
+		it("symlinks");
+	}
 });
