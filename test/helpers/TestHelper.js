@@ -56,6 +56,18 @@ TestHelper.prototype.file = function file(name) {
 	fs.writeFileSync(path.join(this.testdir, name), Math.random() + "", "utf-8");
 };
 
+TestHelper.prototype.symlinkFile = function symlinkFile(name, target) {
+	fs.symlinkSync(target, path.join(this.testdir, name), "file");
+};
+
+TestHelper.prototype.symlinkDir = function symlinkDir(name, target) {
+	fs.symlinkSync(target, path.join(this.testdir, name), "dir");
+};
+
+TestHelper.prototype.unlink = function unlink(name) {
+	fs.unlinkSync(path.join(this.testdir, name));
+};
+
 TestHelper.prototype.mtime = function mtime(name, mtime) {
 	var stats = fs.statSync(path.join(this.testdir, name));
 	fs.utimesSync(path.join(this.testdir, name), stats.atime, new Date(mtime));

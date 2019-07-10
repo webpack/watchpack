@@ -28,18 +28,24 @@ var Watchpack = require("watchpack");
 
 var wp = new Watchpack({
 	// options:
-	aggregateTimeout: 1000
+	aggregateTimeout: 1000,
 	// fire "aggregated" event when after a change for 1000ms no additional change occurred
 	// aggregated defaults to undefined, which doesn't fire an "aggregated" event
 
-	poll: true
+	poll: true,
 	// poll: true - use polling with the default interval
 	// poll: 10000 - use polling with an interval of 10s
 	// poll defaults to undefined, which prefer native watching methods
 	// Note: enable polling when watching on a network path
 	// When WATCHPACK_POLLING environment variable is set it will override this option
 
-	ignored: "**/.git",
+	followSymlinks: true,
+	// true: follows symlinks and watches symlinks and real files
+	//   (This makes sense when symlinks has not been resolved yet, comes with a performance hit)
+	// false (default): watches only specified item they may be real files or symlinks
+	//   (This makes sense when symlinks has already been resolved)
+
+	ignored: "**/.git"
 	// ignored: "string" - a glob pattern for files or folders that should not be watched
 	// ignored: ["string", "string"] - multiple glob patterns that should be ignored
 	// All subdirectories are ignored too
