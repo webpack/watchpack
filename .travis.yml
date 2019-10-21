@@ -25,28 +25,8 @@ matrix:
       node_js: "10"
       env: WATCHPACK_POLLING=200
       stage: advanced
-    - os: linux
-      node_js: "8"
-      stage: advanced
-    - os: linux
-      node_js: "8"
-      env: WATCHPACK_POLLING=200
-      stage: advanced
-    - os: linux
-      node_js: "6"
-      stage: advanced
-    - os: linux
-      node_js: "6"
-      env: WATCHPACK_POLLING=200
-      stage: advanced
     - os: osx
       node_js: "10"
-      stage: advanced
-    - os: osx
-      node_js: "8"
-      stage: advanced
-    - os: osx
-      node_js: "6"
       stage: advanced
 
 script:
