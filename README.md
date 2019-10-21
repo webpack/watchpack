@@ -51,7 +51,7 @@ var wp = new Watchpack({
 	// All subdirectories are ignored too
 });
 
-// Watchpack.prototype.watch(files: string[], directories: string[], startTime?: number)
+// Watchpack.prototype.watch(files: Iterable<string>, directories: Iterable<string>, startTime?: number)
 wp.watch(listOfFiles, listOfDirectories, Date.now() - 10000);
 // starts watching these files and directories
 // calling this again will override the files and directories
@@ -65,6 +65,7 @@ wp.on("change", function(filePath, mtime) {
 wp.on("aggregated", function(changes, removals) {
 	// changes: a Set of all changed files
 	// removals: a Set of all removed files
+	// watchpack gives up ownership on these Sets.
 });
 
 // Watchpack.prototype.pause()
@@ -81,7 +82,7 @@ var fileTimes = wp.getTimeInfoEntries();
 // returns a Map with all known time info objects for files and directories
 // this include info from files not directly watched
 // key: absolute path, value: object with { safeTime, timestamp }
-// safeTime: the time before that all changes happened
+// safeTime: a point in time at which it is safe to say all changes happened before that
 // timestamp: only for files, the mtime timestamp of the file
 
 // (deprecated)
