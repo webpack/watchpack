@@ -4,7 +4,22 @@ var fs = require("fs");
 var path = require("path");
 var rimraf = require("rimraf");
 
-var watcherManager = require("../../lib/watcherManager");
+require("../../lib/getWatcherManager");
+var watcherManagerModule =
+	require.cache[require.resolve("../../lib/getWatcherManager")];
+
+const allWatcherManager = new Set();
+const oldFn = watcherManagerModule.exports;
+watcherManagerModule = options => {
+	const watcherManager = oldFn(options);
+	allWatcherManager.add(watcherManager);
+};
+
+const checkAllWatcherClosed = () => {
+	for (const watcherManager of allWatcherManager) {
+		Array.from(watcherManager.directoryWatchers.keys()).should.be.eql([]);
+	}
+};
 
 function TestHelper(testdir) {
 	this.testdir = testdir;
@@ -19,7 +34,7 @@ function TestHelper(testdir) {
 module.exports = TestHelper;
 
 TestHelper.prototype._before = function before(done) {
-	Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
+	checkAllWatcherClosed();
 	this.tick(
 		400,
 		function() {
@@ -42,7 +57,7 @@ TestHelper.prototype._after = function after(done) {
 				this.tick(100, del.bind(this));
 				return;
 			}
-			Object.keys(watcherManager.directoryWatchers).should.be.eql([]);
+			checkAllWatcherClosed();
 			this.tick(300, done);
 		}.bind(this)
 	);
@@ -88,5 +103,9 @@ TestHelper.prototype.tick = function tick(arg, fn) {
 };
 
 TestHelper.prototype.getNumberOfWatchers = function getNumberOfWatchers() {
-	return Object.keys(watcherManager.directoryWatchers).length;
+	const count = 0;
+	for (const watcherManager of allWatcherManager) {
+		count += watcherManager.directoryWatchers.size;
+	}
+	return count;
 };
