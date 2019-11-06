@@ -293,7 +293,7 @@ describe("Watchpack", function() {
 		});
 		testHelper.dir("dir");
 		testHelper.tick(function() {
-			w.watch([], [path.join(fixtures, "dir", "sub")]);
+			w.watch({ missing: [path.join(fixtures, "dir", "sub")] });
 			testHelper.tick(function() {
 				testHelper.dir(path.join("dir", "sub"));
 			});
@@ -362,9 +362,7 @@ describe("Watchpack", function() {
 			Array.from(changes).should.be.eql([
 				path.join(fixtures, "dir", "sub", "a")
 			]);
-			Array.from(removals).should.be.eql([
-				path.join(fixtures, "dir", "sub", "a")
-			]);
+			Array.from(removals).should.be.eql([]);
 			w.close();
 			done();
 		});
@@ -755,6 +753,55 @@ describe("Watchpack", function() {
 						});
 					});
 				});
+			});
+		});
+	});
+
+	it("should report removal of file and directory if it is missing in initial scan", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		w.on("aggregated", function(changes, removals) {
+			Array.from(changes).should.be.eql([]);
+			Array.from(removals)
+				.sort()
+				.should.be.eql([
+					path.join(fixtures, "dir", "a"),
+					path.join(fixtures, "dir", "b")
+				]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.tick(() => {
+			w.watch({
+				files: [path.join(fixtures, "dir", "a")],
+				directories: [path.join(fixtures, "dir", "b")],
+				missing: [path.join(fixtures, "dir", "c")]
+			});
+		});
+	});
+
+	it("should report removal of file and directory if parent directory is missing in initial scan", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		w.on("aggregated", function(changes, removals) {
+			Array.from(changes).should.be.eql([]);
+			Array.from(removals)
+				.sort()
+				.should.be.eql([
+					path.join(fixtures, "dir", "a"),
+					path.join(fixtures, "dir", "b")
+				]);
+			w.close();
+			done();
+		});
+		testHelper.tick(() => {
+			w.watch({
+				files: [path.join(fixtures, "dir", "a")],
+				directories: [path.join(fixtures, "dir", "b")],
+				missing: [path.join(fixtures, "dir", "c")]
 			});
 		});
 	});

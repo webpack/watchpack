@@ -51,15 +51,40 @@ var wp = new Watchpack({
 	// All subdirectories are ignored too
 });
 
-// Watchpack.prototype.watch(files: Iterable<string>, directories: Iterable<string>, startTime?: number)
-wp.watch(listOfFiles, listOfDirectories, Date.now() - 10000);
+// Watchpack.prototype.watch({
+//   files: Iterable<string>,
+//   directories: Iterable<string>,
+//   missing: Iterable<string>,
+//   startTime?: number
+// })
+wp.watch({
+	files: listOfFiles,
+	directories: listOfDirectories,
+	missing: listOfNotExistingItems,
+	startTime: Date.now() - 10000
+});
 // starts watching these files and directories
 // calling this again will override the files and directories
+// files: can be files or directories, for files: content and existance changes are tracked
+//        for directories: only existance and timestamp changes are tracked
+// directories: only directories, directory content (and content of children, ...) and
+//              existance changes are tracked.
+//              assumed to exist, when directory is not found without futher information a remove event is emitted
+// missing: can be files or directores,
+//          only existance changes are tracked
+//          expected to not exist, no remove event is emitted when not found initially
+// files and directories are assumed to exist, when they are not found without futher information a remove event is emitted
+// missing is assumed to not exist and no remove event is emitted
 
-wp.on("change", function(filePath, mtime) {
+wp.on("change", function(filePath, mtime, explanation) {
 	// filePath: the changed file
-	// mtime: last modified time for the changed file (null if file was removed)
-	// for folders it's a time before that all changes in the directory happened
+	// mtime: last modified time for the changed file
+	// explanation: textual information how this change was detected
+});
+
+wp.on("remove", function(filePath, explanation) {
+	// filePath: the removed file or directory
+	// explanation: textual information how this change was detected
 });
 
 wp.on("aggregated", function(changes, removals) {
