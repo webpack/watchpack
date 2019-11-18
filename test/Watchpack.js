@@ -35,10 +35,36 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should not watch a single ignored file", function(done) {
+	it("should not watch a single ignored file (glob)", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 300,
 			ignored: "**/a"
+		});
+		var changeEvents = 0;
+		var aggregatedEvents = 0;
+		w.on("change", () => {
+			changeEvents++;
+		});
+		w.on("aggregated", () => {
+			aggregatedEvents++;
+		});
+		w.watch([path.join(fixtures, "a")], []);
+		testHelper.tick(() => {
+			testHelper.file("a");
+			testHelper.tick(1000, () => {
+				changeEvents.should.be.eql(0);
+				aggregatedEvents.should.be.eql(0);
+				testHelper.getNumberOfWatchers().should.be.eql(0);
+				w.close();
+				done();
+			});
+		});
+	});
+
+	it("should not watch a single ignored file (regexp)", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 300,
+			ignored: /\/a$/
 		});
 		var changeEvents = 0;
 		var aggregatedEvents = 0;
