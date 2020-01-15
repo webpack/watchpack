@@ -832,6 +832,41 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should not detect file reading as change, but atomic file writes", done => {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		w.on("aggregated", function(changes, removals) {
+			Array.from(changes)
+				.sort()
+				.should.be.eql([
+					path.join(fixtures, "dir", "b"),
+					path.join(fixtures, "dir", "c")
+				]);
+			Array.from(removals).should.be.eql([]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.file(path.join("dir", "a"));
+		testHelper.file(path.join("dir", "b"));
+		testHelper.file(path.join("dir", "c"));
+		testHelper.tick(1000, () => {
+			w.watch({
+				files: [
+					path.join(fixtures, "dir", "a"),
+					path.join(fixtures, "dir", "b"),
+					path.join(fixtures, "dir", "c")
+				]
+			});
+			testHelper.tick(1000, () => {
+				testHelper.accessFile(path.join("dir", "a"));
+				testHelper.fileAtomic(path.join("dir", "b"));
+				testHelper.file(path.join("dir", "c"));
+			});
+		});
+	});
+
 	let symlinksSupported = false;
 	try {
 		const fs = require("fs");

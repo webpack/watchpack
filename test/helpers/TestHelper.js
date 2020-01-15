@@ -3,6 +3,7 @@
 var fs = require("fs");
 var path = require("path");
 var rimraf = require("rimraf");
+var writeFileAtomic = require("write-file-atomic");
 
 require("../../lib/getWatcherManager");
 var watcherManagerModule =
@@ -69,6 +70,24 @@ TestHelper.prototype.dir = function dir(name) {
 
 TestHelper.prototype.file = function file(name) {
 	fs.writeFileSync(path.join(this.testdir, name), Math.random() + "", "utf-8");
+};
+
+TestHelper.prototype.fileAtomic = function fileAtomic(name) {
+	writeFileAtomic.sync(
+		path.join(this.testdir, name),
+		Math.random() + "",
+		"utf-8"
+	);
+};
+
+TestHelper.prototype.accessFile = function accessFile(name) {
+	const stat = fs.statSync(path.join(this.testdir, name));
+	fs.utimesSync(
+		path.join(this.testdir, name),
+		new Date(Date.now() - 1000 * 60 * 60 * 24),
+		stat.mtime
+	);
+	fs.readFileSync(path.join(this.testdir, name));
 };
 
 TestHelper.prototype.symlinkFile = function symlinkFile(name, target) {
