@@ -41,8 +41,7 @@
   },
   "dependencies": {
     "glob-to-regexp": "^0.4.1",
-    "graceful-fs": "^4.1.2",
-    "neo-async": "^2.5.0"
+    "graceful-fs": "^4.1.2"
   },
   "engines": {
     "node": ">=10.13.0"
