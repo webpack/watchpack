@@ -68,6 +68,10 @@ TestHelper.prototype.dir = function dir(name) {
 	fs.mkdirSync(path.join(this.testdir, name));
 };
 
+TestHelper.prototype.rename = function rename(orig, dest) {
+	fs.renameSync(path.join(this.testdir, orig), path.join(this.testdir, dest));
+};
+
 TestHelper.prototype.file = function file(name) {
 	fs.writeFileSync(path.join(this.testdir, name), Math.random() + "", "utf-8");
 };
