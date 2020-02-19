@@ -55,12 +55,11 @@ if (fsIsCaseInsensitive) {
 			testHelper.dir(dir);
 			testHelper.file(testFile);
 
-			let afterRename = false;
-
 			w.on("aggregated", function(changes, removals) {
-				if (!afterRename) return;
 				const files = w.getTimeInfoEntries();
 				w.close();
+
+				changes.has(path.join(fixtures, dir)).should.be.eql(true);
 
 				for (const file of files.keys()) {
 					if (file.endsWith("hello.txt")) {
@@ -70,11 +69,12 @@ if (fsIsCaseInsensitive) {
 				return done();
 			});
 
-			w.watch([], [path.join(fixtures, "case-rename")], 0);
-
 			testHelper.tick(function() {
-				afterRename = true;
-				testHelper.rename(testFile, testFileRename);
+				w.watch([], [path.join(fixtures, "case-rename")]);
+
+				testHelper.tick(function() {
+					testHelper.rename(testFile, testFileRename);
+				});
 			});
 		});
 
@@ -88,12 +88,12 @@ if (fsIsCaseInsensitive) {
 			testHelper.dir(dir);
 			testHelper.file(testFile);
 
-			let afterRename = false;
-
 			w.on("aggregated", function(changes, removals) {
-				if (!afterRename) return;
 				const files = w.getTimeInfoEntries();
 				w.close();
+
+				changes.has(path.join(fixtures, testFileRename)).should.be.eql(true);
+				removals.has(path.join(fixtures, testFileRename)).should.be.eql(false);
 
 				for (const file of files.keys()) {
 					if (file.endsWith("hello.txt") && files.get(file)) {
@@ -103,11 +103,15 @@ if (fsIsCaseInsensitive) {
 				return done();
 			});
 
-			w.watch([path.join(fixtures, testFile)], [], 0);
-
 			testHelper.tick(function() {
-				afterRename = true;
-				testHelper.rename(testFile, testFileRename);
+				w.watch({
+					files: [path.join(fixtures, testFile)],
+					missing: [path.join(fixtures, testFileRename)]
+				});
+
+				testHelper.tick(function() {
+					testHelper.rename(testFile, testFileRename);
+				});
 			});
 		});
 	});
