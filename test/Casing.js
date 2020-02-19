@@ -44,5 +44,75 @@ if (fsIsCaseInsensitive) {
 				testHelper.file("A");
 			});
 		});
+
+		it("should mark as missing on changing filename casing (dir watch)", function(done) {
+			var w = new Watchpack({
+				aggregateTimeout: 1000
+			});
+			var dir = "case-rename";
+			var testFile = path.join(dir, "hello.txt");
+			var testFileRename = path.join(dir, "hEllO.txt");
+			testHelper.dir(dir);
+			testHelper.file(testFile);
+
+			w.on("aggregated", function(changes, removals) {
+				const files = w.getTimeInfoEntries();
+				w.close();
+
+				changes.has(path.join(fixtures, dir)).should.be.eql(true);
+
+				for (const file of files.keys()) {
+					if (file.endsWith("hello.txt")) {
+						return done(new Error(`Renamed file was still in timeInfoEntries`));
+					}
+				}
+				return done();
+			});
+
+			testHelper.tick(function() {
+				w.watch([], [path.join(fixtures, "case-rename")]);
+
+				testHelper.tick(function() {
+					testHelper.rename(testFile, testFileRename);
+				});
+			});
+		});
+
+		it("should mark as missing on changing filename casing (file watch)", function(done) {
+			var w = new Watchpack({
+				aggregateTimeout: 1000
+			});
+			var dir = "case-rename";
+			var testFile = path.join(dir, "hello.txt");
+			var testFileRename = path.join(dir, "hEllO.txt");
+			testHelper.dir(dir);
+			testHelper.file(testFile);
+
+			w.on("aggregated", function(changes, removals) {
+				const files = w.getTimeInfoEntries();
+				w.close();
+
+				changes.has(path.join(fixtures, testFileRename)).should.be.eql(true);
+				removals.has(path.join(fixtures, testFileRename)).should.be.eql(false);
+
+				for (const file of files.keys()) {
+					if (file.endsWith("hello.txt") && files.get(file)) {
+						return done(new Error(`Renamed file was still in timeInfoEntries`));
+					}
+				}
+				return done();
+			});
+
+			testHelper.tick(function() {
+				w.watch({
+					files: [path.join(fixtures, testFile)],
+					missing: [path.join(fixtures, testFileRename)]
+				});
+
+				testHelper.tick(function() {
+					testHelper.rename(testFile, testFileRename);
+				});
+			});
+		});
 	});
 }
