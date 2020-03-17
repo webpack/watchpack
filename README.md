@@ -66,15 +66,15 @@ wp.watch({
 });
 // starts watching these files and directories
 // calling this again will override the files and directories
-// files: can be files or directories, for files: content and existance changes are tracked
-//        for directories: only existance and timestamp changes are tracked
+// files: can be files or directories, for files: content and existence changes are tracked
+//        for directories: only existence and timestamp changes are tracked
 // directories: only directories, directory content (and content of children, ...) and
-//              existance changes are tracked.
-//              assumed to exist, when directory is not found without futher information a remove event is emitted
-// missing: can be files or directores,
-//          only existance changes are tracked
+//              existence changes are tracked.
+//              assumed to exist, when directory is not found without further information a remove event is emitted
+// missing: can be files or directorees,
+//          only existence changes are tracked
 //          expected to not exist, no remove event is emitted when not found initially
-// files and directories are assumed to exist, when they are not found without futher information a remove event is emitted
+// files and directories are assumed to exist, when they are not found without further information a remove event is emitted
 // missing is assumed to not exist and no remove event is emitted
 
 wp.on("change", function(filePath, mtime, explanation) {
