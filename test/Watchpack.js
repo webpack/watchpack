@@ -783,6 +783,33 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should not report changes in initial scan when no start time is provided", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		w.on("aggregated", () => {
+			done(new Error("should not fire"));
+		});
+		testHelper.dir("dir");
+		testHelper.dir("dir/b");
+		testHelper.dir("dir/b/sub");
+		testHelper.file("dir/b/sub/file");
+		testHelper.file("dir/b/file");
+		testHelper.file("dir/a");
+		testHelper.tick(() => {
+			w.watch({
+				files: [path.join(fixtures, "dir", "a")],
+				directories: [path.join(fixtures, "dir", "b")],
+				missing: [path.join(fixtures, "dir", "c")]
+			});
+			testHelper.tick(2000, () => {
+				// no event fired
+				w.close();
+				done();
+			});
+		});
+	});
+
 	it("should report removal of file and directory if it is missing in initial scan", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
