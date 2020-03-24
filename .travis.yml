@@ -19,6 +19,13 @@ matrix:
       env: WATCHPACK_POLLING=200
       stage: advanced
     - os: linux
+      node_js: "13"
+      stage: advanced
+    - os: linux
+      node_js: "13"
+      env: WATCHPACK_POLLING=200
+      stage: advanced
+    - os: linux
       node_js: "10"
       stage: advanced
     - os: linux
