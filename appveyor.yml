@@ -10,6 +10,7 @@ cache:
 # what combinations to test
 environment:
   matrix:
+    - nodejs_version: 13
     - nodejs_version: 12
     - nodejs_version: 10
 
