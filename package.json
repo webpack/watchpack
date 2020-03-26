@@ -1,6 +1,6 @@
 {
   "name": "watchpack",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "",
   "main": "./lib/watchpack.js",
   "directories": {
