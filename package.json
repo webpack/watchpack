@@ -37,14 +37,11 @@
     "should": "^8.3.1"
   },
   "optionalDependencies": {
-    "chokidar": "^3.3.0",
+    "chokidar": "^3.4.0",
     "chokidar2": "file:./chokidar2"
   },
   "dependencies": {
     "graceful-fs": "^4.1.2",
     "neo-async": "^2.5.0"
-  },
-  "resolutions": {
-    "chokidar/readdirp": "~3.4.0"
   }
 }
