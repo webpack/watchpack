@@ -14,11 +14,12 @@ environment:
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
-  - npm install
+  - yarn --frozen-lockfile
 
 build: off
 
 test_script:
   - node --version
   - npm --version
-  - cmd: npm test
+  - yarn --version
+  - cmd: yarn test
