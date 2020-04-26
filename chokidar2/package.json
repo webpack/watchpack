@@ -1,0 +1,11 @@
+{
+  "name": "chokidar2",
+  "version": "2.0.0",
+  "private": true,
+  "engines": {
+    "node": "<8.10.0"
+  },
+  "dependencies": {
+    "chokidar": "^2.1.8"
+  }
+}

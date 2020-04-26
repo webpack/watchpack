@@ -4,7 +4,7 @@
 require("should");
 var path = require("path");
 var fs = require("fs");
-var chokidar = require("chokidar");
+var chokidar = require("../lib/chokidar");
 var TestHelper = require("./helpers/TestHelper");
 var Watchpack = require("../lib/watchpack");
 
