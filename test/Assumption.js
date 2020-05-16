@@ -4,7 +4,7 @@
 require("should");
 var path = require("path");
 var fs = require("fs");
-var chokidar = require("chokidar");
+var chokidar = require("../lib/chokidar");
 var TestHelper = require("./helpers/TestHelper");
 var Watchpack = require("../lib/watchpack");
 
@@ -182,6 +182,39 @@ describe("Assumption", function() {
 					done(err);
 					done = function() {};
 				});
+				testHelper.tick(500, function() {
+					done();
+				});
+			});
+		});
+	});
+
+	[1, 10, 20, 50, 100, 200, 300, 400, 500].reverse().forEach(function(delay) {
+		it("should not fire events after watcher has been closed after " + delay + "ms delay", function(done) {
+			var watcher = watcherToClose = chokidar.watch(fixtures, {
+				ignoreInitial: true,
+				persistent: true,
+				followSymlinks: false,
+				depth: 0,
+				atomic: false,
+				alwaysStat: true,
+				ignorePermissionErrors: true
+			});
+			watcher.on("add", function(arg) {
+				done(new Error("should not be emitted " + arg));
+				done = function() {};
+			});
+			watcher.on("change", function(arg) {
+				done(new Error("should not be emitted " + arg));
+				done = function() {};
+			});
+			watcher.on("error", function(err) {
+				done(err);
+				done = function() {};
+			});
+			testHelper.tick(delay, function() {
+				watcher.close();
+				testHelper.file("watch-test-file-close");
 				testHelper.tick(500, function() {
 					done();
 				});

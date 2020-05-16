@@ -36,8 +36,11 @@
     "rimraf": "^2.6.2",
     "should": "^8.3.1"
   },
+  "optionalDependencies": {
+    "chokidar": "^3.4.0",
+    "chokidar2": "file:./chokidar2"
+  },
   "dependencies": {
-    "chokidar": "^2.1.8",
     "graceful-fs": "^4.1.2",
     "neo-async": "^2.5.0"
   }
