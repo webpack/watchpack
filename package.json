@@ -39,7 +39,7 @@
   },
   "optionalDependencies": {
     "chokidar": "^3.4.0",
-    "chokidar2": "file:./chokidar2"
+    "watchpack-chokidar2": "^2.0.0"
   },
   "dependencies": {
     "graceful-fs": "^4.1.2",
