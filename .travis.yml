@@ -9,20 +9,20 @@ stages:
 matrix:
   include:
     - os: linux
-      node_js: "12"
+      node_js: "14"
       stage: basic
     - os: osx
-      node_js: "12"
+      node_js: "14"
       stage: basic
     - os: linux
-      node_js: "12"
+      node_js: "14"
       env: WATCHPACK_POLLING=200
       stage: advanced
     - os: linux
-      node_js: "13"
+      node_js: "12"
       stage: advanced
     - os: linux
-      node_js: "13"
+      node_js: "12"
       env: WATCHPACK_POLLING=200
       stage: advanced
     - os: linux
