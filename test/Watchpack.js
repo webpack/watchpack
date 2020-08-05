@@ -894,6 +894,71 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should allow to reuse watchers when watch is called again", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		w.on("aggregated", () => {
+			done(new Error("should not fire"));
+		});
+		testHelper.dir("dir");
+		testHelper.dir("dir/b");
+		testHelper.dir("dir/b/sub");
+		testHelper.file("dir/b/sub/file");
+		testHelper.file("dir/b/file");
+		testHelper.dir("dir/b1");
+		testHelper.dir("dir/b1/sub");
+		testHelper.file("dir/b1/sub/file");
+		testHelper.file("dir/b1/file");
+		testHelper.dir("dir/b2");
+		testHelper.dir("dir/b2/sub");
+		testHelper.file("dir/b2/sub/file");
+		testHelper.file("dir/b2/file");
+		testHelper.file("dir/a");
+		testHelper.file("dir/a1");
+		testHelper.file("dir/a2");
+		testHelper.tick(() => {
+			w.watch({
+				files: [
+					path.join(fixtures, "dir", "a"),
+					path.join(fixtures, "dir", "a1")
+				],
+				directories: [
+					path.join(fixtures, "dir", "b"),
+					path.join(fixtures, "dir", "b1")
+				],
+				missing: [
+					path.join(fixtures, "dir", "c"),
+					path.join(fixtures, "dir", "c1")
+				]
+			});
+			testHelper.tick(() => {
+				w.watch({
+					files: [
+						path.join(fixtures, "dir", "a"),
+						path.join(fixtures, "dir", "a2")
+					],
+					directories: [
+						path.join(fixtures, "dir", "b"),
+						path.join(fixtures, "dir", "b2")
+					],
+					missing: [
+						path.join(fixtures, "dir", "c"),
+						path.join(fixtures, "dir", "c2")
+					]
+				});
+				testHelper.file("dir/b1/sub/file");
+				testHelper.file("dir/a1");
+				testHelper.file("dir/c1");
+				testHelper.tick(2000, () => {
+					// no event fired
+					w.close();
+					done();
+				});
+			});
+		});
+	});
+
 	let symlinksSupported = false;
 	try {
 		const fs = require("fs");
