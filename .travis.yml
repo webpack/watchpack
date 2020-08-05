@@ -14,6 +14,10 @@ matrix:
     - os: osx
       node_js: "14"
       stage: basic
+    - os: osx
+      node_js: "14"
+      env: WATCHPACK_WATCHER_LIMIT=1
+      stage: advanced
     - os: linux
       node_js: "14"
       env: WATCHPACK_POLLING=200
