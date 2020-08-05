@@ -10,7 +10,7 @@ const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
 
 describe("ManyWatchers", function() {
-	this.timeout(120000);
+	this.timeout(180000);
 	beforeEach(testHelper.before);
 	afterEach(testHelper.after);
 
@@ -32,6 +32,11 @@ describe("ManyWatchers", function() {
 				w.close();
 				done();
 			});
+			for (let i = 100; i < files.length; i += 987) {
+				for (let j = 0; j < files.length - i; j += 987) {
+					w.watch({ files: files.slice(j, j + i) });
+				}
+			}
 			w.watch({ files });
 			testHelper.tick(10000, () => {
 				testHelper.file("49/49/file");
