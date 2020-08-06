@@ -590,12 +590,11 @@ describe("Watchpack", function() {
 	});
 
 	it("should detect a single change to future timestamps", function(done) {
-		var w = new Watchpack({
+		const options = {
 			aggregateTimeout: 1000
-		});
-		var w2 = new Watchpack({
-			aggregateTimeout: 1000
-		});
+		};
+		var w = new Watchpack(options);
+		var w2 = new Watchpack(options);
 		w.on("change", function() {
 			throw new Error("should not report change event");
 		});
@@ -604,15 +603,41 @@ describe("Watchpack", function() {
 		});
 		testHelper.file("a");
 		testHelper.tick(400, function() {
-			w2.watch([path.join(fixtures, "a")], []);
+			w2.watch([path.join(fixtures, "a")], [], Date.now());
 			testHelper.tick(1000, function() {
 				// wait for initial scan
 				testHelper.mtime("a", Date.now() + 1000000);
 				testHelper.tick(400, function() {
-					w.watch([path.join(fixtures, "a")], []);
+					w.watch([path.join(fixtures, "a")], [], Date.now());
 					testHelper.tick(1000, function() {
 						w2.close();
 						w.close();
+						done();
+					});
+				});
+			});
+		});
+	});
+
+	it("should create different watchers for different options", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var w2 = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		testHelper.file("a");
+		testHelper.tick(400, function() {
+			w.watch([path.join(fixtures, "a")], [], Date.now());
+			w2.watch([path.join(fixtures, "a")], [], Date.now());
+			testHelper.tick(1000, function() {
+				testHelper.file("a");
+				testHelper.tick(400, function() {
+					testHelper.file("a");
+					testHelper.tick(1000, function() {
+						w2.close();
+						w.close();
+						console.log("test done");
 						done();
 					});
 				});
