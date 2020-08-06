@@ -5,6 +5,8 @@ var path = require("path");
 var rimraf = require("rimraf");
 var writeFileAtomic = require("write-file-atomic");
 
+var watchEventSource = require("../../lib/watchEventSource");
+
 require("../../lib/getWatcherManager");
 var watcherManagerModule =
 	require.cache[require.resolve("../../lib/getWatcherManager")];
@@ -20,6 +22,7 @@ const checkAllWatcherClosed = () => {
 	for (const watcherManager of allWatcherManager) {
 		Array.from(watcherManager.directoryWatchers.keys()).should.be.eql([]);
 	}
+	watchEventSource.getNumberOfWatchers().should.be.eql(0);
 };
 
 function TestHelper(testdir) {
