@@ -25,10 +25,18 @@ describe("ManyWatchers", function() {
 				j >>= 1;
 			}
 			const dir = `${i & highBit}/${i & ~highBit}`;
-			if (i === highBit) testHelper.dir(`${i}`);
+			if (i === highBit) {
+				testHelper.dir(`${i}`);
+				testHelper.file(`${i}/file`);
+				files.push(path.join(fixtures, `${i}`, "file"));
+			}
 			testHelper.dir(dir);
 			testHelper.file(`${dir}/file`);
 			files.push(path.join(fixtures, dir, "file"));
+			if (i === highBit) {
+				testHelper.file(`${dir}/file2`);
+				files.push(path.join(fixtures, dir, "file2"));
+			}
 		}
 		testHelper.tick(1000, () => {
 			const w = new Watchpack({
