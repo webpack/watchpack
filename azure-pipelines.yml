@@ -5,8 +5,8 @@ jobs:
     strategy:
       maxParallel: 3
       matrix:
-        node-13:
-          node_version: ^13.0.0
+        node-14:
+          node_version: ^14.0.0
         node-12:
           node_version: ^12.4.0
         node-10:
@@ -42,8 +42,8 @@ jobs:
     strategy:
       maxParallel: 3
       matrix:
-        node-13:
-          node_version: ^13.0.0
+        node-14:
+          node_version: ^14.0.0
         node-12:
           node_version: ^12.4.0
         node-10:
@@ -79,8 +79,8 @@ jobs:
     strategy:
       maxParallel: 3
       matrix:
-        node-13:
-          node_version: ^13.0.0
+        node-14:
+          node_version: ^14.0.0
         node-12:
           node_version: ^12.4.0
         node-10:
