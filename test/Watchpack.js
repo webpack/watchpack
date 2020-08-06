@@ -590,12 +590,11 @@ describe("Watchpack", function() {
 	});
 
 	it("should detect a single change to future timestamps", function(done) {
-		var w = new Watchpack({
+		const options = {
 			aggregateTimeout: 1000
-		});
-		var w2 = new Watchpack({
-			aggregateTimeout: 1000
-		});
+		};
+		var w = new Watchpack(options);
+		var w2 = new Watchpack(options);
 		w.on("change", function() {
 			throw new Error("should not report change event");
 		});
@@ -604,12 +603,37 @@ describe("Watchpack", function() {
 		});
 		testHelper.file("a");
 		testHelper.tick(400, function() {
-			w2.watch([path.join(fixtures, "a")], []);
+			w2.watch([path.join(fixtures, "a")], [], Date.now());
 			testHelper.tick(1000, function() {
 				// wait for initial scan
 				testHelper.mtime("a", Date.now() + 1000000);
 				testHelper.tick(400, function() {
-					w.watch([path.join(fixtures, "a")], []);
+					w.watch([path.join(fixtures, "a")], [], Date.now());
+					testHelper.tick(1000, function() {
+						w2.close();
+						w.close();
+						done();
+					});
+				});
+			});
+		});
+	});
+
+	it("should create different watchers for different options", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var w2 = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		testHelper.file("a");
+		testHelper.tick(400, function() {
+			w.watch([path.join(fixtures, "a")], [], Date.now());
+			w2.watch([path.join(fixtures, "a")], [], Date.now());
+			testHelper.tick(1000, function() {
+				testHelper.file("a");
+				testHelper.tick(400, function() {
+					testHelper.file("a");
 					testHelper.tick(1000, function() {
 						w2.close();
 						w.close();
@@ -890,6 +914,71 @@ describe("Watchpack", function() {
 				testHelper.accessFile(path.join("dir", "a"));
 				testHelper.fileAtomic(path.join("dir", "b"));
 				testHelper.file(path.join("dir", "c"));
+			});
+		});
+	});
+
+	it("should allow to reuse watchers when watch is called again", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		w.on("aggregated", () => {
+			done(new Error("should not fire"));
+		});
+		testHelper.dir("dir");
+		testHelper.dir("dir/b");
+		testHelper.dir("dir/b/sub");
+		testHelper.file("dir/b/sub/file");
+		testHelper.file("dir/b/file");
+		testHelper.dir("dir/b1");
+		testHelper.dir("dir/b1/sub");
+		testHelper.file("dir/b1/sub/file");
+		testHelper.file("dir/b1/file");
+		testHelper.dir("dir/b2");
+		testHelper.dir("dir/b2/sub");
+		testHelper.file("dir/b2/sub/file");
+		testHelper.file("dir/b2/file");
+		testHelper.file("dir/a");
+		testHelper.file("dir/a1");
+		testHelper.file("dir/a2");
+		testHelper.tick(() => {
+			w.watch({
+				files: [
+					path.join(fixtures, "dir", "a"),
+					path.join(fixtures, "dir", "a1")
+				],
+				directories: [
+					path.join(fixtures, "dir", "b"),
+					path.join(fixtures, "dir", "b1")
+				],
+				missing: [
+					path.join(fixtures, "dir", "c"),
+					path.join(fixtures, "dir", "c1")
+				]
+			});
+			testHelper.tick(() => {
+				w.watch({
+					files: [
+						path.join(fixtures, "dir", "a"),
+						path.join(fixtures, "dir", "a2")
+					],
+					directories: [
+						path.join(fixtures, "dir", "b"),
+						path.join(fixtures, "dir", "b2")
+					],
+					missing: [
+						path.join(fixtures, "dir", "c"),
+						path.join(fixtures, "dir", "c2")
+					]
+				});
+				testHelper.file("dir/b1/sub/file");
+				testHelper.file("dir/a1");
+				testHelper.file("dir/c1");
+				testHelper.tick(2000, () => {
+					// no event fired
+					w.close();
+					done();
+				});
 			});
 		});
 	});
