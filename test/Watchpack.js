@@ -637,7 +637,6 @@ describe("Watchpack", function() {
 					testHelper.tick(1000, function() {
 						w2.close();
 						w.close();
-						console.log("test done");
 						done();
 					});
 				});
