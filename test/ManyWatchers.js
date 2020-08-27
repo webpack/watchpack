@@ -40,7 +40,7 @@ describe("ManyWatchers", function() {
 		}
 		testHelper.file("file");
 		files.push(path.join(fixtures, "file"));
-		testHelper.tick(1000, () => {
+		testHelper.tick(10000, () => {
 			const w = new Watchpack({
 				aggregateTimeout: 1000
 			});
