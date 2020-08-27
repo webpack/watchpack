@@ -17,7 +17,7 @@ describe("ManyWatchers", function() {
 
 	it("should watch more than 4096 directories", done => {
 		const files = [];
-		for (let i = 1; i <= 5000; i++) {
+		for (let i = 1; i < 5000; i++) {
 			let highBit = 1;
 			let j = i;
 			while (j > 1) {
@@ -38,6 +38,8 @@ describe("ManyWatchers", function() {
 				files.push(path.join(fixtures, dir, "file2"));
 			}
 		}
+		testHelper.file("file");
+		files.push(path.join(fixtures, "file"));
 		testHelper.tick(1000, () => {
 			const w = new Watchpack({
 				aggregateTimeout: 1000
