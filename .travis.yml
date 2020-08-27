@@ -13,6 +13,7 @@ matrix:
       stage: basic
     - os: osx
       node_js: "14"
+      env: WATCHPACK_RECURSIVE_WATCHER_LOGGING=1
       stage: basic
     - os: osx
       node_js: "14"

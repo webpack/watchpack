@@ -11,7 +11,7 @@ const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
 
 describe("ManyWatchers", function() {
-	this.timeout(180000);
+	this.timeout(240000);
 	beforeEach(testHelper.before);
 	afterEach(testHelper.after);
 
