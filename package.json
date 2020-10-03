@@ -34,7 +34,7 @@
     "eslint-plugin-prettier": "^3.1.4",
     "istanbul": "^0.4.3",
     "mocha": "^5.2.0",
-    "prettier": "^1.19.1",
+    "prettier": "2",
     "rimraf": "^3.0.2",
     "should": "^8.4.0",
     "write-file-atomic": "^3.0.3"
