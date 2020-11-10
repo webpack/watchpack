@@ -1,6 +1,6 @@
 {
   "name": "watchpack",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "description": "",
   "main": "./lib/watchpack.js",
   "directories": {
@@ -42,6 +42,8 @@
   },
   "dependencies": {
     "graceful-fs": "^4.1.2",
-    "neo-async": "^2.5.0"
+    "neo-async": "^2.5.0",
+    "chokidar": "^3.4.1",
+    "watchpack-chokidar2": "^2.0.1"
   }
 }
