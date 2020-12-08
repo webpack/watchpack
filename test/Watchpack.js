@@ -885,6 +885,32 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should not report changes to a folder watched as file when items are added", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 100
+		});
+		w.on("aggregated", () => {
+			done(new Error("should not fire"));
+		});
+		testHelper.dir("dir");
+		testHelper.file("dir/a");
+		testHelper.tick(1000, () => {
+			testHelper.file("dir/b");
+			w.watch({
+				files: [path.join(fixtures, "dir")],
+				startTime: Date.now()
+			});
+			testHelper.tick(1000, () => {
+				testHelper.file("dir/c");
+				testHelper.tick(1000, () => {
+					// no event fired
+					w.close();
+					done();
+				});
+			});
+		});
+	});
+
 	it("should report removal of file and directory if it is missing in initial scan", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
