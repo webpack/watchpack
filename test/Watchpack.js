@@ -809,7 +809,7 @@ describe("Watchpack", function() {
 
 	it("should not report changes in initial scan when no start time is provided", function(done) {
 		var w = new Watchpack({
-			aggregateTimeout: 1000
+			aggregateTimeout: 100
 		});
 		w.on("aggregated", () => {
 			done(new Error("should not fire"));
@@ -818,18 +818,95 @@ describe("Watchpack", function() {
 		testHelper.dir("dir/b");
 		testHelper.dir("dir/b/sub");
 		testHelper.file("dir/b/sub/file");
+		testHelper.dir("dir/b/sub/sub");
+		testHelper.file("dir/b/sub/sub/file");
 		testHelper.file("dir/b/file");
 		testHelper.file("dir/a");
-		testHelper.tick(() => {
+		testHelper.tick(1000, () => {
 			w.watch({
-				files: [path.join(fixtures, "dir", "a")],
-				directories: [path.join(fixtures, "dir", "b")],
-				missing: [path.join(fixtures, "dir", "c")]
+				directories: [path.join(fixtures, "dir", "b", "sub")]
 			});
 			testHelper.tick(2000, () => {
 				// no event fired
-				w.close();
-				done();
+				w.watch({
+					files: [path.join(fixtures, "dir", "a")],
+					directories: [
+						path.join(fixtures, "dir", "b", "sub"),
+						path.join(fixtures, "dir", "b")
+					],
+					missing: [path.join(fixtures, "dir", "c")]
+				});
+				testHelper.tick(2000, () => {
+					// no event fired
+					w.close();
+					done();
+				});
+			});
+		});
+	});
+
+	it("should not report changes in initial scan when start time is provided", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 100
+		});
+		w.on("aggregated", () => {
+			done(new Error("should not fire"));
+		});
+		testHelper.dir("dir");
+		testHelper.dir("dir/b");
+		testHelper.dir("dir/b/sub");
+		testHelper.file("dir/b/sub/file");
+		testHelper.dir("dir/b/sub/sub");
+		testHelper.file("dir/b/sub/sub/file");
+		testHelper.file("dir/b/file");
+		testHelper.file("dir/a");
+		testHelper.tick(1000, () => {
+			w.watch({
+				directories: [path.join(fixtures, "dir", "b", "sub")],
+				startTime: Date.now()
+			});
+			testHelper.tick(2000, () => {
+				// no event fired
+				w.watch({
+					files: [path.join(fixtures, "dir", "a")],
+					directories: [
+						path.join(fixtures, "dir", "b", "sub"),
+						path.join(fixtures, "dir", "b")
+					],
+					missing: [path.join(fixtures, "dir", "c")],
+					startTime: Date.now()
+				});
+				testHelper.tick(2000, () => {
+					// no event fired
+					w.close();
+					done();
+				});
+			});
+		});
+	});
+
+	it("should not report changes to a folder watched as file when items are added", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 100
+		});
+		w.on("aggregated", () => {
+			done(new Error("should not fire"));
+		});
+		testHelper.dir("dir");
+		testHelper.file("dir/a");
+		testHelper.tick(1000, () => {
+			testHelper.file("dir/b");
+			w.watch({
+				files: [path.join(fixtures, "dir")],
+				startTime: Date.now()
+			});
+			testHelper.tick(1000, () => {
+				testHelper.file("dir/c");
+				testHelper.tick(1000, () => {
+					// no event fired
+					w.close();
+					done();
+				});
 			});
 		});
 	});
