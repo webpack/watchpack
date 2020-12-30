@@ -87,6 +87,30 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should not watch data: urls", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 300,
+		});
+		var changeEvents = 0;
+		var aggregatedEvents = 0;
+		w.on("change", () => {
+			changeEvents++;
+		});
+		w.on("aggregated", () => {
+			aggregatedEvents++;
+		});
+		w.watch(['data:text/javascript,'], []);
+		testHelper.tick(() => {
+			testHelper.tick(1000, () => {
+				changeEvents.should.be.eql(0);
+				aggregatedEvents.should.be.eql(0);
+				testHelper.getNumberOfWatchers().should.be.eql(0);
+				w.close();
+				done();
+			});
+		});
+	});
+
 	it("should watch multiple files", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
