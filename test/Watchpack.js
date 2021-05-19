@@ -35,6 +35,37 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should aggregate changes while paused", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		testHelper.file("a");
+		testHelper.file("b");
+		w.watch([path.join(fixtures, "a"), path.join(fixtures, "b")], []);
+		testHelper.tick(function() {
+			w.pause();
+			w.on("change", function(file) {
+				throw new Error("should not be emitted");
+			});
+			w.on("aggregated", function(changes) {
+				throw new Error("should not be emitted");
+			});
+			testHelper.tick(function() {
+				testHelper.file("a");
+				testHelper.remove("b");
+				testHelper.file("b");
+				testHelper.remove("a");
+				testHelper.tick(function() {
+					const { changes, removals } = w.getAggregated();
+					Array.from(changes).should.be.eql([path.join(fixtures, "b")]);
+					Array.from(removals).should.be.eql([path.join(fixtures, "a")]);
+					w.close();
+					done();
+				});
+			});
+		});
+	});
+
 	it("should not watch a single ignored file (glob)", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 300,
