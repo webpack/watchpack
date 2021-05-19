@@ -98,10 +98,19 @@ wp.on("aggregated", function(changes, removals) {
 wp.pause();
 // stops emitting events, but keeps watchers open
 // next "watch" call can reuse the watchers
+// The watcher will keep aggregating events
+// which can be received with getAggregated()
 
 // Watchpack.prototype.close()
 wp.close();
 // stops emitting events and closes all watchers
+
+// Watchpack.prototype.getAggregated(): { changes: Set<string>, removals: Set<string> }
+const { changes, removals } = wp.getAggregated();
+// returns the current aggregated info and removes that from the watcher
+// The next aggregated event won't include that info and will only emitted
+// when futher changes happen
+// Can also be used when paused.
 
 // Watchpack.prototype.getTimeInfoEntries()
 var fileTimes = wp.getTimeInfoEntries();
