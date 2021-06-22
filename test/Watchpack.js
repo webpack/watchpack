@@ -14,6 +14,16 @@ describe("Watchpack", function() {
 	beforeEach(testHelper.before);
 	afterEach(testHelper.after);
 
+	it("should throw on invalid ignore options", function() {
+		try {
+		var w = new Watchpack({
+			ignored: [/\/a$/i]
+		});
+		} catch(e) {
+			e.message.should.startWith("Invalid");
+		}
+	});
+
 	it("should watch a single file", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
@@ -96,6 +106,32 @@ describe("Watchpack", function() {
 		var w = new Watchpack({
 			aggregateTimeout: 300,
 			ignored: /\/a$/
+		});
+		var changeEvents = 0;
+		var aggregatedEvents = 0;
+		w.on("change", () => {
+			changeEvents++;
+		});
+		w.on("aggregated", () => {
+			aggregatedEvents++;
+		});
+		w.watch([path.join(fixtures, "a")], []);
+		testHelper.tick(() => {
+			testHelper.file("a");
+			testHelper.tick(1000, () => {
+				changeEvents.should.be.eql(0);
+				aggregatedEvents.should.be.eql(0);
+				testHelper.getNumberOfWatchers().should.be.eql(0);
+				w.close();
+				done();
+			});
+		});
+	});
+
+	it("should not watch a single ignored file (array with regexp and glob)", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 300,
+			ignored: [/\/a$/, "**/b"]
 		});
 		var changeEvents = 0;
 		var aggregatedEvents = 0;
