@@ -524,6 +524,44 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should watch file in a sub directory (passed in maps)", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if (changeEvents[changeEvents.length - 1] === file) return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
+			const files = new Map();
+			const directories = new Map();
+			const times = w.getTimeInfoEntries();
+			w.getTimeInfoEntries(files, directories);
+			// aggregated results should be the same as seperated maps
+			Array.from(times).sort().should.be.eql([...Array.from(files), ...Array.from(directories)].sort())
+			const dir = directories.get(path.join(fixtures, "dir"));
+			const sub = directories.get(path.join(fixtures, "dir", "sub"));
+			const a = files.get(path.join(fixtures, "dir", "sub", "a"));
+			dir.should.be.type("object");
+			dir.should.have.property("safeTime");
+			sub.safeTime.should.be.aboveOrEqual(a.safeTime);
+			dir.safeTime.should.be.aboveOrEqual(sub.safeTime);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.dir(path.join("dir", "sub"));
+		testHelper.tick(function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(function() {
+				testHelper.file(path.join("dir", "sub", "a"));
+			});
+		});
+	});
+
 	it("should watch 2 files in a not-existing directory", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
