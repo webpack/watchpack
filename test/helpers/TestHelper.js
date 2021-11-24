@@ -119,9 +119,11 @@ TestHelper.prototype.remove = function remove(name) {
 };
 
 TestHelper.prototype.tick = function tick(arg, fn) {
+	// if polling is set, ensure the tick is longer than the polling interval.
+	let defaultTick = (+process.env.WATCHPACK_POLLING || 100) + 10;
 	if (typeof arg === "function") {
 		fn = arg;
-		arg = 100;
+		arg = defaultTick;
 	}
 	setTimeout(function() {
 		fn();
