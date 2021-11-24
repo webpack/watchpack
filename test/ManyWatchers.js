@@ -66,6 +66,12 @@ describe("ManyWatchers", function() {
 			}
 			w.watch({ files });
 			console.timeEnd("creating/closing watchers");
+			console.time("calling watch with the same files");
+			for (let i = 0; i < 2000; i++) {
+				w.watch({ files });
+			}
+			console.timeEnd("calling watch with the same files");
+
 			testHelper.tick(10000, () => {
 				console.time("detecting change event");
 				testHelper.file("4096/900/file");
