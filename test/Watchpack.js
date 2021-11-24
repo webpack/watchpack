@@ -570,6 +570,7 @@ describe("Watchpack", function() {
 			const sub = directories.get(path.join(fixtures, "dir", "sub"));
 			const subAsFile = files.get(path.join(fixtures, "dir", "sub"));
 			const a = files.get(path.join(fixtures, "dir", "sub", "a"));
+			const file = files.get(path.join(fixtures, "file"));
 			dir.should.be.type("object");
 			dir.should.have.property("safeTime");
 			dirAsFile.should.be.type("object");
@@ -581,6 +582,7 @@ describe("Watchpack", function() {
 			a.should.be.type("object");
 			a.should.have.property("safeTime");
 			a.should.have.property("timestamp");
+			(file === null).should.be.eql(true);
 			sub.safeTime.should.be.aboveOrEqual(a.safeTime);
 			dir.safeTime.should.be.aboveOrEqual(sub.safeTime);
 			w.close();
@@ -590,7 +592,7 @@ describe("Watchpack", function() {
 		testHelper.dir(path.join("dir", "sub"));
 		testHelper.dir(path.join("dir", "sub2"));
 		testHelper.tick(function() {
-			w.watch([], [path.join(fixtures, "dir")]);
+			w.watch([path.join(fixtures, "file")], [path.join(fixtures, "dir")]);
 			testHelper.tick(function() {
 				testHelper.file(path.join("dir", "sub", "a"));
 			});
