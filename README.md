@@ -49,6 +49,8 @@ var wp = new Watchpack({
 	// ignored: "string" - a glob pattern for files or folders that should not be watched
 	// ignored: ["string", "string"] - multiple glob patterns that should be ignored
 	// ignored: /regexp/ - a regular expression for files or folders that should not be watched
+	// ignored: (entry) => boolean - an arbitrary function which must return truthy to ignore an entry
+	// For all cases expect the arbitrary function the path will have path separator normalized to '/'.
 	// All subdirectories are ignored too
 });
 
@@ -133,13 +135,13 @@ var fileTimes = wp.getTimes();
 // key: absolute path, value: timestamp as number
 ```
 
-[build-status]: https://travis-ci.org/webpack/watchpack.svg?branch=master
+[build-status]: https://travis-ci.org/webpack/watchpack.svg?branch=main
 [build-status-url]: https://travis-ci.org/webpack/watchpack
-[build-status-veyor]: https://ci.appveyor.com/api/projects/status/e5u2qvmugtv0r647/branch/master?svg=true
-[build-status-veyor-url]: https://ci.appveyor.com/project/sokra/watchpack/branch/master
+[build-status-veyor]: https://ci.appveyor.com/api/projects/status/e5u2qvmugtv0r647/branch/main?svg=true
+[build-status-veyor-url]: https://ci.appveyor.com/project/sokra/watchpack/branch/main
 [coveralls-url]: https://coveralls.io/r/webpack/watchpack/
 [coveralls-image]: https://img.shields.io/coveralls/webpack/watchpack.svg
-[codecov]: https://codecov.io/gh/webpack/watchpack/branch/master/graph/badge.svg
+[codecov]: https://codecov.io/gh/webpack/watchpack/branch/main/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/webpack/watchpack
 [downloads]: https://img.shields.io/npm/dm/watchpack.svg
 [downloads-url]: https://www.npmjs.com/package/watchpack
