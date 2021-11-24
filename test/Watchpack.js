@@ -121,7 +121,7 @@ describe("Watchpack", function() {
 	it("should not watch a single ignored file (function)", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 300,
-			ignored: (entry) => entry.includes("a")
+			ignored: entry => entry.includes("a")
 		});
 		var changeEvents = 0;
 		var aggregatedEvents = 0;
@@ -542,6 +542,53 @@ describe("Watchpack", function() {
 		});
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
+		testHelper.tick(function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(function() {
+				testHelper.file(path.join("dir", "sub", "a"));
+			});
+		});
+	});
+
+	it("should watch file in a sub directory (passed in maps)", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if (changeEvents[changeEvents.length - 1] === file) return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
+			const files = new Map();
+			const directories = new Map();
+			w.collectTimeInfoEntries(files, directories);
+			const dir = directories.get(path.join(fixtures, "dir"));
+			const dirAsFile = files.get(path.join(fixtures, "dir"));
+			const sub = directories.get(path.join(fixtures, "dir", "sub"));
+			const subAsFile = files.get(path.join(fixtures, "dir", "sub"));
+			const a = files.get(path.join(fixtures, "dir", "sub", "a"));
+			dir.should.be.type("object");
+			dir.should.have.property("safeTime");
+			dirAsFile.should.be.type("object");
+			dirAsFile.should.not.have.property("safeTime");
+			sub.should.be.type("object");
+			sub.should.have.property("safeTime");
+			subAsFile.should.be.type("object");
+			subAsFile.should.not.have.property("safeTime");
+			a.should.be.type("object");
+			a.should.have.property("safeTime");
+			a.should.have.property("timestamp");
+			sub.safeTime.should.be.aboveOrEqual(a.safeTime);
+			dir.safeTime.should.be.aboveOrEqual(sub.safeTime);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.dir(path.join("dir", "sub"));
+		testHelper.dir(path.join("dir", "sub2"));
 		testHelper.tick(function() {
 			w.watch([], [path.join(fixtures, "dir")]);
 			testHelper.tick(function() {
