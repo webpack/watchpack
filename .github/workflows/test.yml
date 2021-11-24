@@ -51,6 +51,9 @@ jobs:
           - os: macos-latest
             node-version: 16.x
             polling: "200"
+          - os: macos-latest
+            node-version: 17.x
+            polling: "200"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
