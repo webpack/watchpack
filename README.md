@@ -112,13 +112,18 @@ const { changes, removals } = wp.getAggregated();
 // when futher changes happen
 // Can also be used when paused.
 
-// Watchpack.prototype.getTimeInfoEntries()
-var fileTimes = wp.getTimeInfoEntries();
-// returns a Map with all known time info objects for files and directories
+// Watchpack.prototype.collectTimeInfoEntries(fileInfoEntries: Map<string, Entry>, directoryInfoEntries: Map<string, Entry>)
+wp.collectTimeInfoEntries(fileInfoEntries, directoryInfoEntries);
+// collects time info objects for all known files and directories
 // this include info from files not directly watched
 // key: absolute path, value: object with { safeTime, timestamp }
 // safeTime: a point in time at which it is safe to say all changes happened before that
 // timestamp: only for files, the mtime timestamp of the file
+
+// Watchpack.prototype.getTimeInfoEntries()
+var fileTimes = wp.getTimeInfoEntries();
+// returns a Map with all known time info objects for files and directories
+// similar to collectTimeInfoEntries but returns a single map with all entries
 
 // (deprecated)
 // Watchpack.prototype.getTimes()

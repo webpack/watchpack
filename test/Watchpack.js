@@ -538,15 +538,23 @@ describe("Watchpack", function() {
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
 			const files = new Map();
 			const directories = new Map();
-			const times = w.getTimeInfoEntries();
-			w.getTimeInfoEntries(files, directories);
-			// aggregated results should be the same as seperated maps
-			Array.from(times).sort().should.be.eql([...Array.from(files), ...Array.from(directories)].sort())
+			w.collectTimeInfoEntries(files, directories);
 			const dir = directories.get(path.join(fixtures, "dir"));
+			const dirAsFile = files.get(path.join(fixtures, "dir"));
 			const sub = directories.get(path.join(fixtures, "dir", "sub"));
+			const subAsFile = files.get(path.join(fixtures, "dir", "sub"));
 			const a = files.get(path.join(fixtures, "dir", "sub", "a"));
 			dir.should.be.type("object");
 			dir.should.have.property("safeTime");
+			dirAsFile.should.be.type("object");
+			dirAsFile.should.not.have.property("safeTime");
+			sub.should.be.type("object");
+			sub.should.have.property("safeTime");
+			subAsFile.should.be.type("object");
+			subAsFile.should.not.have.property("safeTime");
+			a.should.be.type("object");
+			a.should.have.property("safeTime");
+			a.should.have.property("timestamp");
 			sub.safeTime.should.be.aboveOrEqual(a.safeTime);
 			dir.safeTime.should.be.aboveOrEqual(sub.safeTime);
 			w.close();
@@ -554,6 +562,7 @@ describe("Watchpack", function() {
 		});
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
+		testHelper.dir(path.join("dir", "sub2"));
 		testHelper.tick(function() {
 			w.watch([], [path.join(fixtures, "dir")]);
 			testHelper.tick(function() {
