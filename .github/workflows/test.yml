@@ -38,19 +38,6 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: [10.x, 12.x, 14.x, 16.x, 17.x]
         polling: ["false", "200"]
-        exclude:
-          - os: macos-latest
-            node-version: 10.x
-            polling: "200"
-          - os: macos-latest
-            node-version: 12.x
-            polling: "200"
-          - os: macos-latest
-            node-version: 14.x
-            polling: "200"
-          - os: macos-latest
-            node-version: 16.x
-            polling: "200"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
