@@ -50,6 +50,7 @@ var wp = new Watchpack({
 	// ignored: ["string", "string"] - multiple glob patterns that should be ignored
 	// ignored: /regexp/ - a regular expression for files or folders that should not be watched
 	// ignored: (entry) => boolean - an arbirary function which must return truthy to ignore an entry
+	// For all cases expect the arbirary function the path will have path separator normalized to '/'.
 	// All subdirectories are ignored too
 });
 
