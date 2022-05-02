@@ -144,6 +144,12 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should not accept undefined in files", function(done) {
+		var w = new Watchpack({});
+		w.watch([undefined], []);
+		done();
+	});
+
 	it("should watch multiple files", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
