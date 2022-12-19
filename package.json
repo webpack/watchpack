@@ -12,6 +12,7 @@
   "scripts": {
     "pretest": "yarn lint",
     "test": "mocha",
+    "test:debug": "mocha --inspect-brk",
     "lint": "eslint lib",
     "precover": "yarn lint",
     "pretty-files": "prettier \"lib/**.*\" \"test/**/*.js\" --write",
