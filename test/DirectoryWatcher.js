@@ -12,6 +12,15 @@ var testHelper = new TestHelper(fixtures);
 
 var openWatchers = [];
 
+var fsIsCaseInsensitive;
+try {
+	fsIsCaseInsensitive = require("fs").existsSync(
+		path.join(__dirname, "..", "PACKAGE.JSON")
+	);
+} catch (e) {
+	fsIsCaseInsensitive = false;
+}
+
 var DirectoryWatcher = function(p, options) {
 	var d = new OrgDirectoryWatcher(getWatcherManager(options), p, options);
 	openWatchers.push(d);
@@ -169,31 +178,33 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
-	it("should collectTimeInfoEntries for uppercase and lowercase filename", function(done) {
-		testHelper.file("A");
-		var d = new DirectoryWatcher(fixtures, {});
-		var a = d.watch(path.join(fixtures, "a"));
+	if (fsIsCaseInsensitive) {
+		it("should collectTimeInfoEntries for uppercase and lowercase filename", function(done) {
+			testHelper.file("A");
+			var d = new DirectoryWatcher(fixtures, {});
+			var a = d.watch(path.join(fixtures, "a"));
 
-		let filenameTimestamps = new Map();
-		let directoryTimestamps = new Map();
-		testHelper.tick(function() {
-			d.collectTimeInfoEntries(filenameTimestamps, directoryTimestamps);
-			let lowercase = filenameTimestamps.get(
-				path.join(testHelper.testdir, "a")
-			);
-			let uppercase = filenameTimestamps.get(
-				path.join(testHelper.testdir, "A")
-			);
-			if (!lowercase) {
-				throw new Error("should have timeInfoEntries for lowercase");
-			}
-			if (!uppercase) {
-				throw new Error("should have timeInfoEntries for uppercase");
-			}
-			a.close();
-			done();
+			let filenameTimestamps = new Map();
+			let directoryTimestamps = new Map();
+			testHelper.tick(function() {
+				d.collectTimeInfoEntries(filenameTimestamps, directoryTimestamps);
+				let lowercase = filenameTimestamps.get(
+					path.join(testHelper.testdir, "a")
+				);
+				let uppercase = filenameTimestamps.get(
+					path.join(testHelper.testdir, "A")
+				);
+				if (!lowercase) {
+					throw new Error("should have timeInfoEntries for lowercase");
+				}
+				if (!uppercase) {
+					throw new Error("should have timeInfoEntries for uppercase");
+				}
+				a.close();
+				done();
+			});
 		});
-	});
+	}
 
 	if (!+process.env.WATCHPACK_POLLING) {
 		it("should log errors emitted from watcher to stderr", function(done) {
