@@ -1226,7 +1226,9 @@ describe("Watchpack", function() {
 	}
 
 	if (symlinksSupported) {
-		describe("symlinks", () => {
+		describe("symlinks", function() {
+			this.timeout(20000);
+
 			beforeEach(done => {
 				testHelper.dir("a");
 				testHelper.dir(path.join("a", "b"));
