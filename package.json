@@ -1,6 +1,6 @@
 {
   "name": "watchpack",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "description": "",
   "main": "./lib/watchpack.js",
   "directories": {
@@ -10,12 +10,12 @@
     "lib/"
   ],
   "scripts": {
-    "pretest": "yarn lint",
-    "test": "mocha",
-    "lint": "eslint lib",
-    "precover": "yarn lint",
     "pretty-files": "prettier \"lib/**.*\" \"test/**/*.js\" --write",
-    "cover": "istanbul cover node_modules/mocha/bin/_mocha"
+    "lint": "eslint lib",
+    "test:only": "mocha",
+    "test:coverage": "istanbul cover node_modules/mocha/bin/_mocha",
+    "pretest": "yarn lint",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
