@@ -70,3 +70,4 @@ jobs:
         with:
           flags: integration
           functionalities: gcov
+          token: ${{ secrets.CODECOV_TOKEN }}
