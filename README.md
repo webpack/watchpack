@@ -2,9 +2,7 @@
 
 Wrapper library for directory and file watching.
 
-[![Build Status][build-status]][build-status-url]
-[![Build status][build-status-veyor]][build-status-veyor-url]
-[![Test coverage][coveralls-image]][coveralls-url]
+[![Test](https://github.com/webpack/watchpack/actions/workflows/test.yml/badge.svg)](https://github.com/webpack/watchpack/actions/workflows/test.yml)
 [![codecov][codecov]][codecov-url]
 [![downloads][downloads]][downloads-url]
 [![Github contributors][contributors]][contributors-url]
