@@ -4,7 +4,7 @@ Wrapper library for directory and file watching.
 
 [![Test](https://github.com/webpack/watchpack/actions/workflows/test.yml/badge.svg)](https://github.com/webpack/watchpack/actions/workflows/test.yml)
 [![Codecov](https://codecov.io/gh/webpack/watchpack/graph/badge.svg?token=8xk2OrrxWm)](https://codecov.io/gh/webpack/watchpack)
-[![Downloads](https://img.shields.io/npm/dm/watchpack.svg)]](https://www.npmjs.com/package/watchpack)
+[![Downloads](https://img.shields.io/npm/dm/watchpack.svg)](https://www.npmjs.com/package/watchpack)
 
 ## Concept
 
