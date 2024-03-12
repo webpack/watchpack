@@ -169,6 +169,52 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
+	it("should report directory as initial missing on the second watch when directory doesn't exist", function(done) {
+		var wm = getWatcherManager({});
+		testHelper.dir("dir1");
+		wm.watchDirectory(path.join(fixtures, "dir1"));
+
+		testHelper.tick(function() {
+			var initialMissing = false;
+			wm.watchDirectory(path.join(fixtures, "dir3")).on(
+				"initial-missing",
+				() => {
+					initialMissing = true;
+				}
+			);
+			testHelper.tick(function() {
+				for (const [, w] of wm.directoryWatchers) {
+					w.close();
+				}
+				initialMissing.should.be.eql(true);
+				done();
+			});
+		});
+	});
+
+	it("should not report directory as initial missing on the second watch when directory exists", function(done) {
+		var wm = getWatcherManager({});
+		testHelper.dir("dir1");
+		wm.watchDirectory(path.join(fixtures, "dir1"));
+
+		testHelper.tick(function() {
+			var initialMissing = false;
+			wm.watchDirectory(path.join(fixtures, "dir1")).on(
+				"initial-missing",
+				() => {
+					initialMissing = true;
+				}
+			);
+			testHelper.tick(function() {
+				for (const [, w] of wm.directoryWatchers) {
+					w.close();
+				}
+				initialMissing.should.be.eql(false);
+				done();
+			});
+		});
+	});
+
 	if (!+process.env.WATCHPACK_POLLING) {
 		it("should log errors emitted from watcher to stderr", function(done) {
 			var error_logged = false;
