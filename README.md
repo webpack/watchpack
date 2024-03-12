@@ -3,9 +3,8 @@
 Wrapper library for directory and file watching.
 
 [![Test](https://github.com/webpack/watchpack/actions/workflows/test.yml/badge.svg)](https://github.com/webpack/watchpack/actions/workflows/test.yml)
-[![codecov][codecov]][codecov-url]
-[![downloads][downloads]][downloads-url]
-[![Github contributors][contributors]][contributors-url]
+[![Codecov](https://codecov.io/gh/webpack/watchpack/graph/badge.svg?token=8xk2OrrxWm)](https://codecov.io/gh/webpack/watchpack)
+[![Downloads](https://img.shields.io/npm/dm/watchpack.svg)]](https://www.npmjs.com/package/watchpack)
 
 ## Concept
 
@@ -132,16 +131,3 @@ var fileTimes = wp.getTimes();
 // this include timestamps from files not directly watched
 // key: absolute path, value: timestamp as number
 ```
-
-[build-status]: https://travis-ci.org/webpack/watchpack.svg?branch=main
-[build-status-url]: https://travis-ci.org/webpack/watchpack
-[build-status-veyor]: https://ci.appveyor.com/api/projects/status/e5u2qvmugtv0r647/branch/main?svg=true
-[build-status-veyor-url]: https://ci.appveyor.com/project/sokra/watchpack/branch/main
-[coveralls-url]: https://coveralls.io/r/webpack/watchpack/
-[coveralls-image]: https://img.shields.io/coveralls/webpack/watchpack.svg
-[codecov]: https://codecov.io/gh/webpack/watchpack/branch/main/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/webpack/watchpack
-[downloads]: https://img.shields.io/npm/dm/watchpack.svg
-[downloads-url]: https://www.npmjs.com/package/watchpack
-[contributors]: https://img.shields.io/github/contributors/webpack/watchpack.svg
-[contributors-url]: https://github.com/webpack/watchpack/graphs/contributors
