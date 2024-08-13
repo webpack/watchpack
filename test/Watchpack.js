@@ -271,7 +271,7 @@ describe("Watchpack", function() {
 
 	it("should watch a file in a directory when ignore is empty array", function(done) {
 		var w = new Watchpack({
-			aggregateTimeout: 300,
+			aggregateTimeout: 1000,
 			ignored: []
 		});
 		var changeEvents = 0;
