@@ -269,6 +269,50 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should watch a file when ignore is empty array", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000,
+			ignored: []
+		});
+		var changeEvents = 0;
+		w.on("change", function(file) {
+			file.should.be.eql(path.join(fixtures, "a"));
+			changeEvents++;
+		});
+		w.on("aggregated", function(changes) {
+			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+			changeEvents.should.be.greaterThan(0);
+			w.close();
+			done();
+		});
+		w.watch([path.join(fixtures, "a")], []);
+		testHelper.tick(function() {
+			testHelper.file("a");
+		});
+	});
+
+	it("should watch a file when ignore is empty string", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000,
+			ignored: ""
+		});
+		var changeEvents = 0;
+		w.on("change", function(file) {
+			file.should.be.eql(path.join(fixtures, "a"));
+			changeEvents++;
+		});
+		w.on("aggregated", function(changes) {
+			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+			changeEvents.should.be.greaterThan(0);
+			w.close();
+			done();
+		});
+		w.watch([path.join(fixtures, "a")], []);
+		testHelper.tick(function() {
+			testHelper.file("a");
+		});
+	});
+
 	it("should watch a file then a directory", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 1000
