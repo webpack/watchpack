@@ -81,7 +81,7 @@ describe("ManyWatchers", function() {
 	});
 
 	it("should set the watcher limit based on the platform", () => {
-		should.eql(
+		should.equal(
 			watchEventSource.watcherLimit,
 			require("os").platform() === "darwin" ? 20 : 10000
 		);
