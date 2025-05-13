@@ -221,9 +221,10 @@ describe("DirectoryWatcher", function() {
 		testHelper.dir("watch-test-dir");
 		testHelper.tick(() => {
 			var d = new DirectoryWatcher(path.join(fixtures, "watch-test-dir"), {});
+			var a = d.watch(path.join(fixtures, "watch-test-dir"));
 			let gotDirectoryRemoved = false;
 			
-			d.on("change", (filePath, mtime, type) => {
+			a.on("change", (filePath, mtime, type) => {
 				console.log(">>> change: ", filePath, mtime, type)
 				if (type && type.includes("directory-removed")) {
 					gotDirectoryRemoved = true;
@@ -234,10 +235,10 @@ describe("DirectoryWatcher", function() {
 				testHelper.remove("watch-test-dir");
 				testHelper.tick(3000, function() {
 				if (gotDirectoryRemoved) {
-					d.close();
+					a.close();
 					done();
 				} else {
-					d.close();
+					a.close();
 					done(new Error("Didn't receive a event about removed directory"));
 				}
 				});
