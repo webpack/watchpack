@@ -6,6 +6,7 @@ var path = require("path");
 var TestHelper = require("./helpers/TestHelper");
 var getWatcherManager = require("../lib/getWatcherManager");
 var OrgDirectoryWatcher = require("../lib/DirectoryWatcher");
+var IS_OSX = require("os").platform() === "darwin";
 
 var fixtures = path.join(__dirname, "fixtures");
 var testHelper = new TestHelper(fixtures);
@@ -214,6 +215,36 @@ describe("DirectoryWatcher", function() {
 			});
 		});
 	});
+
+	if (!IS_OSX) {
+	it("should detect removed directory", function(done) {
+		testHelper.dir("watch-test-dir");
+		testHelper.tick(() => {
+			var d = new DirectoryWatcher(path.join(fixtures, "watch-test-dir"), {});
+			let gotDirectoryRemoved = false;
+			
+			d.on("change", (filePath, mtime, type) => {
+				if (type && type.includes("directory-removed")) {
+					console.log(">>> filePath: ", filePath)
+					gotDirectoryRemoved = true;
+				}
+			});
+
+			testHelper.tick(500, function() {
+				testHelper.remove("watch-test-dir");
+				testHelper.tick(3000, function() {
+				if (gotDirectoryRemoved) {
+					d.close();
+					done();
+				} else {
+					d.close();
+					done(new Error("Didn't receive a event about removed directory"));
+				}
+				});
+			});
+		});
+	});
+	}
 
 	if (!+process.env.WATCHPACK_POLLING) {
 		it("should log errors emitted from watcher to stderr", function(done) {
