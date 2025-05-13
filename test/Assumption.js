@@ -328,6 +328,7 @@ describe("Assumption", function() {
 					console.log("should detect removed directory: close...")
 				});
 				watcher.on("error", function(err) {
+					console.log("should detect removed directory: close...")
 					if (err && err.code === "EPERM") gotPermError = true;
 				});
 				testHelper.tick(500, function() {
