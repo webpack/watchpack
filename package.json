@@ -15,7 +15,7 @@
     "test:only": "mocha",
     "test:coverage": "istanbul cover node_modules/mocha/bin/_mocha",
     "pretest": "yarn lint",
-    "test": "mocha"
+    "test": "mocha ./test/Assumption.js"
   },
   "repository": {
     "type": "git",
