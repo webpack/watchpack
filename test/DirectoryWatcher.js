@@ -224,8 +224,8 @@ describe("DirectoryWatcher", function() {
 			let gotDirectoryRemoved = false;
 			
 			d.on("change", (filePath, mtime, type) => {
+				console.log(">>> change: ", filePath, mtime, type)
 				if (type && type.includes("directory-removed")) {
-					console.log(">>> filePath: ", filePath)
 					gotDirectoryRemoved = true;
 				}
 			});
