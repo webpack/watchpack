@@ -224,7 +224,7 @@ describe("DirectoryWatcher", function() {
 			var a = d.watch(path.join(fixtures, "watch-test-dir"));
 			let gotDirectoryRemoved = false;
 			
-			a.on("change", (filePath, mtime, type) => {
+			a.on("remove", (filePath, mtime, type) => {
 				console.log(">>> change: ", filePath, mtime, type)
 				if (type && type.includes("directory-removed")) {
 					gotDirectoryRemoved = true;
