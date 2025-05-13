@@ -320,8 +320,12 @@ describe("Assumption", function() {
 				let gotSelfRename = false;
 				let gotPermError = false;
 				watcher.on("change", function(type, filename) {
+					console.log("should detect removed directory: change...", type, filename)
 					if (type === "rename" && filename === "watch-test-dir")
 						gotSelfRename = true;
+				});
+				watcher.on("close", function() {
+					console.log("should detect removed directory: close...")
 				});
 				watcher.on("error", function(err) {
 					if (err && err.code === "EPERM") gotPermError = true;
