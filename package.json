@@ -12,8 +12,8 @@
   "scripts": {
     "pretty-files": "prettier \"lib/**.*\" \"test/**/*.js\" --write",
     "lint": "eslint lib",
-    "test:only": "mocha",
-    "test:coverage": "istanbul cover node_modules/mocha/bin/_mocha",
+    "test:only": "mocha ./test/Assumption.js",
+    "test:coverage": "mocha ./test/Assumption.js",
     "pretest": "yarn lint",
     "test": "mocha ./test/Assumption.js"
   },
