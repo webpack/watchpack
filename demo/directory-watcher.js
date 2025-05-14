@@ -5,6 +5,12 @@ const getWatcherManager = require('../lib/getWatcherManager');
 // Create a test directory to watch
 const watchDir = path.join(__dirname, 'watch-test');
 
+const fs = require('fs');
+
+if (!fs.existsSync(watchDir)) {
+    fs.mkdirSync(watchDir, { recursive: true });
+}
+
 // Create a DirectoryWatcher instance
 const watcher = new DirectoryWatcher(getWatcherManager({}), watchDir, {});
 
@@ -34,21 +40,3 @@ directoryWatcher.on('initial-missing', (type) => {
         type
     });
 });
-
-console.log(`Watching directory: ${watchDir}`);
-console.log('You can now make changes to the directory to see the events:');
-console.log('1. Create new files');
-console.log('2. Modify existing files');
-console.log('3. Delete files');
-console.log('4. Create/delete directories');
-
-// Keep the process running
-process.stdin.resume();
-
-// Cleanup on exit
-process.on('SIGINT', () => {
-    console.log('\nClosing watcher...');
-    directoryWatcher.close();
-    watcher.close();
-    process.exit();
-}); 

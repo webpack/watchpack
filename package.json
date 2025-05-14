@@ -15,7 +15,8 @@
     "test:only": "mocha ./test/DirectoryWatcher.js",
     "test:coverage": "mocha ./test/DirectoryWatcher.js",
     "pretest": "yarn lint",
-    "test": "mocha ./test/DirectoryWatcher.js"
+    "test": "mocha ./test/DirectoryWatcher.js",
+    "demo": "node demo/directory-watcher.js"
   },
   "repository": {
     "type": "git",
