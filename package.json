@@ -12,10 +12,10 @@
   "scripts": {
     "pretty-files": "prettier \"lib/**.*\" \"test/**/*.js\" --write",
     "lint": "eslint lib",
-    "test:only": "mocha ./test/DirectoryWatcher.js",
-    "test:coverage": "mocha ./test/DirectoryWatcher.js",
+    "test:only": "mocha ./test/Watchpack.js",
+    "test:coverage": "mocha ./test/Watchpack.js",
     "pretest": "yarn lint",
-    "test": "mocha ./test/DirectoryWatcher.js",
+    "test": "mocha ./test/Watchpack.js",
     "demo": "node demo/directory-watcher.js"
   },
   "repository": {
