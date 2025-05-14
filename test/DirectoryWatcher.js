@@ -223,7 +223,7 @@ describe("DirectoryWatcher", function() {
 		testHelper.dir("watch-test-dir");
 		testHelper.tick(() => {
 			var d = new DirectoryWatcher(path.join(fixtures, "watch-test-dir"), {});
-			var a = d.watch(path.join(fixtures, "watch-test-dir"));
+			var a = d.watch(path.join(fixtures));
 			let gotDirectoryRemoved = false;
 			
 			a.on("error", (err) => {
