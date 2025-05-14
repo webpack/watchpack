@@ -37,7 +37,6 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
-	if (!IS_OSX) {
 	it("should detect removed directory", function(done) {
 		console.log(">>> ...")
 
@@ -76,5 +75,4 @@ describe("DirectoryWatcher", function() {
 			});
 		});
 	});
-	}
 });
