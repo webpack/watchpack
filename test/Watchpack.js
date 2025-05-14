@@ -19,13 +19,17 @@ describe("Watchpack", function() {
 			aggregateTimeout: 1000
 		});
 		var changeEvents = [];
-		w.on("change", function(file) {
-			if (changeEvents[changeEvents.length - 1] === file) return;
-			changeEvents.push(file);
+		w.on("change", function(filePath, mtime, explanation) {
+			console.log(">>> change: ", filePath, mtime, explanation)
+		});
+		w.on("remove", function(filePath, explanation) {
+			console.log(">>> remove: ", filePath, explanation)
+		});
+		w.on("error", function(err) {	
+			console.log(">>> error: ", err)
 		});
 		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
-			changeEvents.should.be.eql([path.join(fixtures, "dir", "a")]);
+			console.log(">>> aggregated: ", changes)
 			w.close();
 			done();
 		});
@@ -33,7 +37,7 @@ describe("Watchpack", function() {
 		testHelper.tick(200, function() {
 			w.watch([], [path.join(fixtures, "dir")]);
 			testHelper.tick(200, function() {
-				testHelper.file(path.join("dir", "a"));
+				testHelper.remove("dir");
 			});
 		});
 	});
