@@ -16,7 +16,10 @@ describe("Watchpack", function() {
 
 	it("should detect removed directory", function(done) {
 		var w = new Watchpack({
-			aggregateTimeout: 1000
+			aggregateTimeout: 1000,
+			poll: false,           
+			followSymlinks: false,
+			ignored: ['**/node_modules/**', '**/.git/**'] 
 		});
 		var changeEvents = [];
 		w.on("change", function(filePath, mtime, explanation) {
@@ -35,7 +38,11 @@ describe("Watchpack", function() {
 		});
 		testHelper.dir("dir");
 		testHelper.tick(200, function() {
-			w.watch([], [path.join(fixtures, "dir")]);
+			w.watch({
+				directories: [path.join(fixtures, "dir")],  // 要监听的目录列表
+				missing: [],             // 要监听但可能不存在的文件列表
+				startTime: Date.now()    // 开始时间，只监听这个时间之后的变化
+			});
 			testHelper.tick(200, function() {
 				testHelper.remove("dir");
 			});

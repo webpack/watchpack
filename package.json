@@ -16,7 +16,8 @@
     "test:coverage": "mocha ./test/Watchpack.js",
     "pretest": "yarn lint",
     "test": "mocha ./test/Watchpack.js",
-    "demo": "node demo/directory-watcher.js"
+    "demo": "node demo/directory-watcher.js",
+    "demo2": "node demo/watchpack-demo.js"
   },
   "repository": {
     "type": "git",
