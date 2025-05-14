@@ -212,6 +212,30 @@ describe("Watchpack", function() {
 		});
 	});
 
+	it("should detect removed directory", function(done) {
+		var w = new Watchpack({
+			aggregateTimeout: 1000
+		});
+		var changeEvents = [];
+		w.on("change", function(file) {
+			if (changeEvents[changeEvents.length - 1] === file) return;
+			changeEvents.push(file);
+		});
+		w.on("aggregated", function(changes) {
+			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+			changeEvents.should.be.eql([path.join(fixtures, "dir", "a")]);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.tick(200, function() {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(200, function() {
+				testHelper.file(path.join("dir", "a"));
+			});
+		});
+	});
+
 	it("should not watch an ignored directory", function(done) {
 		var w = new Watchpack({
 			aggregateTimeout: 300,
