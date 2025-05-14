@@ -218,6 +218,8 @@ describe("DirectoryWatcher", function() {
 
 	if (!IS_OSX) {
 	it("should detect removed directory", function(done) {
+		console.log(">>> ...")
+
 		testHelper.dir("watch-test-dir");
 		testHelper.tick(() => {
 			var d = new DirectoryWatcher(path.join(fixtures, "watch-test-dir"), {});
