@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: [10.x, 12.x, 14.x, 16.x, 18.x, 20.x, 22.x]
+        node-version: [10.x, 12.x, 14.x, 16.x, 18.x, 20.x, 22.x, 24.x]
         polling: ["false", "200"]
         exclude:
           - os: macos-latest
@@ -50,9 +50,6 @@ jobs:
             polling: "200"
           - os: macos-latest
             node-version: 20.x
-            polling: "200"
-          - os: macos-latest
-            node-version: 21.x
             polling: "200"
     runs-on: ${{ matrix.os }}
     steps:
@@ -77,8 +74,7 @@ jobs:
       - run: yarn test:coverage --report lcovonly
         env:
           WATCHPACK_POLLING: ${{ matrix.polling }}
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           flags: integration
-          functionalities: gcov
           token: ${{ secrets.CODECOV_TOKEN }}
