@@ -8,10 +8,12 @@ var TestHelper = require("./helpers/TestHelper");
 
 var fixtures = path.join(__dirname, "fixtures");
 var testHelper = new TestHelper(fixtures);
+var { createHandleChangeEvent } = require("../lib/watchEventSource");
 
 const IS_OSX = require("os").platform() === "darwin";
 const IS_WIN = require("os").platform() === "win32";
 const SUPPORTS_RECURSIVE_WATCHING = IS_OSX || IS_WIN;
+
 
 describe("Assumption", function() {
 	this.timeout(10000);
@@ -319,10 +321,11 @@ describe("Assumption", function() {
 				));
 				let gotSelfRename = false;
 				let gotPermError = false;
-				watcher.on("change", function(type, filename) {
+				let handleChangeEvent = createHandleChangeEvent(watcher, path.join(fixtures, "watch-test-dir"), (type, filename) => {
 					if (type === "rename" && filename === "watch-test-dir")
 						gotSelfRename = true;
 				});
+				watcher.on("change", handleChangeEvent);
 				watcher.on("error", function(err) {
 					if (err && err.code === "EPERM") gotPermError = true;
 				});
