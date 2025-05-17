@@ -6,6 +6,7 @@ const path = require("path");
 const TestHelper = require("./helpers/TestHelper");
 const Watchpack = require("../lib/watchpack");
 const watchEventSource = require("../lib/watchEventSource");
+const should = require("should");
 
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
@@ -77,5 +78,12 @@ describe("ManyWatchers", function() {
 				testHelper.file("4096/900/file");
 			});
 		});
+	});
+
+	it("should set the watcher limit based on the platform", () => {
+		should.equal(
+			watchEventSource.watcherLimit,
+			require("os").platform() === "darwin" ? 20 : 10000
+		);
 	});
 });
