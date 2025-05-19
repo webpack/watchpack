@@ -16,7 +16,6 @@ watchpack high level API doesn't map directly to watchers. Instead a three level
 - The real watchers are created by the `DirectoryWatcher`.
 - Files are never watched directly. This should keep the watcher count low.
 - Watching can be started in the past. This way watching can start after file reading.
-- Symlinks are not followed, instead the symlink is watched.
 
 ## API
 
