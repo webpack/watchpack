@@ -15,6 +15,17 @@ const IS_WIN = require("os").platform() === "win32";
 const SUPPORTS_RECURSIVE_WATCHING = IS_OSX || IS_WIN;
 
 
+function getNodeVersion() {
+	try {
+		return parseInt(process.version.split('.')[0].replace('v', ''), 10)
+	} catch (e) {
+		return 0;
+	}
+}
+
+const IS_NODE_VERSION_GT_24 = getNodeVersion() >= 24;
+
+
 describe("Assumption", function() {
 	this.timeout(10000);
 	var watcherToClose = null;
@@ -337,6 +348,15 @@ describe("Assumption", function() {
 							done(new Error("Didn't receive a event about removed directory"));
 					});
 				});
+			});
+		});
+	}
+
+	if (IS_WIN) {
+		it("should return EINVAL when lstat a directory on Windows", function(done) {
+			fs.lstat('D:\\System Volume Information', (err) => {
+				err.code.should.be.equal(IS_NODE_VERSION_GT_24 ? 'EINVAL' : 'EPERM');
+				done();
 			});
 		});
 	}
