@@ -1303,6 +1303,8 @@ describe("Watchpack", function() {
 				testHelper.symlinkFile(path.join("a", "b", "link"), "c");
 				testHelper.symlinkFile(path.join("a", "b", "link2"), "link");
 				testHelper.symlinkFile("link2", "link/link/link2");
+				testHelper.dir("b");
+				testHelper.symlinkDir(path.join("b", "link"), path.join("..", "a", "b"));
 
 				testHelper.tick(1000, done);
 			});
@@ -1431,6 +1433,20 @@ describe("Watchpack", function() {
 					() => {
 						testHelper.unlink(path.join("a", "link"));
 						testHelper.symlinkDir(path.join("a", "link"), path.join("b", "d"));
+					}
+				);
+			});
+
+			it("should detect a change to symlinked file outside watched directory", function(done) {
+				expectWatchEvent(
+					[],
+					path.join(fixtures, "b"),
+					changes => {
+						Array.from(changes).should.be.eql([path.join(fixtures, "b")]);
+						done();
+					},
+					() => {
+						testHelper.file(path.join("a", "b", "d"));
 					}
 				);
 			});
