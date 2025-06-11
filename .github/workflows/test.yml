@@ -75,7 +75,7 @@ jobs:
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
       - run: yarn --frozen-lockfile
         if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x' && matrix.node-version != '16.x'
-      - run: yarn test:coverage --report lcovonly
+      - run: yarn test:coverage --reporter=lcov
         env:
           WATCHPACK_POLLING: ${{ matrix.polling }}
       - uses: codecov/codecov-action@v5
