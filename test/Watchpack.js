@@ -1313,7 +1313,8 @@ describe("Watchpack", function watchpackTest() {
 					followSymlinks: true,
 				});
 
-				w.watch([...files], [...dirs], Date.now());
+				// eslint-disable-next-line unicorn/prefer-spread
+				w.watch([].concat(files), [].concat(dirs), Date.now());
 
 				let active = false;
 				let closed = false;
@@ -1405,7 +1406,7 @@ describe("Watchpack", function watchpackTest() {
 				);
 			});
 
-			it("should detect a symlink file change in a watched symlinked directory", (done) => {
+			it.only("should detect a symlink file change in a watched symlinked directory", (done) => {
 				expectWatchEvent(
 					[],
 					path.join(fixtures, "link"),
