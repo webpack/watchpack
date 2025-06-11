@@ -1,96 +1,102 @@
-/*globals describe it beforeEach afterEach */
+/* globals describe it beforeEach afterEach */
 "use strict";
 
 require("should");
-var path = require("path");
-var TestHelper = require("./helpers/TestHelper");
-var getWatcherManager = require("../lib/getWatcherManager");
-var OrgDirectoryWatcher = require("../lib/DirectoryWatcher");
 
-var fixtures = path.join(__dirname, "fixtures");
-var testHelper = new TestHelper(fixtures);
+const path = require("path");
+const TestHelper = require("./helpers/TestHelper");
+const getWatcherManager = require("../lib/getWatcherManager");
+const OrgDirectoryWatcher = require("../lib/DirectoryWatcher");
 
-var openWatchers = [];
+const fixtures = path.join(__dirname, "fixtures");
+const testHelper = new TestHelper(fixtures);
 
-var DirectoryWatcher = function(p, options) {
-	var d = new OrgDirectoryWatcher(getWatcherManager(options), p, options);
-	openWatchers.push(d);
-	var orgClose = d.close;
-	d.close = function() {
+const openWatchers = [];
+
+function DirectoryWatcher(directoryPath, options) {
+	const directoryWatcher = new OrgDirectoryWatcher(
+		getWatcherManager(options),
+		directoryPath,
+		options,
+	);
+	openWatchers.push(directoryWatcher);
+	const orgClose = directoryWatcher.close;
+	directoryWatcher.close = function close() {
 		orgClose.call(this);
-		var idx = openWatchers.indexOf(d);
+		const idx = openWatchers.indexOf(directoryWatcher);
 		if (idx < 0) throw new Error("DirectoryWatcher was already closed");
 		openWatchers.splice(idx, 1);
 	};
-	return d;
-};
+	return directoryWatcher;
+}
 
-describe("DirectoryWatcher", function() {
+describe("DirectoryWatcher", function directoryWatcherTest() {
 	this.timeout(10000);
 	beforeEach(testHelper.before);
 	afterEach(testHelper.after);
-	afterEach(function() {
-		openWatchers.forEach(function(d) {
-			console.log("DirectoryWatcher (" + d.path + ") was not closed.");
-			d.close();
-		});
+	afterEach(() => {
+		for (const watchers of openWatchers) {
+			// eslint-disable-next-line no-console
+			console.log(`DirectoryWatcher (${watchers.path}) was not closed.`);
+			watchers.close();
+		}
 	});
 
-	it("should detect a file creation", function(done) {
-		var d = new DirectoryWatcher(fixtures, {});
-		var a = d.watch(path.join(fixtures, "a"));
-		a.on("change", function(mtime) {
+	it("should detect a file creation", (done) => {
+		const directoryWatcher = new DirectoryWatcher(fixtures, {});
+		const a = directoryWatcher.watch(path.join(fixtures, "a"));
+		a.on("change", (mtime) => {
 			mtime.should.be.type("number");
-			Object.keys(d.getTimes())
+			Object.keys(directoryWatcher.getTimes())
 				.sort()
 				.should.be.eql([path.join(fixtures, "a")]);
 			a.close();
 			done();
 		});
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			testHelper.file("a");
 		});
 	});
 
-	it("should detect a file change", function(done) {
-		var d = new DirectoryWatcher(fixtures, {});
+	it("should detect a file change", (done) => {
+		const directoryWatcher = new DirectoryWatcher(fixtures, {});
 		testHelper.file("a");
-		testHelper.tick(1000, function() {
-			var a = d.watch(path.join(fixtures, "a"));
-			a.on("change", function(mtime) {
+		testHelper.tick(1000, () => {
+			const a = directoryWatcher.watch(path.join(fixtures, "a"));
+			a.on("change", (mtime) => {
 				mtime.should.be.type("number");
 				a.close();
 				done();
 			});
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.file("a");
 			});
 		});
 	});
 
-	it("should not detect a file change in initial scan", function(done) {
+	it("should not detect a file change in initial scan", (done) => {
 		testHelper.file("a");
-		testHelper.tick(function() {
-			var d = new DirectoryWatcher(fixtures, {});
-			var a = d.watch(path.join(fixtures, "a"));
-			a.on("change", function() {
+		testHelper.tick(() => {
+			const directoryWatcher = new DirectoryWatcher(fixtures, {});
+			const a = directoryWatcher.watch(path.join(fixtures, "a"));
+			a.on("change", () => {
 				throw new Error("should not be detected");
 			});
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				a.close();
 				done();
 			});
 		});
 	});
 
-	it("should detect a file change in initial scan with start date", function(done) {
-		var start = new Date();
-		testHelper.tick(1000, function() {
+	it("should detect a file change in initial scan with start date", (done) => {
+		const start = new Date();
+		testHelper.tick(1000, () => {
 			testHelper.file("a");
-			testHelper.tick(1000, function() {
-				var d = new DirectoryWatcher(fixtures, {});
-				var a = d.watch(path.join(fixtures, "a"), start);
-				a.on("change", function() {
+			testHelper.tick(1000, () => {
+				const directoryWatcher = new DirectoryWatcher(fixtures, {});
+				const a = directoryWatcher.watch(path.join(fixtures, "a"), start);
+				a.on("change", () => {
 					a.close();
 					done();
 				});
@@ -98,43 +104,37 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
-	it("should not detect a file change in initial scan without start date", function(done) {
+	it("should not detect a file change in initial scan without start date", (done) => {
 		testHelper.file("a");
-		testHelper.tick(200, function() {
-			var d = new DirectoryWatcher(fixtures, {});
-			var a = d.watch(path.join(fixtures, "a"));
-			a.on("change", function(mtime, type) {
+		testHelper.tick(200, () => {
+			const directoryWatcher = new DirectoryWatcher(fixtures, {});
+			const a = directoryWatcher.watch(path.join(fixtures, "a"));
+			a.on("change", (mtime, type) => {
 				throw new Error(
-					"should not be detected (" +
-						type +
-						" mtime=" +
-						mtime +
-						" now=" +
-						Date.now() +
-						")"
+					`should not be detected (${type} mtime=${mtime} now=${Date.now()})`,
 				);
 			});
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				a.close();
 				done();
 			});
 		});
 	});
 
-	var timings = {
+	const timings = {
 		slow: 300,
-		fast: 50
+		fast: 50,
 	};
-	Object.keys(timings).forEach(function(name) {
-		var time = timings[name];
-		it("should detect multiple file changes (" + name + ")", function(done) {
-			var d = new DirectoryWatcher(fixtures, {});
+	for (const name of Object.keys(timings)) {
+		const time = timings[name];
+		it(`should detect multiple file changes (${name})`, (done) => {
+			const directoryWatcher = new DirectoryWatcher(fixtures, {});
 			testHelper.file("a");
-			testHelper.tick(function() {
-				var a = d.watch(path.join(fixtures, "a"));
-				var count = 20;
-				var wasChanged = false;
-				a.on("change", function(mtime) {
+			testHelper.tick(() => {
+				const a = directoryWatcher.watch(path.join(fixtures, "a"));
+				let count = 20;
+				let wasChanged = false;
+				a.on("change", (mtime) => {
 					mtime.should.be.type("number");
 					if (!wasChanged) return;
 					wasChanged = false;
@@ -142,47 +142,47 @@ describe("DirectoryWatcher", function() {
 						a.close();
 						done();
 					} else {
-						testHelper.tick(time, function() {
+						testHelper.tick(time, () => {
 							wasChanged = true;
 							testHelper.file("a");
 						});
 					}
 				});
-				testHelper.tick(function() {
+				testHelper.tick(() => {
 					wasChanged = true;
 					testHelper.file("a");
 				});
 			});
 		});
-	});
+	}
 
-	it("should detect a file removal", function(done) {
+	it("should detect a file removal", (done) => {
 		testHelper.file("a");
-		var d = new DirectoryWatcher(fixtures, {});
-		var a = d.watch(path.join(fixtures, "a"));
-		a.on("remove", function() {
+		const directoryWatcher = new DirectoryWatcher(fixtures, {});
+		const a = directoryWatcher.watch(path.join(fixtures, "a"));
+		a.on("remove", () => {
 			a.close();
 			done();
 		});
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			testHelper.remove("a");
 		});
 	});
 
-	it("should report directory as initial missing on the second watch when directory doesn't exist", function(done) {
-		var wm = getWatcherManager({});
+	it("should report directory as initial missing on the second watch when directory doesn't exist", (done) => {
+		const wm = getWatcherManager({});
 		testHelper.dir("dir1");
 		wm.watchDirectory(path.join(fixtures, "dir1"));
 
-		testHelper.tick(function() {
-			var initialMissing = false;
+		testHelper.tick(() => {
+			let initialMissing = false;
 			wm.watchDirectory(path.join(fixtures, "dir3")).on(
 				"initial-missing",
 				() => {
 					initialMissing = true;
-				}
+				},
 			);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				for (const [, w] of wm.directoryWatchers) {
 					w.close();
 				}
@@ -192,20 +192,20 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
-	it("should not report directory as initial missing on the second watch when directory exists", function(done) {
-		var wm = getWatcherManager({});
+	it("should not report directory as initial missing on the second watch when directory exists", (done) => {
+		const wm = getWatcherManager({});
 		testHelper.dir("dir1");
 		wm.watchDirectory(path.join(fixtures, "dir1"));
 
-		testHelper.tick(function() {
-			var initialMissing = false;
+		testHelper.tick(() => {
+			let initialMissing = false;
 			wm.watchDirectory(path.join(fixtures, "dir1")).on(
 				"initial-missing",
 				() => {
 					initialMissing = true;
-				}
+				},
 			);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				for (const [, w] of wm.directoryWatchers) {
 					w.close();
 				}
@@ -215,21 +215,21 @@ describe("DirectoryWatcher", function() {
 		});
 	});
 
-	if (!+process.env.WATCHPACK_POLLING) {
-		it("should log errors emitted from watcher to stderr", function(done) {
-			var error_logged = false;
-			var old_stderr = process.stderr.write;
-			process.stderr.write = function(a) {
-				error_logged = true;
+	if (!Number(process.env.WATCHPACK_POLLING)) {
+		it("should log errors emitted from watcher to stderr", (done) => {
+			let errorLogged = false;
+			const oldStderr = process.stderr.write;
+			process.stderr.write = function write(_a) {
+				errorLogged = true;
 			};
-			var d = new DirectoryWatcher(fixtures, {});
-			var a = d.watch(path.join(fixtures, "a"));
-			d.watcher.emit("error", "error_message");
+			const directoryWatcher = new DirectoryWatcher(fixtures, {});
+			const a = directoryWatcher.watch(path.join(fixtures, "a"));
+			directoryWatcher.watcher.emit("error", "error_message");
 
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				a.close();
-				process.stderr.write = old_stderr;
-				error_logged.should.be.true();
+				process.stderr.write = oldStderr;
+				errorLogged.should.be.true();
 				done();
 			});
 		});

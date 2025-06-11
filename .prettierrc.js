@@ -1,13 +1,24 @@
+"use strict";
+
 module.exports = {
 	printWidth: 80,
 	useTabs: true,
 	tabWidth: 2,
+	trailingComma: "all",
+	arrowParens: "always",
 	overrides: [
 		{
-			files: "*.{json,yml}",
+			files: "*.json",
 			options: {
-				useTabs: false
-			}
-		}
-	]
+				parser: "json",
+				useTabs: false,
+			},
+		},
+		{
+			files: "*.{cts,mts,ts}",
+			options: {
+				parser: "typescript",
+			},
+		},
+	],
 };

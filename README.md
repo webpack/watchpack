@@ -21,9 +21,9 @@ watchpack high level API doesn't map directly to watchers. Instead a three level
 ## API
 
 ```javascript
-var Watchpack = require("watchpack");
+const Watchpack = require("watchpack");
 
-var wp = new Watchpack({
+const wp = new Watchpack({
 	// options:
 	aggregateTimeout: 1000,
 	// fire "aggregated" event when after a change for 1000ms no additional change occurred
@@ -42,7 +42,7 @@ var wp = new Watchpack({
 	// false (default): watches only specified item they may be real files or symlinks
 	//   (This makes sense when symlinks has already been resolved)
 
-	ignored: "**/.git"
+	ignored: "**/.git",
 	// ignored: "string" - a glob pattern for files or folders that should not be watched
 	// ignored: ["string", "string"] - multiple glob patterns that should be ignored
 	// ignored: /regexp/ - a regular expression for files or folders that should not be watched
@@ -61,7 +61,7 @@ wp.watch({
 	files: listOfFiles,
 	directories: listOfDirectories,
 	missing: listOfNotExistingItems,
-	startTime: Date.now() - 10000
+	startTime: Date.now() - 10000,
 });
 // starts watching these files and directories
 // calling this again will override the files and directories
@@ -76,18 +76,18 @@ wp.watch({
 // files and directories are assumed to exist, when they are not found without further information a remove event is emitted
 // missing is assumed to not exist and no remove event is emitted
 
-wp.on("change", function(filePath, mtime, explanation) {
+wp.on("change", (filePath, mtime, explanation) => {
 	// filePath: the changed file
 	// mtime: last modified time for the changed file
 	// explanation: textual information how this change was detected
 });
 
-wp.on("remove", function(filePath, explanation) {
+wp.on("remove", (filePath, explanation) => {
 	// filePath: the removed file or directory
 	// explanation: textual information how this change was detected
 });
 
-wp.on("aggregated", function(changes, removals) {
+wp.on("aggregated", (changes, removals) => {
 	// changes: a Set of all changed files
 	// removals: a Set of all removed files
 	// watchpack gives up ownership on these Sets.
@@ -120,13 +120,13 @@ wp.collectTimeInfoEntries(fileInfoEntries, directoryInfoEntries);
 // timestamp: only for files, the mtime timestamp of the file
 
 // Watchpack.prototype.getTimeInfoEntries()
-var fileTimes = wp.getTimeInfoEntries();
+const fileTimes = wp.getTimeInfoEntries();
 // returns a Map with all known time info objects for files and directories
 // similar to collectTimeInfoEntries but returns a single map with all entries
 
 // (deprecated)
 // Watchpack.prototype.getTimes()
-var fileTimes = wp.getTimes();
+const fileTimesOld = wp.getTimes();
 // returns an object with all known change times for files
 // this include timestamps from files not directly watched
 // key: absolute path, value: timestamp as number

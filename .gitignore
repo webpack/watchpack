@@ -3,4 +3,5 @@
 /playground/folder
 /coverage
 .DS_Store
-package-lock.json
+.eslintcache
+yarn.lock

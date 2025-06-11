@@ -17,14 +17,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          cache: "yarn"
-      - run: yarn --frozen-lockfile
-      - uses: actions/cache@v4
+          cache: "npm"
+      - run: npm ci
+      - name: Cache eslint result
+        uses: actions/cache@v4
         with:
           path: .eslintcache
-          key: lint-${{ env.GITHUB_SHA }}
-          restore-keys: lint-
-      - run: yarn lint
+          key: lint-eslint-${{ runner.os }}-node-${{ hashFiles('**/package-lock.json', '**/eslint.config.mjs') }}
+          restore-keys: lint-eslint-
+      - run: npm run lint
   test:
     strategy:
       fail-fast: false
@@ -69,9 +70,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           architecture: ${{ steps.calculate_architecture.outputs.result }}
-          cache: "yarn"
-      - run: yarn --frozen-lockfile
-      - run: yarn test:coverage --report lcovonly
+          cache: "npm"
+      - run: npm install --ignore-engines
+        if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
+      - run: npm ci
+        if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x' && matrix.node-version != '16.x'
+      - run: npm run test:coverage
         env:
           WATCHPACK_POLLING: ${{ matrix.polling }}
       - uses: codecov/codecov-action@v5
