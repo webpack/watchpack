@@ -23,7 +23,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .eslintcache
-          key: lint-eslint-${{ runner.os }}-node-${{ hashFiles('**/yarn.lock', '**/eslint.config.mjs') }}
+          key: lint-eslint-${{ runner.os }}-node-${{ hashFiles('**/package-lock.json', '**/eslint.config.mjs') }}
           restore-keys: lint-eslint-
       - run: npm run lint
   test:
@@ -73,7 +73,7 @@ jobs:
           cache: "npm"
       - run: npm install --ignore-engines
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
-      - run: yarn --frozen-lockfile
+      - run: npm ci
         if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x' && matrix.node-version != '16.x'
       - run: npm run test:coverage
         env:
