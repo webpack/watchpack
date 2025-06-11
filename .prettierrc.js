@@ -8,7 +8,7 @@ module.exports = {
 	arrowParens: "always",
 	overrides: [
 		{
-			files: "*.{json,yml}",
+			files: "*.json",
 			options: {
 				parser: "json",
 				useTabs: false,

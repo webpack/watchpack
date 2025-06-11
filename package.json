@@ -6,18 +6,16 @@
   "directories": {
     "test": "test"
   },
-  "files": [
-    "lib/"
-  ],
+  "files": ["lib/"],
   "scripts": {
-    "lint": "yarn lint:code",
+    "lint": "npm run lint:code",
     "lint:code": "eslint --cache .",
-    "fmt": "yarn fmt:base --loglevel warn --write",
-    "fmt:check": "yarn fmt:base --check",
+    "fmt": "npm run fmt:base -- --log-level warn --write",
+    "fmt:check": "npm run fmt:base -- --check",
     "fmt:base": "prettier --cache --ignore-unknown .",
     "test:only": "mocha",
     "test:coverage": "nyc --reporter=lcov node_modules/mocha/bin/_mocha",
-    "pretest": "yarn lint",
+    "pretest": "npm run lint",
     "test": "mocha"
   },
   "repository": {
@@ -46,7 +44,7 @@
     "eslint-plugin-unicorn": "^59.0.1",
     "globals": "^16.2.0",
     "mocha": "^5.0.1",
-    "nyc": "^17.1.0",
+    "nyc": "^15.1.0",
     "prettier": "^3.5.3",
     "rimraf": "^2.6.2",
     "should": "^8.3.1",

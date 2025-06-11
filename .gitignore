@@ -4,4 +4,4 @@
 /coverage
 .DS_Store
 .eslintcache
-package-lock.json
+yarn.lock

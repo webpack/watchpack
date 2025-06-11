@@ -42,7 +42,7 @@ const wp = new Watchpack({
 	// false (default): watches only specified item they may be real files or symlinks
 	//   (This makes sense when symlinks has already been resolved)
 
-	ignored: "**/.git"
+	ignored: "**/.git",
 	// ignored: "string" - a glob pattern for files or folders that should not be watched
 	// ignored: ["string", "string"] - multiple glob patterns that should be ignored
 	// ignored: /regexp/ - a regular expression for files or folders that should not be watched
@@ -61,7 +61,7 @@ wp.watch({
 	files: listOfFiles,
 	directories: listOfDirectories,
 	missing: listOfNotExistingItems,
-	startTime: Date.now() - 10000
+	startTime: Date.now() - 10000,
 });
 // starts watching these files and directories
 // calling this again will override the files and directories
