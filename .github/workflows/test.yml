@@ -19,11 +19,12 @@ jobs:
           node-version: lts/*
           cache: "yarn"
       - run: yarn --frozen-lockfile
-      - uses: actions/cache@v4
+      - name: Cache eslint result
+        uses: actions/cache@v4
         with:
           path: .eslintcache
-          key: lint-${{ env.GITHUB_SHA }}
-          restore-keys: lint-
+          key: lint-eslint-${{ runner.os }}-node-${{ hashFiles('**/yarn.lock', '**/eslint.config.mjs') }}
+          restore-keys: lint-eslint-
       - run: yarn lint
   test:
     strategy:
@@ -70,7 +71,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
           architecture: ${{ steps.calculate_architecture.outputs.result }}
           cache: "yarn"
+      - run: yarn --frozen-lockfile --ignore-engines
+        if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
       - run: yarn --frozen-lockfile
+        if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x' && matrix.node-version != '16.x'
       - run: yarn test:coverage --report lcovonly
         env:
           WATCHPACK_POLLING: ${{ matrix.polling }}

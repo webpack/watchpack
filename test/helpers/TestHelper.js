@@ -1,69 +1,67 @@
 "use strict";
 
-var fs = require("fs");
-var path = require("path");
-var rimraf = require("rimraf");
-var writeFileAtomic = require("write-file-atomic");
+const fs = require("fs");
+const path = require("path");
+const rimraf = require("rimraf");
+const writeFileAtomic = require("write-file-atomic");
 
-var watchEventSource = require("../../lib/watchEventSource");
+const watchEventSource = require("../../lib/watchEventSource");
 
 require("../../lib/getWatcherManager");
-var watcherManagerModule =
+let watcherManagerModule =
 	require.cache[require.resolve("../../lib/getWatcherManager")];
 
 const allWatcherManager = new Set();
 const oldFn = watcherManagerModule.exports;
-watcherManagerModule = options => {
+watcherManagerModule = (options) => {
 	const watcherManager = oldFn(options);
 	allWatcherManager.add(watcherManager);
 };
 
 const checkAllWatcherClosed = () => {
 	for (const watcherManager of allWatcherManager) {
-		Array.from(watcherManager.directoryWatchers.keys()).should.be.eql([]);
+		[...watcherManager.directoryWatchers.keys()].should.be.eql([]);
 	}
 	watchEventSource.getNumberOfWatchers().should.be.eql(0);
 };
 
 function TestHelper(testdir) {
 	this.testdir = testdir;
-	var self = this;
-	this.before = function(done) {
+	const self = this;
+	this.before = function before(done) {
 		self._before(done);
 	};
-	this.after = function(done) {
+	this.after = function after(done) {
 		self._after(done);
 	};
 }
+
 module.exports = TestHelper;
 
-TestHelper.prototype._before = function before(done) {
+TestHelper.prototype._before = function _before(done) {
 	checkAllWatcherClosed();
-	this.tick(
-		400,
-		function() {
-			rimraf.sync(this.testdir);
-			fs.mkdirSync(this.testdir);
-			done();
-		}.bind(this)
-	);
+	this.tick(400, () => {
+		rimraf.sync(this.testdir);
+		fs.mkdirSync(this.testdir);
+		done();
+	});
 };
 
-TestHelper.prototype._after = function after(done) {
-	var i = 0;
+TestHelper.prototype._after = function _after(done) {
+	let i = 0;
 	this.tick(
 		300,
 		function del() {
 			try {
 				rimraf.sync(this.testdir);
-			} catch (e) {
-				if (i++ > 20) throw e;
+			} catch (err) {
+				if (i++ > 20) throw err;
 				this.tick(100, del.bind(this));
 				return;
 			}
 			checkAllWatcherClosed();
 			this.tick(300, done);
-		}.bind(this)
+		}.bind(this),
 	);
 };
 
@@ -76,14 +74,14 @@ TestHelper.prototype.rename = function rename(orig, dest) {
 };
 
 TestHelper.prototype.file = function file(name) {
-	fs.writeFileSync(path.join(this.testdir, name), Math.random() + "", "utf-8");
+	fs.writeFileSync(path.join(this.testdir, name), `${Math.random()}`, "utf8");
 };
 
 TestHelper.prototype.fileAtomic = function fileAtomic(name) {
 	writeFileAtomic.sync(
 		path.join(this.testdir, name),
-		Math.random() + "",
-		"utf-8"
+		`${Math.random()}`,
+		"utf8",
 	);
 };
 
@@ -92,7 +90,7 @@ TestHelper.prototype.accessFile = function accessFile(name) {
 	fs.utimesSync(
 		path.join(this.testdir, name),
 		new Date(Date.now() - 1000 * 60 * 60 * 24),
-		stat.mtime
+		stat.mtime,
 	);
 	fs.readFileSync(path.join(this.testdir, name));
 };
@@ -110,7 +108,7 @@ TestHelper.prototype.unlink = function unlink(name) {
 };
 
 TestHelper.prototype.mtime = function mtime(name, mtime) {
-	var stats = fs.statSync(path.join(this.testdir, name));
+	const stats = fs.statSync(path.join(this.testdir, name));
 	fs.utimesSync(path.join(this.testdir, name), stats.atime, new Date(mtime));
 };
 
@@ -120,18 +118,18 @@ TestHelper.prototype.remove = function remove(name) {
 
 TestHelper.prototype.tick = function tick(arg, fn) {
 	// if polling is set, ensure the tick is longer than the polling interval.
-	let defaultTick = (+process.env.WATCHPACK_POLLING || 100) + 10;
+	const defaultTick = (Number(process.env.WATCHPACK_POLLING) || 100) + 10;
 	if (typeof arg === "function") {
 		fn = arg;
 		arg = defaultTick;
 	}
-	setTimeout(function() {
+	setTimeout(() => {
 		fn();
 	}, arg);
 };
 
 TestHelper.prototype.getNumberOfWatchers = function getNumberOfWatchers() {
-	const count = 0;
+	let count = 0;
 	for (const watcherManager of allWatcherManager) {
 		count += watcherManager.directoryWatchers.size;
 	}

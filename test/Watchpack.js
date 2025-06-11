@@ -1,64 +1,65 @@
-/*globals describe it beforeEach afterEach */
+/* globals describe it beforeEach afterEach */
 "use strict";
 
 require("should");
-var path = require("path");
-var TestHelper = require("./helpers/TestHelper");
-var Watchpack = require("../lib/watchpack");
 
-var fixtures = path.join(__dirname, "fixtures");
-var testHelper = new TestHelper(fixtures);
+const path = require("path");
+const TestHelper = require("./helpers/TestHelper");
+const Watchpack = require("../lib/watchpack");
 
-describe("Watchpack", function() {
+const fixtures = path.join(__dirname, "fixtures");
+const testHelper = new TestHelper(fixtures);
+
+describe("Watchpack", function watchpackTest() {
 	this.timeout(10000);
 	beforeEach(testHelper.before);
 	afterEach(testHelper.after);
 
-	it("should watch a single file", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a single file", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = 0;
-		w.on("change", function(file) {
+		let changeEvents = 0;
+		w.on("change", (file) => {
 			file.should.be.eql(path.join(fixtures, "a"));
 			changeEvents++;
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "a")]);
 			changeEvents.should.be.greaterThan(0);
 			w.close();
 			done();
 		});
 		w.watch([path.join(fixtures, "a")], []);
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			testHelper.file("a");
 		});
 	});
 
-	it("should aggregate changes while paused", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should aggregate changes while paused", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
 		testHelper.file("a");
 		testHelper.file("b");
 		w.watch([path.join(fixtures, "a"), path.join(fixtures, "b")], []);
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.pause();
-			w.on("change", function(file) {
+			w.on("change", (_file) => {
 				throw new Error("should not be emitted");
 			});
-			w.on("aggregated", function(changes) {
+			w.on("aggregated", (_changes) => {
 				throw new Error("should not be emitted");
 			});
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.file("a");
 				testHelper.remove("b");
 				testHelper.file("b");
 				testHelper.remove("a");
-				testHelper.tick(function() {
+				testHelper.tick(() => {
 					const { changes, removals } = w.getAggregated();
-					Array.from(changes).should.be.eql([path.join(fixtures, "b")]);
-					Array.from(removals).should.be.eql([path.join(fixtures, "a")]);
+					[...changes].should.be.eql([path.join(fixtures, "b")]);
+					[...removals].should.be.eql([path.join(fixtures, "a")]);
 					w.close();
 					done();
 				});
@@ -66,13 +67,13 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should not watch a single ignored file (glob)", function(done) {
-		var w = new Watchpack({
+	it("should not watch a single ignored file (glob)", (done) => {
+		const w = new Watchpack({
 			aggregateTimeout: 300,
-			ignored: "**/a"
+			ignored: "**/a",
 		});
-		var changeEvents = 0;
-		var aggregatedEvents = 0;
+		let changeEvents = 0;
+		let aggregatedEvents = 0;
 		w.on("change", () => {
 			changeEvents++;
 		});
@@ -92,13 +93,13 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should not watch a single ignored file (regexp)", function(done) {
-		var w = new Watchpack({
+	it("should not watch a single ignored file (regexp)", (done) => {
+		const w = new Watchpack({
 			aggregateTimeout: 300,
-			ignored: /\/a$/
+			ignored: /\/a$/,
 		});
-		var changeEvents = 0;
-		var aggregatedEvents = 0;
+		let changeEvents = 0;
+		let aggregatedEvents = 0;
 		w.on("change", () => {
 			changeEvents++;
 		});
@@ -118,13 +119,13 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should not watch a single ignored file (function)", function(done) {
-		var w = new Watchpack({
+	it("should not watch a single ignored file (function)", (done) => {
+		const w = new Watchpack({
 			aggregateTimeout: 300,
-			ignored: entry => entry.includes("a")
+			ignored: (entry) => entry.includes("a"),
 		});
-		var changeEvents = 0;
-		var aggregatedEvents = 0;
+		let changeEvents = 0;
+		let aggregatedEvents = 0;
 		w.on("change", () => {
 			changeEvents++;
 		});
@@ -144,17 +145,17 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should watch multiple files", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch multiple files", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes)
+		w.on("aggregated", (changes) => {
+			[...changes]
 				.sort()
 				.should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
 			changeEvents.should.be.eql([
@@ -162,7 +163,7 @@ describe("Watchpack", function() {
 				path.join(fixtures, "b"),
 				path.join(fixtures, "a"),
 				path.join(fixtures, "b"),
-				path.join(fixtures, "a")
+				path.join(fixtures, "a"),
 			]);
 			Object.keys(w.getTimes())
 				.sort()
@@ -171,15 +172,15 @@ describe("Watchpack", function() {
 			done();
 		});
 		w.watch([path.join(fixtures, "a"), path.join(fixtures, "b")], []);
-		testHelper.tick(400, function() {
+		testHelper.tick(400, () => {
 			testHelper.file("a");
-			testHelper.tick(400, function() {
+			testHelper.tick(400, () => {
 				testHelper.file("b");
-				testHelper.tick(400, function() {
+				testHelper.tick(400, () => {
 					testHelper.file("a");
-					testHelper.tick(400, function() {
+					testHelper.tick(400, () => {
 						testHelper.file("b");
-						testHelper.tick(400, function() {
+						testHelper.tick(400, () => {
 							testHelper.file("a");
 						});
 					});
@@ -188,37 +189,37 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should watch a directory", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a directory", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "a")]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
-		testHelper.tick(200, function() {
+		testHelper.tick(200, () => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(200, function() {
+			testHelper.tick(200, () => {
 				testHelper.file(path.join("dir", "a"));
 			});
 		});
 	});
 
-	it("should not watch an ignored directory", function(done) {
-		var w = new Watchpack({
+	it("should not watch an ignored directory", (done) => {
+		const w = new Watchpack({
 			aggregateTimeout: 300,
-			ignored: ["**/dir"]
+			ignored: ["**/dir"],
 		});
-		var changeEvents = 0;
-		var aggregatedEvents = 0;
+		let changeEvents = 0;
+		let aggregatedEvents = 0;
 		w.on("change", () => {
 			changeEvents++;
 		});
@@ -226,11 +227,11 @@ describe("Watchpack", function() {
 			aggregatedEvents++;
 		});
 		testHelper.dir("dir");
-		testHelper.tick(200, function() {
+		testHelper.tick(200, () => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(200, function() {
+			testHelper.tick(200, () => {
 				testHelper.file(path.join("dir", "a"));
-				testHelper.tick(1000, function() {
+				testHelper.tick(1000, () => {
 					changeEvents.should.be.eql(0);
 					aggregatedEvents.should.be.eql(0);
 					testHelper.getNumberOfWatchers().should.be.eql(0);
@@ -241,13 +242,13 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should not watch an ignored file in a directory", function(done) {
-		var w = new Watchpack({
+	it("should not watch an ignored file in a directory", (done) => {
+		const w = new Watchpack({
 			aggregateTimeout: 300,
-			ignored: ["**/a"]
+			ignored: ["**/a"],
 		});
-		var changeEvents = 0;
-		var aggregatedEvents = 0;
+		let changeEvents = 0;
+		let aggregatedEvents = 0;
 		w.on("change", () => {
 			changeEvents++;
 		});
@@ -255,11 +256,11 @@ describe("Watchpack", function() {
 			aggregatedEvents++;
 		});
 		testHelper.dir("dir");
-		testHelper.tick(200, function() {
+		testHelper.tick(200, () => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(200, function() {
+			testHelper.tick(200, () => {
 				testHelper.file(path.join("dir", "a"));
-				testHelper.tick(1000, function() {
+				testHelper.tick(1000, () => {
 					changeEvents.should.be.eql(0);
 					aggregatedEvents.should.be.eql(0);
 					w.close();
@@ -269,84 +270,84 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should watch a file when ignore is empty array", function(done) {
-		var w = new Watchpack({
+	it("should watch a file when ignore is empty array", (done) => {
+		const w = new Watchpack({
 			aggregateTimeout: 1000,
-			ignored: []
+			ignored: [],
 		});
-		var changeEvents = 0;
-		w.on("change", function(file) {
+		let changeEvents = 0;
+		w.on("change", (file) => {
 			file.should.be.eql(path.join(fixtures, "a"));
 			changeEvents++;
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "a")]);
 			changeEvents.should.be.greaterThan(0);
 			w.close();
 			done();
 		});
 		w.watch([path.join(fixtures, "a")], []);
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			testHelper.file("a");
 		});
 	});
 
-	it("should watch a file when ignore is an array with empty string", function(done) {
-		var w = new Watchpack({
+	it("should watch a file when ignore is an array with empty string", (done) => {
+		const w = new Watchpack({
 			aggregateTimeout: 1000,
-			ignored: ["", ""]
+			ignored: ["", ""],
 		});
-		var changeEvents = 0;
-		w.on("change", function(file) {
+		let changeEvents = 0;
+		w.on("change", (file) => {
 			file.should.be.eql(path.join(fixtures, "a"));
 			changeEvents++;
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "a")]);
 			changeEvents.should.be.greaterThan(0);
 			w.close();
 			done();
 		});
 		w.watch([path.join(fixtures, "a")], []);
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			testHelper.file("a");
 		});
 	});
 
-	it("should watch a file when ignore is empty string", function(done) {
-		var w = new Watchpack({
+	it("should watch a file when ignore is empty string", (done) => {
+		const w = new Watchpack({
 			aggregateTimeout: 1000,
-			ignored: ""
+			ignored: "",
 		});
-		var changeEvents = 0;
-		w.on("change", function(file) {
+		let changeEvents = 0;
+		w.on("change", (file) => {
 			file.should.be.eql(path.join(fixtures, "a"));
 			changeEvents++;
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "a")]);
 			changeEvents.should.be.greaterThan(0);
 			w.close();
 			done();
 		});
 		w.watch([path.join(fixtures, "a")], []);
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			testHelper.file("a");
 		});
 	});
 
-	it("should watch a file then a directory", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a file then a directory", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes, removals) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
-			Array.from(removals).should.be.eql([]);
+		w.on("aggregated", (changes, removals) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
+			[...removals].should.be.eql([]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "a")]);
 			w.close();
 			done();
@@ -354,70 +355,70 @@ describe("Watchpack", function() {
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "subdir"));
 		testHelper.file(path.join("dir", "a"));
-		testHelper.tick(400, function() {
+		testHelper.tick(400, () => {
 			w.watch([path.join(fixtures, "dir", "a")], []);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				w.watch([], [path.join(fixtures, "dir")]);
-				testHelper.tick(function() {
+				testHelper.tick(() => {
 					testHelper.file(path.join("dir", "a"));
 				});
 			});
 		});
 	});
 
-	it("should watch a directory (delete file)", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a directory (delete file)", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "a")]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
 		testHelper.file(path.join("dir", "a"));
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.remove(path.join("dir", "a"));
 			});
 		});
 	});
 
-	it("should watch a directory (delete and recreate file)", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a directory (delete and recreate file)", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([
 				path.join(fixtures, "dir", "a"),
 				path.join(fixtures, "dir", "b"),
-				path.join(fixtures, "dir", "a")
+				path.join(fixtures, "dir", "a"),
 			]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
 		testHelper.file(path.join("dir", "a"));
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.remove(path.join("dir", "a"));
-				testHelper.tick(function() {
+				testHelper.tick(() => {
 					testHelper.file(path.join("dir", "b"));
-					testHelper.tick(500, function() {
+					testHelper.tick(500, () => {
 						testHelper.file(path.join("dir", "a"));
 					});
 				});
@@ -425,104 +426,102 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should watch a missing directory", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a missing directory", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir", "sub")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir", "sub")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub")]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch({ missing: [path.join(fixtures, "dir", "sub")] });
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.dir(path.join("dir", "sub"));
 			});
 		});
 	});
 
-	it("should watch a directory (add directory)", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a directory (add directory)", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub")]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.dir(path.join("dir", "sub"));
 			});
 		});
 	});
 
-	it("should watch a directory (delete directory)", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a directory (delete directory)", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
 		testHelper.file(path.join("dir", "sub", "a"));
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.remove(path.join("dir", "sub"));
 			});
 		});
 	});
 
-	it("should watch a directory (delete, restore and change directory)", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a directory (delete, restore and change directory)", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes, removals) {
-			Array.from(changes).should.be.eql([
-				path.join(fixtures, "dir", "sub", "a")
-			]);
-			Array.from(removals).should.be.eql([]);
+		w.on("aggregated", (changes, removals) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
+			[...removals].should.be.eql([]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
 		testHelper.file(path.join("dir", "sub", "a"));
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch([path.join(fixtures, "dir", "sub", "a")], []);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.remove(path.join("dir", "sub"));
-				testHelper.tick(function() {
+				testHelper.tick(() => {
 					testHelper.dir(path.join("dir", "sub"));
 					testHelper.file(path.join("dir", "sub", "a"));
 				});
@@ -530,72 +529,72 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should watch a directory (delete directory2)", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch a directory (delete directory2)", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub")]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.remove(path.join("dir", "sub"));
 			});
 		});
 	});
 
-	it("should watch already watched directory", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch already watched directory", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "a")]);
 			w.close();
 			done();
 		});
 		testHelper.dir("dir");
 		testHelper.file(path.join("dir", "a"));
-		testHelper.tick(400, function() {
+		testHelper.tick(400, () => {
 			w.watch([path.join(fixtures, "dir", "a")], []);
-			testHelper.tick(1000, function() {
+			testHelper.tick(1000, () => {
 				w.watch([], [path.join(fixtures, "dir")]);
-				testHelper.tick(400, function() {
+				testHelper.tick(400, () => {
 					testHelper.remove(path.join("dir", "a"));
 				});
 			});
 		});
 	});
 
-	it("should watch file in a sub directory", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch file in a sub directory", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
-			var times = w.getTimeInfoEntries();
+			const times = w.getTimeInfoEntries();
 			const dir = times.get(path.join(fixtures, "dir"));
 			const sub = times.get(path.join(fixtures, "dir", "sub"));
 			const a = times.get(path.join(fixtures, "dir", "sub", "a"));
@@ -608,25 +607,25 @@ describe("Watchpack", function() {
 		});
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.file(path.join("dir", "sub", "a"));
 			});
 		});
 	});
 
-	it("should watch file in a sub directory (passed in maps)", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch file in a sub directory (passed in maps)", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub", "a")]);
 			const files = new Map();
 			const directories = new Map();
@@ -657,19 +656,19 @@ describe("Watchpack", function() {
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
 		testHelper.dir(path.join("dir", "sub2"));
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch([path.join(fixtures, "file")], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.file(path.join("dir", "sub", "a"));
 			});
 		});
 	});
 
-	it("should watch directory as file and directory", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch directory as file and directory", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		w.on("aggregated", function(changes) {
+		w.on("aggregated", (_changes) => {
 			const files = new Map();
 			const directories = new Map();
 			w.collectTimeInfoEntries(files, directories);
@@ -699,31 +698,31 @@ describe("Watchpack", function() {
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
 		testHelper.dir(path.join("dir", "sub2"));
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			w.watch(
 				[
 					path.join(fixtures, "dir", "sub", "a"),
 					path.join(fixtures, "dir", "sub"),
-					path.join(fixtures)
+					path.join(fixtures),
 				],
-				[path.join(fixtures, "dir", "sub")]
+				[path.join(fixtures, "dir", "sub")],
 			);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.file(path.join("dir", "sub", "a"));
 			});
 		});
 	});
 
-	it("should watch 2 files in a not-existing directory", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch 2 files in a not-existing directory", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes)
+		w.on("aggregated", (changes) => {
+			[...changes]
 				.sort()
 				.should.be.eql([
 					path.join(fixtures, "dir", "sub", "a"),
-					path.join(fixtures, "dir", "sub", "b")
+					path.join(fixtures, "dir", "sub", "b"),
 				]);
 			w.close();
 			done();
@@ -732,30 +731,30 @@ describe("Watchpack", function() {
 		w.watch(
 			[
 				path.join(fixtures, "dir", "sub", "a"),
-				path.join(fixtures, "dir", "sub", "b")
+				path.join(fixtures, "dir", "sub", "b"),
 			],
-			[]
+			[],
 		);
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			testHelper.dir(path.join("dir", "sub"));
 			testHelper.file(path.join("dir", "sub", "a"));
 			testHelper.file(path.join("dir", "sub", "b"));
 		});
 	});
 
-	it("should watch file in a sub sub directory", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch file in a sub sub directory", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([
-				path.join(fixtures, "dir", "sub", "sub", "a")
+				path.join(fixtures, "dir", "sub", "sub", "a"),
 			]);
 			Object.keys(w.getTimes())
 				.sort()
@@ -763,7 +762,7 @@ describe("Watchpack", function() {
 					path.join(fixtures, "dir"),
 					path.join(fixtures, "dir", "sub"),
 					path.join(fixtures, "dir", "sub", "sub"),
-					path.join(fixtures, "dir", "sub", "sub", "a")
+					path.join(fixtures, "dir", "sub", "sub", "a"),
 				]);
 			w.close();
 			done();
@@ -771,27 +770,27 @@ describe("Watchpack", function() {
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub"));
 		testHelper.dir(path.join("dir", "sub", "sub"));
-		testHelper.tick(2000, function() {
+		testHelper.tick(2000, () => {
 			w.watch([], [path.join(fixtures, "dir")], Date.now());
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.file(path.join("dir", "sub", "sub", "a"));
 			});
 		});
 	});
 
-	it("should watch file in a directory that contains special glob characters", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should watch file in a directory that contains special glob characters", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = [];
-		w.on("change", function(file) {
+		const changeEvents = [];
+		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
 			changeEvents.push(file);
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "dir")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "dir")]);
 			changeEvents.should.be.eql([path.join(fixtures, "dir", "sub()", "a")]);
-			var times = w.getTimeInfoEntries();
+			const times = w.getTimeInfoEntries();
 			const dir = times.get(path.join(fixtures, "dir"));
 			const sub = times.get(path.join(fixtures, "dir", "sub()"));
 			const a = times.get(path.join(fixtures, "dir", "sub()", "a"));
@@ -802,35 +801,35 @@ describe("Watchpack", function() {
 		});
 		testHelper.dir("dir");
 		testHelper.dir(path.join("dir", "sub()"));
-		testHelper.tick(2000, function() {
+		testHelper.tick(2000, () => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.file(path.join("dir", "sub()", "a"));
 			});
 		});
 	});
 
-	it("should detect a single change to future timestamps", function(done) {
+	it("should detect a single change to future timestamps", (done) => {
 		const options = {
-			aggregateTimeout: 1000
+			aggregateTimeout: 1000,
 		};
-		var w = new Watchpack(options);
-		var w2 = new Watchpack(options);
-		w.on("change", function() {
+		const w = new Watchpack(options);
+		const w2 = new Watchpack(options);
+		w.on("change", () => {
 			throw new Error("should not report change event");
 		});
-		w.on("aggregated", function() {
+		w.on("aggregated", () => {
 			throw new Error("should not report aggregated event");
 		});
 		testHelper.file("a");
-		testHelper.tick(400, function() {
+		testHelper.tick(400, () => {
 			w2.watch([path.join(fixtures, "a")], [], Date.now());
-			testHelper.tick(1000, function() {
+			testHelper.tick(1000, () => {
 				// wait for initial scan
 				testHelper.mtime("a", Date.now() + 1000000);
-				testHelper.tick(400, function() {
+				testHelper.tick(400, () => {
 					w.watch([path.join(fixtures, "a")], [], Date.now());
-					testHelper.tick(1000, function() {
+					testHelper.tick(1000, () => {
 						w2.close();
 						w.close();
 						done();
@@ -840,22 +839,22 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should create different watchers for different options", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should create different watchers for different options", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var w2 = new Watchpack({
-			aggregateTimeout: 1000
+		const w2 = new Watchpack({
+			aggregateTimeout: 1000,
 		});
 		testHelper.file("a");
-		testHelper.tick(400, function() {
+		testHelper.tick(400, () => {
 			w.watch([path.join(fixtures, "a")], [], Date.now());
 			w2.watch([path.join(fixtures, "a")], [], Date.now());
-			testHelper.tick(1000, function() {
+			testHelper.tick(1000, () => {
 				testHelper.file("a");
-				testHelper.tick(400, function() {
+				testHelper.tick(400, () => {
 					testHelper.file("a");
-					testHelper.tick(1000, function() {
+					testHelper.tick(1000, () => {
 						w2.close();
 						w.close();
 						done();
@@ -865,47 +864,47 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should detect a past change to a file (timestamp)", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should detect a past change to a file (timestamp)", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var changeEvents = 0;
-		w.on("change", function(file) {
+		let changeEvents = 0;
+		w.on("change", (file) => {
 			file.should.be.eql(path.join(fixtures, "a"));
 			changeEvents++;
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "a")]);
 			changeEvents.should.be.greaterThan(0);
 			w.close();
 			done();
 		});
-		var startTime = Date.now();
-		testHelper.tick(function() {
+		const startTime = Date.now();
+		testHelper.tick(() => {
 			testHelper.file("a");
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				w.watch([path.join(fixtures, "a")], [], startTime);
 			});
 		});
 	});
 
-	it("should not detect a past change to a file (watched)", function(done) {
-		var w2 = new Watchpack();
-		var w = new Watchpack();
-		w.on("change", function() {
+	it("should not detect a past change to a file (watched)", (done) => {
+		const w2 = new Watchpack();
+		const w = new Watchpack();
+		w.on("change", () => {
 			throw new Error("Should not be detected");
 		});
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			testHelper.file("b");
 			w2.watch([path.join(fixtures, "b")], []);
-			testHelper.tick(1000, function() {
+			testHelper.tick(1000, () => {
 				// wait for stable state
 				testHelper.file("a");
-				testHelper.tick(1000, function() {
-					var startTime = Date.now();
-					testHelper.tick(400, function() {
+				testHelper.tick(1000, () => {
+					const startTime = Date.now();
+					testHelper.tick(400, () => {
 						w.watch([path.join(fixtures, "a")], [], startTime);
-						testHelper.tick(1000, function() {
+						testHelper.tick(1000, () => {
 							w.close();
 							w2.close();
 							done();
@@ -916,29 +915,29 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should detect a past change to a file (watched)", function(done) {
-		var w2 = new Watchpack();
-		var w = new Watchpack();
-		var changeEvents = 0;
-		w.on("change", function(file) {
+	it("should detect a past change to a file (watched)", (done) => {
+		const w2 = new Watchpack();
+		const w = new Watchpack();
+		let changeEvents = 0;
+		w.on("change", (file) => {
 			file.should.be.eql(path.join(fixtures, "a"));
 			changeEvents++;
 		});
-		w.on("aggregated", function(changes) {
-			Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+		w.on("aggregated", (changes) => {
+			[...changes].should.be.eql([path.join(fixtures, "a")]);
 			changeEvents.should.be.eql(1);
 			w.close();
 			w2.close();
 			done();
 		});
-		testHelper.tick(function() {
+		testHelper.tick(() => {
 			testHelper.file("b");
 			w2.watch([path.join(fixtures, "b")], []);
-			testHelper.tick(function() {
-				var startTime = Date.now();
-				testHelper.tick(function() {
+			testHelper.tick(() => {
+				const startTime = Date.now();
+				testHelper.tick(() => {
 					testHelper.file("a");
-					testHelper.tick(400, function() {
+					testHelper.tick(400, () => {
 						w.watch([path.join(fixtures, "a")], [], startTime);
 					});
 				});
@@ -946,45 +945,45 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should watch a single file removal", function(done) {
+	it("should watch a single file removal", (done) => {
 		testHelper.file("a");
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		var removeEvents = 0;
-		w.on("remove", function(file) {
+		let removeEvents = 0;
+		w.on("remove", (file) => {
 			file.should.be.eql(path.join(fixtures, "a"));
 			removeEvents++;
 		});
-		w.on("aggregated", function(changes, removals) {
-			Array.from(removals).should.be.eql([path.join(fixtures, "a")]);
+		w.on("aggregated", (changes, removals) => {
+			[...removals].should.be.eql([path.join(fixtures, "a")]);
 			removeEvents.should.be.eql(1);
 			w.close();
 			done();
 		});
-		testHelper.tick(400, function() {
+		testHelper.tick(400, () => {
 			w.watch([path.join(fixtures, "a")], []);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.remove("a");
 			});
 		});
 	});
 
-	it("should watch multiple file removals", function(done) {
-		var step = 0;
+	it("should watch multiple file removals", (done) => {
+		let step = 0;
 		testHelper.file("a");
 		testHelper.file("b");
-		var w = new Watchpack({
-			aggregateTimeout: 3000
+		const w = new Watchpack({
+			aggregateTimeout: 3000,
 		});
-		var removeEvents = [];
-		w.on("remove", function(file) {
+		const removeEvents = [];
+		w.on("remove", (file) => {
 			if (removeEvents[removeEvents.length - 1] === file) return;
 			removeEvents.push(file);
 		});
-		w.on("aggregated", function(changes, removals) {
+		w.on("aggregated", (changes, removals) => {
 			step.should.be.eql(6);
-			Array.from(removals)
+			[...removals]
 				.sort()
 				.should.be.eql([path.join(fixtures, "a"), path.join(fixtures, "b")]);
 			if (!+process.env.WATCHPACK_POLLING) {
@@ -992,7 +991,7 @@ describe("Watchpack", function() {
 					path.join(fixtures, "a"),
 					path.join(fixtures, "b"),
 					path.join(fixtures, "a"),
-					path.join(fixtures, "b")
+					path.join(fixtures, "b"),
 				]);
 			}
 			Object.keys(w.getTimes())
@@ -1001,23 +1000,23 @@ describe("Watchpack", function() {
 			w.close();
 			done();
 		});
-		testHelper.tick(400, function() {
+		testHelper.tick(400, () => {
 			w.watch([path.join(fixtures, "a"), path.join(fixtures, "b")], []);
 			step = 1;
-			testHelper.tick(1000, function() {
+			testHelper.tick(1000, () => {
 				testHelper.remove("a");
 				step = 2;
-				testHelper.tick(function() {
+				testHelper.tick(() => {
 					testHelper.remove("b");
 					step = 3;
-					testHelper.tick(1000, function() {
+					testHelper.tick(1000, () => {
 						testHelper.file("a");
 						testHelper.file("b");
 						step = 4;
-						testHelper.tick(1000, function() {
+						testHelper.tick(1000, () => {
 							testHelper.remove("a");
 							step = 5;
-							testHelper.tick(function() {
+							testHelper.tick(() => {
 								testHelper.remove("b");
 								step = 6;
 							});
@@ -1028,47 +1027,9 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should not report changes in initial scan when no start time is provided", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 100
-		});
-		w.on("aggregated", () => {
-			done(new Error("should not fire"));
-		});
-		testHelper.dir("dir");
-		testHelper.dir("dir/b");
-		testHelper.dir("dir/b/sub");
-		testHelper.file("dir/b/sub/file");
-		testHelper.dir("dir/b/sub/sub");
-		testHelper.file("dir/b/sub/sub/file");
-		testHelper.file("dir/b/file");
-		testHelper.file("dir/a");
-		testHelper.tick(1000, () => {
-			w.watch({
-				directories: [path.join(fixtures, "dir", "b", "sub")]
-			});
-			testHelper.tick(2000, () => {
-				// no event fired
-				w.watch({
-					files: [path.join(fixtures, "dir", "a")],
-					directories: [
-						path.join(fixtures, "dir", "b", "sub"),
-						path.join(fixtures, "dir", "b")
-					],
-					missing: [path.join(fixtures, "dir", "c")]
-				});
-				testHelper.tick(2000, () => {
-					// no event fired
-					w.close();
-					done();
-				});
-			});
-		});
-	});
-
-	it("should not report changes in initial scan when start time is provided", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 100
+	it("should not report changes in initial scan when no start time is provided", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 100,
 		});
 		w.on("aggregated", () => {
 			done(new Error("should not fire"));
@@ -1084,7 +1045,6 @@ describe("Watchpack", function() {
 		testHelper.tick(1000, () => {
 			w.watch({
 				directories: [path.join(fixtures, "dir", "b", "sub")],
-				startTime: Date.now()
 			});
 			testHelper.tick(2000, () => {
 				// no event fired
@@ -1092,10 +1052,9 @@ describe("Watchpack", function() {
 					files: [path.join(fixtures, "dir", "a")],
 					directories: [
 						path.join(fixtures, "dir", "b", "sub"),
-						path.join(fixtures, "dir", "b")
+						path.join(fixtures, "dir", "b"),
 					],
 					missing: [path.join(fixtures, "dir", "c")],
-					startTime: Date.now()
 				});
 				testHelper.tick(2000, () => {
 					// no event fired
@@ -1106,9 +1065,49 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should not report changes to a folder watched as file when items are added", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 100
+	it("should not report changes in initial scan when start time is provided", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 100,
+		});
+		w.on("aggregated", () => {
+			done(new Error("should not fire"));
+		});
+		testHelper.dir("dir");
+		testHelper.dir("dir/b");
+		testHelper.dir("dir/b/sub");
+		testHelper.file("dir/b/sub/file");
+		testHelper.dir("dir/b/sub/sub");
+		testHelper.file("dir/b/sub/sub/file");
+		testHelper.file("dir/b/file");
+		testHelper.file("dir/a");
+		testHelper.tick(1000, () => {
+			w.watch({
+				directories: [path.join(fixtures, "dir", "b", "sub")],
+				startTime: Date.now(),
+			});
+			testHelper.tick(2000, () => {
+				// no event fired
+				w.watch({
+					files: [path.join(fixtures, "dir", "a")],
+					directories: [
+						path.join(fixtures, "dir", "b", "sub"),
+						path.join(fixtures, "dir", "b"),
+					],
+					missing: [path.join(fixtures, "dir", "c")],
+					startTime: Date.now(),
+				});
+				testHelper.tick(2000, () => {
+					// no event fired
+					w.close();
+					done();
+				});
+			});
+		});
+	});
+
+	it("should not report changes to a folder watched as file when items are added", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 100,
 		});
 		w.on("aggregated", () => {
 			done(new Error("should not fire"));
@@ -1119,7 +1118,7 @@ describe("Watchpack", function() {
 			testHelper.file("dir/b");
 			w.watch({
 				files: [path.join(fixtures, "dir")],
-				startTime: Date.now()
+				startTime: Date.now(),
 			});
 			testHelper.tick(1000, () => {
 				testHelper.file("dir/c");
@@ -1132,17 +1131,17 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should report removal of file and directory if it is missing in initial scan", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should report removal of file and directory if it is missing in initial scan", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		w.on("aggregated", function(changes, removals) {
-			Array.from(changes).should.be.eql([]);
-			Array.from(removals)
+		w.on("aggregated", (changes, removals) => {
+			[...changes].should.be.eql([]);
+			[...removals]
 				.sort()
 				.should.be.eql([
 					path.join(fixtures, "dir", "a"),
-					path.join(fixtures, "dir", "b")
+					path.join(fixtures, "dir", "b"),
 				]);
 			w.close();
 			done();
@@ -1152,22 +1151,22 @@ describe("Watchpack", function() {
 			w.watch({
 				files: [path.join(fixtures, "dir", "a")],
 				directories: [path.join(fixtures, "dir", "b")],
-				missing: [path.join(fixtures, "dir", "c")]
+				missing: [path.join(fixtures, "dir", "c")],
 			});
 		});
 	});
 
-	it("should report removal of file and directory if parent directory is missing in initial scan", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should report removal of file and directory if parent directory is missing in initial scan", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		w.on("aggregated", function(changes, removals) {
-			Array.from(changes).should.be.eql([]);
-			Array.from(removals)
+		w.on("aggregated", (changes, removals) => {
+			[...changes].should.be.eql([]);
+			[...removals]
 				.sort()
 				.should.be.eql([
 					path.join(fixtures, "dir", "a"),
-					path.join(fixtures, "dir", "b")
+					path.join(fixtures, "dir", "b"),
 				]);
 			w.close();
 			done();
@@ -1176,23 +1175,23 @@ describe("Watchpack", function() {
 			w.watch({
 				files: [path.join(fixtures, "dir", "a")],
 				directories: [path.join(fixtures, "dir", "b")],
-				missing: [path.join(fixtures, "dir", "c")]
+				missing: [path.join(fixtures, "dir", "c")],
 			});
 		});
 	});
 
-	it("should not detect file reading as change, but atomic file writes", done => {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should not detect file reading as change, but atomic file writes", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
-		w.on("aggregated", function(changes, removals) {
-			Array.from(changes)
+		w.on("aggregated", (changes, removals) => {
+			[...changes]
 				.sort()
 				.should.be.eql([
 					path.join(fixtures, "dir", "b"),
-					path.join(fixtures, "dir", "c")
+					path.join(fixtures, "dir", "c"),
 				]);
-			Array.from(removals).should.be.eql([]);
+			[...removals].should.be.eql([]);
 			w.close();
 			done();
 		});
@@ -1205,8 +1204,8 @@ describe("Watchpack", function() {
 				files: [
 					path.join(fixtures, "dir", "a"),
 					path.join(fixtures, "dir", "b"),
-					path.join(fixtures, "dir", "c")
-				]
+					path.join(fixtures, "dir", "c"),
+				],
 			});
 			testHelper.tick(1000, () => {
 				testHelper.accessFile(path.join("dir", "a"));
@@ -1216,9 +1215,9 @@ describe("Watchpack", function() {
 		});
 	});
 
-	it("should allow to reuse watchers when watch is called again", function(done) {
-		var w = new Watchpack({
-			aggregateTimeout: 1000
+	it("should allow to reuse watchers when watch is called again", (done) => {
+		const w = new Watchpack({
+			aggregateTimeout: 1000,
 		});
 		w.on("aggregated", () => {
 			done(new Error("should not fire"));
@@ -1243,31 +1242,31 @@ describe("Watchpack", function() {
 			w.watch({
 				files: [
 					path.join(fixtures, "dir", "a"),
-					path.join(fixtures, "dir", "a1")
+					path.join(fixtures, "dir", "a1"),
 				],
 				directories: [
 					path.join(fixtures, "dir", "b"),
-					path.join(fixtures, "dir", "b1")
+					path.join(fixtures, "dir", "b1"),
 				],
 				missing: [
 					path.join(fixtures, "dir", "c"),
-					path.join(fixtures, "dir", "c1")
-				]
+					path.join(fixtures, "dir", "c1"),
+				],
 			});
 			testHelper.tick(() => {
 				w.watch({
 					files: [
 						path.join(fixtures, "dir", "a"),
-						path.join(fixtures, "dir", "a2")
+						path.join(fixtures, "dir", "a2"),
 					],
 					directories: [
 						path.join(fixtures, "dir", "b"),
-						path.join(fixtures, "dir", "b2")
+						path.join(fixtures, "dir", "b2"),
 					],
 					missing: [
 						path.join(fixtures, "dir", "c"),
-						path.join(fixtures, "dir", "c2")
-					]
+						path.join(fixtures, "dir", "c2"),
+					],
 				});
 				testHelper.file("dir/b1/sub/file");
 				testHelper.file("dir/a1");
@@ -1284,16 +1283,17 @@ describe("Watchpack", function() {
 	let symlinksSupported = false;
 	try {
 		const fs = require("fs");
+
 		fs.symlinkSync("helpers", path.join(__dirname, "fixtures"), "dir");
 		fs.unlinkSync(path.join(__dirname, "fixtures"));
 		symlinksSupported = true;
-	} catch (e) {
+	} catch (_err) {
 		// ignore
 	}
 
 	if (symlinksSupported) {
 		describe("symlinks", () => {
-			beforeEach(done => {
+			beforeEach((done) => {
 				testHelper.dir("a");
 				testHelper.dir(path.join("a", "b"));
 				testHelper.file(path.join("a", "b", "c"));
@@ -1308,17 +1308,17 @@ describe("Watchpack", function() {
 			});
 
 			function expectWatchEvent(files, dirs, callback, ready) {
-				var w = new Watchpack({
+				const w = new Watchpack({
 					aggregateTimeout: 500,
-					followSymlinks: true
+					followSymlinks: true,
 				});
 
-				w.watch([].concat(files), [].concat(dirs), Date.now());
+				w.watch([...files], [...dirs], Date.now());
 
 				let active = false;
 				let closed = false;
 
-				w.on("aggregated", changes => {
+				w.on("aggregated", (changes) => {
 					w.close();
 					closed = true;
 					if (!active) throw new Error("Events are not expected yet");
@@ -1332,106 +1332,106 @@ describe("Watchpack", function() {
 				});
 			}
 
-			it("should detect a change to the original file", function(done) {
+			it("should detect a change to the original file", (done) => {
 				expectWatchEvent(
 					path.join(fixtures, "link2"),
 					[],
-					changes => {
-						Array.from(changes).should.be.eql([path.join(fixtures, "link2")]);
+					(changes) => {
+						[...changes].should.be.eql([path.join(fixtures, "link2")]);
 						done();
 					},
 					() => {
 						testHelper.file(path.join("a", "b", "c"));
-					}
+					},
 				);
 			});
 
-			it("should detect a change to the direct symlink", function(done) {
+			it("should detect a change to the direct symlink", (done) => {
 				expectWatchEvent(
 					path.join(fixtures, "link2"),
 					[],
-					changes => {
-						Array.from(changes).should.be.eql([path.join(fixtures, "link2")]);
+					(changes) => {
+						[...changes].should.be.eql([path.join(fixtures, "link2")]);
 						done();
 					},
 					() => {
 						testHelper.unlink("link2");
 						testHelper.symlinkFile("link2", path.join("a", "b", "d"));
-					}
+					},
 				);
 			});
 
-			it("should detect a change to the double symlink", function(done) {
+			it("should detect a change to the double symlink", (done) => {
 				expectWatchEvent(
 					path.join(fixtures, "link2"),
 					[],
-					changes => {
-						Array.from(changes).should.be.eql([path.join(fixtures, "link2")]);
+					(changes) => {
+						[...changes].should.be.eql([path.join(fixtures, "link2")]);
 						done();
 					},
 					() => {
 						testHelper.unlink(path.join("a", "b", "link2"));
 						testHelper.symlinkFile(path.join("a", "b", "link2"), "d");
-					}
+					},
 				);
 			});
 
-			it("should detect a change to the directory symlink", function(done) {
+			it("should detect a change to the directory symlink", (done) => {
 				expectWatchEvent(
 					path.join(fixtures, "link2"),
 					[],
-					changes => {
-						Array.from(changes).should.be.eql([path.join(fixtures, "link2")]);
+					(changes) => {
+						[...changes].should.be.eql([path.join(fixtures, "link2")]);
 						done();
 					},
 					() => {
 						testHelper.unlink(path.join("a", "link"));
 						testHelper.symlinkDir(path.join("a", "link"), path.join("b", "d"));
-					}
+					},
 				);
 			});
 
-			it("should detect a file change in a watched symlinked directory", function(done) {
+			it("should detect a file change in a watched symlinked directory", (done) => {
 				expectWatchEvent(
 					[],
 					path.join(fixtures, "link"),
-					changes => {
-						Array.from(changes).should.be.eql([path.join(fixtures, "link")]);
+					(changes) => {
+						[...changes].should.be.eql([path.join(fixtures, "link")]);
 						done();
 					},
 					() => {
 						testHelper.file(path.join("a", "b", "c"));
-					}
+					},
 				);
 			});
 
-			it("should detect a symlink file change in a watched symlinked directory", function(done) {
+			it("should detect a symlink file change in a watched symlinked directory", (done) => {
 				expectWatchEvent(
 					[],
 					path.join(fixtures, "link"),
-					changes => {
-						Array.from(changes).should.be.eql([path.join(fixtures, "link")]);
+					(changes) => {
+						[...changes].should.be.eql([path.join(fixtures, "link")]);
 						done();
 					},
 					() => {
 						testHelper.unlink(path.join("a", "b", "link2"));
 						testHelper.symlinkFile(path.join("a", "b", "link2"), "d");
-					}
+					},
 				);
 			});
 
-			it("should detect a symlink dir change in a watched symlinked directory", function(done) {
+			it("should detect a symlink dir change in a watched symlinked directory", (done) => {
 				expectWatchEvent(
 					[],
 					path.join(fixtures, "link"),
-					changes => {
-						Array.from(changes).should.be.eql([path.join(fixtures, "link")]);
+					(changes) => {
+						[...changes].should.be.eql([path.join(fixtures, "link")]);
 						done();
 					},
 					() => {
 						testHelper.unlink(path.join("a", "link"));
 						testHelper.symlinkDir(path.join("a", "link"), path.join("b", "d"));
-					}
+					},
 				);
 			});
 		});

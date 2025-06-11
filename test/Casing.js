@@ -1,61 +1,62 @@
-/*globals describe it beforeEach afterEach */
+/* globals describe it beforeEach afterEach */
 "use strict";
 
 require("should");
-var path = require("path");
-var TestHelper = require("./helpers/TestHelper");
-var Watchpack = require("../lib/watchpack");
 
-var fixtures = path.join(__dirname, "fixtures");
-var testHelper = new TestHelper(fixtures);
+const path = require("path");
+const TestHelper = require("./helpers/TestHelper");
+const Watchpack = require("../lib/watchpack");
 
-var fsIsCaseInsensitive;
+const fixtures = path.join(__dirname, "fixtures");
+const testHelper = new TestHelper(fixtures);
+
+let fsIsCaseInsensitive;
 try {
 	fsIsCaseInsensitive = require("fs").existsSync(
-		path.join(__dirname, "..", "PACKAGE.JSON")
+		path.join(__dirname, "..", "PACKAGE.JSON"),
 	);
-} catch (e) {
+} catch (_err) {
 	fsIsCaseInsensitive = false;
 }
 
 if (fsIsCaseInsensitive) {
-	describe("Casing", function() {
+	describe("Casing", function casingTest() {
 		this.timeout(10000);
 		beforeEach(testHelper.before);
 		afterEach(testHelper.after);
 
-		it("should watch a file with the wrong casing", function(done) {
-			var w = new Watchpack({
-				aggregateTimeout: 1000
+		it("should watch a file with the wrong casing", (done) => {
+			const w = new Watchpack({
+				aggregateTimeout: 1000,
 			});
-			var changeEvents = 0;
-			w.on("change", function(file) {
+			let changeEvents = 0;
+			w.on("change", (file) => {
 				file.should.be.eql(path.join(fixtures, "a"));
 				changeEvents++;
 			});
-			w.on("aggregated", function(changes) {
-				Array.from(changes).should.be.eql([path.join(fixtures, "a")]);
+			w.on("aggregated", (changes) => {
+				[...changes].should.be.eql([path.join(fixtures, "a")]);
 				changeEvents.should.be.greaterThan(0);
 				w.close();
 				done();
 			});
 			w.watch([path.join(fixtures, "a")], []);
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				testHelper.file("A");
 			});
 		});
 
-		it("should mark as missing on changing filename casing (dir watch)", function(done) {
-			var w = new Watchpack({
-				aggregateTimeout: 1000
+		it("should mark as missing on changing filename casing (dir watch)", (done) => {
+			const w = new Watchpack({
+				aggregateTimeout: 1000,
 			});
-			var dir = "case-rename";
-			var testFile = path.join(dir, "hello.txt");
-			var testFileRename = path.join(dir, "hEllO.txt");
+			const dir = "case-rename";
+			const testFile = path.join(dir, "hello.txt");
+			const testFileRename = path.join(dir, "hEllO.txt");
 			testHelper.dir(dir);
 			testHelper.file(testFile);
 
-			w.on("aggregated", function(changes, removals) {
+			w.on("aggregated", (changes, _removals) => {
 				const files = w.getTimeInfoEntries();
 				w.close();
 
@@ -63,32 +64,32 @@ if (fsIsCaseInsensitive) {
 
 				for (const file of files.keys()) {
 					if (file.endsWith("hello.txt")) {
-						return done(new Error(`Renamed file was still in timeInfoEntries`));
+						return done(new Error("Renamed file was still in timeInfoEntries"));
 					}
 				}
 				return done();
 			});
 
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				w.watch([], [path.join(fixtures, "case-rename")]);
 
-				testHelper.tick(function() {
+				testHelper.tick(() => {
 					testHelper.rename(testFile, testFileRename);
 				});
 			});
 		});
 
-		it("should mark as missing on changing filename casing (file watch)", function(done) {
-			var w = new Watchpack({
-				aggregateTimeout: 1000
+		it("should mark as missing on changing filename casing (file watch)", (done) => {
+			const w = new Watchpack({
+				aggregateTimeout: 1000,
 			});
-			var dir = "case-rename";
-			var testFile = path.join(dir, "hello.txt");
-			var testFileRename = path.join(dir, "hEllO.txt");
+			const dir = "case-rename";
+			const testFile = path.join(dir, "hello.txt");
+			const testFileRename = path.join(dir, "hEllO.txt");
 			testHelper.dir(dir);
 			testHelper.file(testFile);
 
-			w.on("aggregated", function(changes, removals) {
+			w.on("aggregated", (changes, removals) => {
 				const files = w.getTimeInfoEntries();
 				w.close();
 
@@ -97,19 +98,19 @@ if (fsIsCaseInsensitive) {
 
 				for (const file of files.keys()) {
 					if (file.endsWith("hello.txt") && files.get(file)) {
-						return done(new Error(`Renamed file was still in timeInfoEntries`));
+						return done(new Error("Renamed file was still in timeInfoEntries"));
 					}
 				}
 				return done();
 			});
 
-			testHelper.tick(function() {
+			testHelper.tick(() => {
 				w.watch({
 					files: [path.join(fixtures, testFile)],
-					missing: [path.join(fixtures, testFileRename)]
+					missing: [path.join(fixtures, testFileRename)],
 				});
 
-				testHelper.tick(function() {
+				testHelper.tick(() => {
 					testHelper.rename(testFile, testFileRename);
 				});
 			});

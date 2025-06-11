@@ -1,7 +1,8 @@
-/*globals describe it beforeEach afterEach */
+/* globals describe it beforeEach afterEach */
 "use strict";
 
 require("should");
+
 const path = require("path");
 const TestHelper = require("./helpers/TestHelper");
 const Watchpack = require("../lib/watchpack");
@@ -11,12 +12,13 @@ const should = require("should");
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
 
-describe("ManyWatchers", function() {
+describe("ManyWatchers", function manyWatchersTests() {
 	this.timeout(600000);
 	beforeEach(testHelper.before);
 	afterEach(testHelper.after);
 
-	it("should watch more than 4096 directories", done => {
+	it("should watch more than 4096 directories", (done) => {
+		// eslint-disable-next-line no-console
 		console.time("creating files");
 		// windows is very slow in creating so many files
 		// this can take about 1 minute
@@ -44,19 +46,20 @@ describe("ManyWatchers", function() {
 		}
 		testHelper.file("file");
 		files.push(path.join(fixtures, "file"));
+		// eslint-disable-next-line no-console
 		console.timeEnd("creating files");
 		testHelper.tick(10000, () => {
 			const w = new Watchpack({
-				aggregateTimeout: 1000
+				aggregateTimeout: 1000,
 			});
-			w.on("aggregated", function(changes) {
+			w.on("aggregated", (changes) => {
+				// eslint-disable-next-line no-console
 				console.timeEnd("detecting change event");
-				Array.from(changes).should.be.eql([
-					path.join(fixtures, "4096/900/file")
-				]);
+				[...changes].should.be.eql([path.join(fixtures, "4096/900/file")]);
 				w.close();
 				done();
 			});
+			// eslint-disable-next-line no-console
 			console.time("creating/closing watchers");
 			// MacOS is very slow in creating and destroying watchers
 			// This can take about 2 minutes
@@ -66,14 +69,18 @@ describe("ManyWatchers", function() {
 				}
 			}
 			w.watch({ files });
+			// eslint-disable-next-line no-console
 			console.timeEnd("creating/closing watchers");
+			// eslint-disable-next-line no-console
 			console.time("calling watch with the same files");
 			for (let i = 0; i < 2000; i++) {
 				w.watch({ files });
 			}
+			// eslint-disable-next-line no-console
 			console.timeEnd("calling watch with the same files");
 
 			testHelper.tick(10000, () => {
+				// eslint-disable-next-line no-console
 				console.time("detecting change event");
 				testHelper.file("4096/900/file");
 			});
@@ -83,7 +90,7 @@ describe("ManyWatchers", function() {
 	it("should set the watcher limit based on the platform", () => {
 		should.equal(
 			watchEventSource.watcherLimit,
-			require("os").platform() === "darwin" ? 20 : 10000
+			require("os").platform() === "darwin" ? 20 : 10000,
 		);
 	});
 });
