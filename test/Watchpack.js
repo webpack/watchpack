@@ -1406,7 +1406,7 @@ describe("Watchpack", function watchpackTest() {
 				);
 			});
 
-			it.only("should detect a symlink file change in a watched symlinked directory", (done) => {
+			it("should detect a symlink file change in a watched symlinked directory", (done) => {
 				expectWatchEvent(
 					[],
 					path.join(fixtures, "link"),
