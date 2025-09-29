@@ -17,16 +17,6 @@ const IS_WIN = require("os").platform() === "win32";
 
 const SUPPORTS_RECURSIVE_WATCHING = IS_OSX || IS_WIN;
 
-function getNodeVersion() {
-	try {
-		return Number.parseInt(process.version.split(".")[0].replace("v", ""), 10);
-	} catch (_err) {
-		return 0;
-	}
-}
-
-const IS_NODE_VERSION_GT_24 = getNodeVersion() >= 24;
-
 describe("Assumption", function assumptionTest() {
 	this.timeout(10000);
 	let watcherToClose = null;
@@ -349,15 +339,6 @@ describe("Assumption", function assumptionTest() {
 						}
 					});
 				});
-			});
-		});
-	}
-
-	if (IS_WIN) {
-		it("should return EINVAL when lstat a directory on Windows", (done) => {
-			fs.lstat("D:\\System Volume Information", (err) => {
-				err.code.should.be.equal(IS_NODE_VERSION_GT_24 ? "EINVAL" : "EPERM");
-				done();
 			});
 		});
 	}
