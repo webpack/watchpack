@@ -6,6 +6,12 @@ export = DirectoryWatcher;
  * @property {() => void} closed closed event
  */
 /**
+ * @typedef {object} DirectoryWatcherOptions
+ * @property {boolean=} followSymlinks true when need to resolve symlinks and watch symlink and real file, otherwise false
+ * @property {IgnoredFunction=} ignored ignore some files from watching (glob pattern or regexp)
+ * @property {number | boolean=} poll true when need to enable polling mode for watching, otherwise false
+ */
+/**
  * @extends {EventEmitter<{ [K in keyof WatchpackEvents]: Parameters<WatchpackEvents[K]> }>}
  */
 declare class DirectoryWatcher extends EventEmitter<{
@@ -26,15 +32,15 @@ declare class DirectoryWatcher extends EventEmitter<{
 	/**
 	 * @param {WatcherManager} watcherManager a watcher manager
 	 * @param {string} directoryPath directory path
-	 * @param {NormalizedWatchOptions} options options
+	 * @param {DirectoryWatcherOptions=} options options
 	 */
 	constructor(
 		watcherManager: WatcherManager,
 		directoryPath: string,
-		options: NormalizedWatchOptions,
+		options?: DirectoryWatcherOptions | undefined,
 	);
 	watcherManager: import("./getWatcherManager").WatcherManager;
-	options: import("./index").NormalizedWatchOptions;
+	options: DirectoryWatcherOptions;
 	path: string;
 	/** @type {Map<string, Entry>} */
 	files: Map<string, Entry>;
@@ -172,9 +178,9 @@ declare class DirectoryWatcher extends EventEmitter<{
 }
 declare namespace DirectoryWatcher {
 	export {
-		Watcher,
 		EXISTANCE_ONLY_TIME_ENTRY,
-		NormalizedWatchOptions,
+		Watcher,
+		IgnoredFunction,
 		EventType,
 		TimeInfoEntries,
 		Entry,
@@ -187,6 +193,7 @@ declare namespace DirectoryWatcher {
 		DirectoryWatcherEvents,
 		InitialScanRemoved,
 		WatchpackEvents,
+		DirectoryWatcherOptions,
 	};
 }
 import { EventEmitter } from "events";
@@ -233,7 +240,7 @@ declare class Watcher<T extends EventMap> extends EventEmitter<{
 	close(): void;
 }
 import watchEventSource = require("./watchEventSource");
-/** @typedef {import("./index").NormalizedWatchOptions} NormalizedWatchOptions */
+/** @typedef {import("./index").IgnoredFunction} IgnoredFunction */
 /** @typedef {import("./index").EventType} EventType */
 /** @typedef {import("./index").TimeInfoEntries} TimeInfoEntries */
 /** @typedef {import("./index").Entry} Entry */
@@ -244,7 +251,7 @@ import watchEventSource = require("./watchEventSource");
 /** @typedef {import("./watchEventSource").Watcher} EventSourceWatcher */
 /** @type {ExistanceOnlyTimeEntry} */
 declare const EXISTANCE_ONLY_TIME_ENTRY: ExistanceOnlyTimeEntry;
-type NormalizedWatchOptions = import("./index").NormalizedWatchOptions;
+type IgnoredFunction = import("./index").IgnoredFunction;
 type EventType = import("./index").EventType;
 type TimeInfoEntries = import("./index").TimeInfoEntries;
 type Entry = import("./index").Entry;
@@ -309,4 +316,18 @@ type WatchpackEvents = {
 	 * closed event
 	 */
 	closed: () => void;
+};
+type DirectoryWatcherOptions = {
+	/**
+	 * true when need to resolve symlinks and watch symlink and real file, otherwise false
+	 */
+	followSymlinks?: boolean | undefined;
+	/**
+	 * ignore some files from watching (glob pattern or regexp)
+	 */
+	ignored?: IgnoredFunction | undefined;
+	/**
+	 * true when need to enable polling mode for watching, otherwise false
+	 */
+	poll?: (number | boolean) | undefined;
 };

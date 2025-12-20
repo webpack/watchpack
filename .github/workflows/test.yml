@@ -28,7 +28,7 @@ jobs:
       - run: npm run lint
   test:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node-version: [10.x, 12.x, 14.x, 16.x, 18.x, 20.x, 22.x, 24.x]
@@ -72,9 +72,9 @@ jobs:
           architecture: ${{ steps.calculate_architecture.outputs.result }}
           cache: "npm"
       - run: npm install --ignore-engines
-        if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x'
+        if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x'
       - run: npm ci
-        if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x' && matrix.node-version != '16.x'
+        if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x'
       - run: npm run test:coverage
         env:
           WATCHPACK_POLLING: ${{ matrix.polling }}

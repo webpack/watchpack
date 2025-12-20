@@ -1,11 +1,8 @@
-/* globals describe it beforeEach afterEach */
 "use strict";
 
-require("should");
-
 const path = require("path");
-const TestHelper = require("./helpers/TestHelper");
 const Watchpack = require("../lib");
+const TestHelper = require("./helpers/TestHelper");
 
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
@@ -19,11 +16,18 @@ try {
 	fsIsCaseInsensitive = false;
 }
 
+// eslint-disable-next-line jest/no-confusing-set-timeout
+jest.setTimeout(10000);
+
 if (fsIsCaseInsensitive) {
-	describe("Casing", function casingTest() {
-		this.timeout(10000);
-		beforeEach(testHelper.before);
-		afterEach(testHelper.after);
+	describe("casing", () => {
+		beforeEach((done) => {
+			testHelper.before(done);
+		});
+
+		afterEach((done) => {
+			testHelper.after(done);
+		});
 
 		it("should watch a file with the wrong casing", (done) => {
 			const w = new Watchpack({
@@ -31,12 +35,12 @@ if (fsIsCaseInsensitive) {
 			});
 			let changeEvents = 0;
 			w.on("change", (file) => {
-				file.should.be.eql(path.join(fixtures, "a"));
+				expect(file).toBe(path.join(fixtures, "a"));
 				changeEvents++;
 			});
 			w.on("aggregated", (changes) => {
-				[...changes].should.be.eql([path.join(fixtures, "a")]);
-				changeEvents.should.be.greaterThan(0);
+				expect([...changes]).toEqual([path.join(fixtures, "a")]);
+				expect(changeEvents).toBeGreaterThan(0);
 				w.close();
 				done();
 			});
@@ -60,10 +64,11 @@ if (fsIsCaseInsensitive) {
 				const files = w.getTimeInfoEntries();
 				w.close();
 
-				changes.has(path.join(fixtures, dir)).should.be.eql(true);
+				expect(changes).toContain(path.join(fixtures, dir));
 
 				for (const file of files.keys()) {
 					if (file.endsWith("hello.txt")) {
+						expect(true).toBe(false);
 						return done(new Error("Renamed file was still in timeInfoEntries"));
 					}
 				}
@@ -93,8 +98,8 @@ if (fsIsCaseInsensitive) {
 				const files = w.getTimeInfoEntries();
 				w.close();
 
-				changes.has(path.join(fixtures, testFileRename)).should.be.eql(true);
-				removals.has(path.join(fixtures, testFileRename)).should.be.eql(false);
+				expect(changes).toContain(path.join(fixtures, testFileRename));
+				expect(removals).not.toContain(path.join(fixtures, testFileRename));
 
 				for (const file of files.keys()) {
 					if (file.endsWith("hello.txt") && files.get(file)) {
@@ -114,6 +119,12 @@ if (fsIsCaseInsensitive) {
 					testHelper.rename(testFile, testFileRename);
 				});
 			});
+		});
+	});
+} else {
+	describe("casing (no tests)", () => {
+		it("pass", () => {
+			expect(true).toBe(true);
 		});
 	});
 }

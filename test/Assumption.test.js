@@ -1,27 +1,31 @@
-/* globals describe it beforeEach afterEach */
 "use strict";
 
-require("should");
-
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
+const { createHandleChangeEvent } = require("../lib/watchEventSource");
 const TestHelper = require("./helpers/TestHelper");
+
+/** @typedef {import("fs").FSWatcher} FSWatcher */
 
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
-
-const { createHandleChangeEvent } = require("../lib/watchEventSource");
 
 const IS_OSX = require("os").platform() === "darwin";
 const IS_WIN = require("os").platform() === "win32";
 
 const SUPPORTS_RECURSIVE_WATCHING = IS_OSX || IS_WIN;
 
-describe("Assumption", function assumptionTest() {
-	this.timeout(10000);
+// eslint-disable-next-line jest/no-confusing-set-timeout
+jest.setTimeout(20000);
+
+describe("Assumption", () => {
+	/** @type {FSWatcher | null} */
 	let watcherToClose = null;
 
-	beforeEach(testHelper.before);
+	beforeEach((done) => {
+		testHelper.before(done);
+	});
+
 	afterEach((done) => {
 		if (watcherToClose) {
 			watcherToClose.close();
@@ -30,8 +34,7 @@ describe("Assumption", function assumptionTest() {
 		testHelper.after(done);
 	});
 
-	it("should have a file system with correct mtime behavior (stats)", function singleTest(done) {
-		this.timeout(20000);
+	it("should have a file system with correct mtime behavior (stats)", (done) => {
 		let i = 60;
 		const count = 60;
 		let minDiffBefore = +Infinity;
@@ -45,22 +48,21 @@ describe("Assumption", function assumptionTest() {
 		 * @returns {void}
 		 */
 		function afterMeasure() {
-			// eslint-disable-next-line no-console
 			console.log(
 				`mtime stats accuracy (before): [${minDiffBefore} ; ${
 					maxDiffBefore
 				}] avg ${Math.round(sumDiffBefore / count)}`,
 			);
-			// eslint-disable-next-line no-console
+
 			console.log(
 				`mtime stats accuracy (after): [${minDiffAfter} ; ${
 					maxDiffAfter
 				}] avg ${Math.round(sumDiffAfter / count)}`,
 			);
-			minDiffBefore.should.be.aboveOrEqual(-2000);
-			maxDiffBefore.should.be.below(2000);
-			minDiffAfter.should.be.aboveOrEqual(-2000);
-			maxDiffAfter.should.be.below(2000);
+			expect(minDiffBefore).toBeGreaterThanOrEqual(-2000);
+			expect(maxDiffBefore).toBeLessThan(2000);
+			expect(minDiffAfter).toBeGreaterThanOrEqual(-2000);
+			expect(maxDiffAfter).toBeLessThan(2000);
 			done();
 		}
 
@@ -85,12 +87,13 @@ describe("Assumption", function assumptionTest() {
 		});
 	});
 
-	it("should have a file system with correct mtime behavior (fs.watch)", function singleTest(done) {
-		this.timeout(20000);
+	it("should have a file system with correct mtime behavior (fs.watch)", (done) => {
 		testHelper.file("a");
 		let i = 60;
 		const count = 60;
+		/** @type {number | undefined} */
 		let before;
+		/** @type {number | undefined} */
 		let after;
 		let minDiffBefore = +Infinity;
 		let maxDiffBefore = -Infinity;
@@ -103,22 +106,21 @@ describe("Assumption", function assumptionTest() {
 		 * @returns {void}
 		 */
 		function afterMeasure() {
-			// eslint-disable-next-line no-console
 			console.log(
 				`mtime fs.watch accuracy (before): [${minDiffBefore} ; ${
 					maxDiffBefore
 				}] avg ${Math.round(sumDiffBefore / count)}`,
 			);
-			// eslint-disable-next-line no-console
+
 			console.log(
 				`mtime fs.watch accuracy (after): [${minDiffAfter} ; ${
 					maxDiffAfter
 				}] avg ${Math.round(sumDiffAfter / count)}`,
 			);
-			minDiffBefore.should.be.aboveOrEqual(-2000);
-			maxDiffBefore.should.be.below(2000);
-			minDiffAfter.should.be.aboveOrEqual(-2000);
-			maxDiffAfter.should.be.below(2000);
+			expect(minDiffBefore).toBeGreaterThanOrEqual(-2000);
+			expect(maxDiffBefore).toBeLessThan(2000);
+			expect(minDiffAfter).toBeGreaterThanOrEqual(-2000);
+			expect(maxDiffAfter).toBeLessThan(2000);
 			done();
 		}
 
@@ -134,7 +136,9 @@ describe("Assumption", function assumptionTest() {
 		const watcher = (watcherToClose = fs.watch(fixtures));
 		testHelper.tick(100, () => {
 			watcher.on("change", (type, filename) => {
-				const stats = fs.statSync(path.join(fixtures, filename));
+				const stats = fs.statSync(
+					path.join(fixtures, /** @type {string} */ (filename)),
+				);
 				if (before && after) {
 					const diffBefore = +stats.mtime - before;
 					if (diffBefore < minDiffBefore) minDiffBefore = diffBefore;
@@ -157,12 +161,13 @@ describe("Assumption", function assumptionTest() {
 	});
 
 	if (SUPPORTS_RECURSIVE_WATCHING) {
-		it("should have a file system with correct mtime behavior (fs.watch recursive)", function singleTest(done) {
-			this.timeout(20000);
+		it("should have a file system with correct mtime behavior (fs.watch recursive)", (done) => {
 			testHelper.file("a");
 			let i = 60;
 			const count = 60;
+			/** @type {number | undefined} */
 			let before;
+			/** @type {number | undefined} */
 			let after;
 			let minDiffBefore = +Infinity;
 			let maxDiffBefore = -Infinity;
@@ -175,22 +180,21 @@ describe("Assumption", function assumptionTest() {
 			 * @returns {void}
 			 */
 			function afterMeasure() {
-				// eslint-disable-next-line no-console
 				console.log(
 					`mtime fs.watch({ recursive: true }) accuracy (before): [${
 						minDiffBefore
 					} ; ${maxDiffBefore}] avg ${Math.round(sumDiffBefore / count)}`,
 				);
-				// eslint-disable-next-line no-console
+
 				console.log(
 					`mtime fs.watch({ recursive: true }) accuracy (after): [${
 						minDiffAfter
 					} ; ${maxDiffAfter}] avg ${Math.round(sumDiffAfter / count)}`,
 				);
-				minDiffBefore.should.be.aboveOrEqual(-2000);
-				maxDiffBefore.should.be.below(2000);
-				minDiffAfter.should.be.aboveOrEqual(-2000);
-				maxDiffAfter.should.be.below(2000);
+				expect(minDiffBefore).toBeGreaterThanOrEqual(-2000);
+				expect(maxDiffBefore).toBeLessThan(2000);
+				expect(minDiffAfter).toBeGreaterThanOrEqual(-2000);
+				expect(maxDiffAfter).toBeLessThan(2000);
 				done();
 			}
 
@@ -208,7 +212,9 @@ describe("Assumption", function assumptionTest() {
 			}));
 			testHelper.tick(100, () => {
 				watcher.on("change", (type, filename) => {
-					const stats = fs.statSync(path.join(fixtures, filename));
+					const stats = fs.statSync(
+						path.join(fixtures, /** @type {string} */ (filename)),
+					);
 					if (before && after) {
 						const diffBefore = +stats.mtime - before;
 						if (diffBefore < minDiffBefore) minDiffBefore = diffBefore;
@@ -236,11 +242,14 @@ describe("Assumption", function assumptionTest() {
 		testHelper.tick(500, () => {
 			const watcher = (watcherToClose = fs.watch(fixtures));
 			watcher.on("change", (arg, arg2) => {
+				expect(true).toBe(false);
 				done(new Error(`should not be emitted ${arg} ${arg2}`));
+				// @ts-expect-error for tests
 				done = function () {};
 			});
 			watcher.on("error", (err) => {
 				done(err);
+				// @ts-expect-error for tests
 				done = function () {};
 			});
 			testHelper.tick(500, () => {
@@ -261,18 +270,24 @@ describe("Assumption", function assumptionTest() {
 				const watcher = (watcherToClose = fs.watch(fixtures, {
 					recursive: true,
 				}));
+				/** @type {string[]} */
 				const events = [];
 				watcher.once("change", () => {
 					testHelper.tick(1000, () => {
-						events.should.matchAny(/watch-test-directory[/\\]watch-test-file/);
+						expect(
+							events.some((item) =>
+								/watch-test-directory[/\\]watch-test-file/.test(item),
+							),
+						).toBe(true);
 						done();
 					});
 				});
 				watcher.on("change", (type, filename) => {
-					events.push(filename);
+					events.push(/** @type {string} */ (filename));
 				});
 				watcher.on("error", (err) => {
 					done(err);
+					// @ts-expect-error for tests
 					done = function () {};
 				});
 				testHelper.tick(500, () => {
@@ -301,18 +316,24 @@ describe("Assumption", function assumptionTest() {
 				const watcher = (watcherToClose = fs.watch(fixtures, {
 					recursive: true,
 				}));
+				/** @type {string[]} */
 				const events = [];
 				watcher.once("change", () => {
 					testHelper.tick(1000, () => {
-						events.should.matchAny(/watch-test-directory[/\\]watch-test-file/);
+						expect(
+							events.some((item) =>
+								/watch-test-directory[/\\]watch-test-file/.test(item),
+							),
+						).toBe(true);
 						done();
 					});
 				});
 				watcher.on("change", (type, filename) => {
-					events.push(filename);
+					events.push(/** @type {string} */ (filename));
 				});
 				watcher.on("error", (err) => {
 					done(err);
+					// @ts-expect-error for tests
 					done = function () {};
 				});
 				testHelper.tick(500, () => {
@@ -342,7 +363,13 @@ describe("Assumption", function assumptionTest() {
 				);
 				watcher.on("change", handleChangeEvent);
 				watcher.on("error", (err) => {
-					if (err && err.code === "EPERM") gotPermError = true;
+					if (
+						err &&
+						/** @type {NodeJS.ErrnoException} */
+						(err).code === "EPERM"
+					) {
+						gotPermError = true;
+					}
 				});
 				testHelper.tick(500, () => {
 					testHelper.remove("watch-test-dir");
@@ -350,6 +377,7 @@ describe("Assumption", function assumptionTest() {
 						if (gotPermError || gotSelfRename) {
 							done();
 						} else {
+							expect(true).toBe(false);
 							done(new Error("Didn't receive a event about removed directory"));
 						}
 					});
@@ -365,11 +393,14 @@ describe("Assumption", function assumptionTest() {
 			testHelper.tick(delay, () => {
 				const watcher = (watcherToClose = fs.watch(fixtures));
 				watcher.on("change", (arg) => {
+					expect(true).toBe(false);
 					done(new Error(`should not be emitted ${arg}`));
+					// @ts-expect-error for tests
 					done = function () {};
 				});
 				watcher.on("error", (err) => {
 					done(err);
+					// @ts-expect-error for tests
 					done = function () {};
 				});
 				testHelper.tick(500, () => {

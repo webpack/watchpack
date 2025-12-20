@@ -1,25 +1,26 @@
 declare namespace _exports {
 	export {
-		NormalizedWatchOptions,
 		EventMap,
+		DirectoryWatcherOptions,
 		DirectoryWatcherEvents,
 		FileWatcherEvents,
 		Watcher,
 	};
 }
-declare function _exports(options: NormalizedWatchOptions): WatcherManager;
+declare function _exports(options: DirectoryWatcherOptions): WatcherManager;
 declare namespace _exports {
 	export { WatcherManager };
 }
 export = _exports;
-type NormalizedWatchOptions = import("./index").NormalizedWatchOptions;
 type EventMap = import("./index").EventMap;
+type DirectoryWatcherOptions =
+	import("./DirectoryWatcher").DirectoryWatcherOptions;
 type DirectoryWatcherEvents =
 	import("./DirectoryWatcher").DirectoryWatcherEvents;
 type FileWatcherEvents = import("./DirectoryWatcher").FileWatcherEvents;
 type Watcher<T extends EventMap> = import("./DirectoryWatcher").Watcher<T>;
-/** @typedef {import("./index").NormalizedWatchOptions} NormalizedWatchOptions */
 /** @typedef {import("./index").EventMap} EventMap */
+/** @typedef {import("./DirectoryWatcher").DirectoryWatcherOptions} DirectoryWatcherOptions */
 /** @typedef {import("./DirectoryWatcher").DirectoryWatcherEvents} DirectoryWatcherEvents */
 /** @typedef {import("./DirectoryWatcher").FileWatcherEvents} FileWatcherEvents */
 /**
@@ -28,10 +29,10 @@ type Watcher<T extends EventMap> = import("./DirectoryWatcher").Watcher<T>;
  */
 declare class WatcherManager {
 	/**
-	 * @param {NormalizedWatchOptions} options options
+	 * @param {DirectoryWatcherOptions=} options options
 	 */
-	constructor(options: NormalizedWatchOptions);
-	options: import("./index").NormalizedWatchOptions;
+	constructor(options?: DirectoryWatcherOptions | undefined);
+	options: DirectoryWatcher.DirectoryWatcherOptions;
 	/** @type {Map<string, DirectoryWatcher>} */
 	directoryWatchers: Map<string, DirectoryWatcher>;
 	/**
