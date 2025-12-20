@@ -45,6 +45,25 @@ class TestHelper {
 	}
 
 	/**
+	 * @param {number | (() => void)} arg arg
+	 * @param {() => void=} fn fn
+	 */
+	tick(arg, fn) {
+		// if polling is set, ensure the tick is longer than the polling interval.
+		const defaultTick = (Number(process.env.WATCHPACK_POLLING) || 100) + 10;
+
+		if (typeof arg === "function") {
+			fn = arg;
+			arg = defaultTick;
+		}
+
+		setTimeout(() => {
+			/** @type {() => void} */
+			(fn)();
+		}, arg);
+	}
+
+	/**
 	 * @param {() => void} done done
 	 */
 	before(done) {
@@ -162,23 +181,6 @@ class TestHelper {
 	 */
 	remove(name) {
 		rimraf.sync(path.join(this.testdir, name));
-	}
-
-	/**
-	 * @param {number | (() => void)} arg arg
-	 * @param {() => void=} fn fn
-	 */
-	tick(arg, fn) {
-		// if polling is set, ensure the tick is longer than the polling interval.
-		const defaultTick = (Number(process.env.WATCHPACK_POLLING) || 100) + 10;
-		if (typeof arg === "function") {
-			fn = arg;
-			arg = defaultTick;
-		}
-		setTimeout(() => {
-			/** @type {() => void} */
-			(fn)();
-		}, arg);
 	}
 
 	getNumberOfWatchers() {

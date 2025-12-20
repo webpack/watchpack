@@ -21,9 +21,13 @@ jest.setTimeout(10000);
 
 if (fsIsCaseInsensitive) {
 	describe("casing", () => {
-		beforeEach(testHelper.before);
+		beforeEach((done) => {
+			testHelper.before(done);
+		});
 
-		afterEach(testHelper.after);
+		afterEach((done) => {
+			testHelper.after(done);
+		});
 
 		it("should watch a file with the wrong casing", (done) => {
 			const w = new Watchpack({

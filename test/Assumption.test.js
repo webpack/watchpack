@@ -22,7 +22,9 @@ describe("Assumption", () => {
 	/** @type {FSWatcher | null} */
 	let watcherToClose = null;
 
-	beforeEach(testHelper.before);
+	beforeEach((done) => {
+		testHelper.before(done);
+	});
 
 	afterEach((done) => {
 		if (watcherToClose) {

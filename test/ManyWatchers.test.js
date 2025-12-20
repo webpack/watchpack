@@ -12,9 +12,13 @@ const testHelper = new TestHelper(fixtures);
 jest.setTimeout(600000);
 
 describe("ManyWatchers", () => {
-	beforeEach(testHelper.before);
+	beforeEach((done) => {
+		testHelper.before(done);
+	});
 
-	afterEach(testHelper.after);
+	afterEach((done) => {
+		testHelper.after(done);
+	});
 
 	it("should watch more than 4096 directories", (done) => {
 		console.time("creating files");
