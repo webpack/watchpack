@@ -11,10 +11,10 @@
     "lib/"
   ],
   "scripts": {
-    "lint": "npm run lint:code && npm run lint:types && npm run lint:declarations && npm run fmt:check && npm run lint:spellcheck",
+    "lint": "npm run lint:code && npm run lint:types && npm run lint:declarations && npm run fmt:check",
     "lint:code": "eslint --cache .",
     "lint:types": "tsc",
-    "lint:declarations": "echo 'test'",
+    "lint:declarations": "npm run fix:declarations && git diff --exit-code ./types",
     "fix": "npm run fix:code && npm run fix:declarations",
     "fix:code": "npm run lint:code -- --fix",
     "fix:declarations": "tsc --noEmit false --declaration --emitDeclarationOnly --outDir types  && prettier \"./types/**/*\" --write",
@@ -60,7 +60,6 @@
     "prettier": "^3.5.3",
     "rimraf": "^2.6.2",
     "should": "^8.3.1",
-    "tooling": "webpack/tooling#v1.24.4",
     "typescript": "^5.9.3",
     "write-file-atomic": "^3.0.1"
   },
