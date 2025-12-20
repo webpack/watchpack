@@ -13,6 +13,12 @@ const testHelper = new TestHelper(fixtures);
 
 const openWatchers = [];
 
+/**
+ * @constructor
+ * @param {string} directoryPath directory path
+ * @param {object} options options
+ * @returns {DirectoryWatcher} directory watcher
+ */
 function DirectoryWatcher(directoryPath, options) {
 	const directoryWatcher = new OrgDirectoryWatcher(
 		getWatcherManager(options),
