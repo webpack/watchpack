@@ -16,6 +16,7 @@ try {
 	fsIsCaseInsensitive = false;
 }
 
+// eslint-disable-next-line jest/no-confusing-set-timeout
 jest.setTimeout(10000);
 
 if (fsIsCaseInsensitive) {

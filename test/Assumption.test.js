@@ -5,6 +5,8 @@ const path = require("path");
 const { createHandleChangeEvent } = require("../lib/watchEventSource");
 const TestHelper = require("./helpers/TestHelper");
 
+/** @typedef {import("fs").FSWatcher} FSWatcher */
+
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
 
@@ -13,9 +15,11 @@ const IS_WIN = require("os").platform() === "win32";
 
 const SUPPORTS_RECURSIVE_WATCHING = IS_OSX || IS_WIN;
 
+// eslint-disable-next-line jest/no-confusing-set-timeout
 jest.setTimeout(20000);
 
 describe("Assumption", () => {
+	/** @type {FSWatcher | null} */
 	let watcherToClose = null;
 
 	beforeEach(testHelper.before);
@@ -85,7 +89,9 @@ describe("Assumption", () => {
 		testHelper.file("a");
 		let i = 60;
 		const count = 60;
+		/** @type {number | undefined} */
 		let before;
+		/** @type {number | undefined} */
 		let after;
 		let minDiffBefore = +Infinity;
 		let maxDiffBefore = -Infinity;
@@ -128,7 +134,9 @@ describe("Assumption", () => {
 		const watcher = (watcherToClose = fs.watch(fixtures));
 		testHelper.tick(100, () => {
 			watcher.on("change", (type, filename) => {
-				const stats = fs.statSync(path.join(fixtures, filename));
+				const stats = fs.statSync(
+					path.join(fixtures, /** @type {string} */ (filename)),
+				);
 				if (before && after) {
 					const diffBefore = +stats.mtime - before;
 					if (diffBefore < minDiffBefore) minDiffBefore = diffBefore;
@@ -155,7 +163,9 @@ describe("Assumption", () => {
 			testHelper.file("a");
 			let i = 60;
 			const count = 60;
+			/** @type {number | undefined} */
 			let before;
+			/** @type {number | undefined} */
 			let after;
 			let minDiffBefore = +Infinity;
 			let maxDiffBefore = -Infinity;
@@ -200,7 +210,9 @@ describe("Assumption", () => {
 			}));
 			testHelper.tick(100, () => {
 				watcher.on("change", (type, filename) => {
-					const stats = fs.statSync(path.join(fixtures, filename));
+					const stats = fs.statSync(
+						path.join(fixtures, /** @type {string} */ (filename)),
+					);
 					if (before && after) {
 						const diffBefore = +stats.mtime - before;
 						if (diffBefore < minDiffBefore) minDiffBefore = diffBefore;
@@ -230,10 +242,12 @@ describe("Assumption", () => {
 			watcher.on("change", (arg, arg2) => {
 				expect(true).toBe(false);
 				done(new Error(`should not be emitted ${arg} ${arg2}`));
+				// @ts-expect-error for tests
 				done = function () {};
 			});
 			watcher.on("error", (err) => {
 				done(err);
+				// @ts-expect-error for tests
 				done = function () {};
 			});
 			testHelper.tick(500, () => {
@@ -254,6 +268,7 @@ describe("Assumption", () => {
 				const watcher = (watcherToClose = fs.watch(fixtures, {
 					recursive: true,
 				}));
+				/** @type {string[]} */
 				const events = [];
 				watcher.once("change", () => {
 					testHelper.tick(1000, () => {
@@ -266,10 +281,11 @@ describe("Assumption", () => {
 					});
 				});
 				watcher.on("change", (type, filename) => {
-					events.push(filename);
+					events.push(/** @type {string} */ (filename));
 				});
 				watcher.on("error", (err) => {
 					done(err);
+					// @ts-expect-error for tests
 					done = function () {};
 				});
 				testHelper.tick(500, () => {
@@ -298,6 +314,7 @@ describe("Assumption", () => {
 				const watcher = (watcherToClose = fs.watch(fixtures, {
 					recursive: true,
 				}));
+				/** @type {string[]} */
 				const events = [];
 				watcher.once("change", () => {
 					testHelper.tick(1000, () => {
@@ -310,10 +327,11 @@ describe("Assumption", () => {
 					});
 				});
 				watcher.on("change", (type, filename) => {
-					events.push(filename);
+					events.push(/** @type {string} */ (filename));
 				});
 				watcher.on("error", (err) => {
 					done(err);
+					// @ts-expect-error for tests
 					done = function () {};
 				});
 				testHelper.tick(500, () => {
@@ -343,7 +361,13 @@ describe("Assumption", () => {
 				);
 				watcher.on("change", handleChangeEvent);
 				watcher.on("error", (err) => {
-					if (err && err.code === "EPERM") gotPermError = true;
+					if (
+						err &&
+						/** @type {NodeJS.ErrnoException} */
+						(err).code === "EPERM"
+					) {
+						gotPermError = true;
+					}
 				});
 				testHelper.tick(500, () => {
 					testHelper.remove("watch-test-dir");
@@ -369,10 +393,12 @@ describe("Assumption", () => {
 				watcher.on("change", (arg) => {
 					expect(true).toBe(false);
 					done(new Error(`should not be emitted ${arg}`));
+					// @ts-expect-error for tests
 					done = function () {};
 				});
 				watcher.on("error", (err) => {
 					done(err);
+					// @ts-expect-error for tests
 					done = function () {};
 				});
 				testHelper.tick(500, () => {

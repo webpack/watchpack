@@ -1,6 +1,6 @@
-export function watch(filePath: string): Watcher;
 export function batch(fn: () => void): void;
 export function getNumberOfWatchers(): number;
+export function watch(filePath: string): Watcher;
 export type FSWatcher = import("fs").FSWatcher;
 export type EventType = import("./index").EventType;
 export type WatcherSet = Set<Watcher>;

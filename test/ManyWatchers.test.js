@@ -8,6 +8,7 @@ const TestHelper = require("./helpers/TestHelper");
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
 
+// eslint-disable-next-line jest/no-confusing-set-timeout
 jest.setTimeout(600000);
 
 describe("ManyWatchers", () => {
@@ -19,6 +20,7 @@ describe("ManyWatchers", () => {
 		console.time("creating files");
 		// windows is very slow in creating so many files
 		// this can take about 1 minute
+		/** @type {string[]} */
 		const files = [];
 		for (let i = 1; i < 5000; i++) {
 			let highBit = 1;

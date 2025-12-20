@@ -1,10 +1,6 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
-    "strict": false,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "strictNullChecks": true,
     "types": ["node", "jest"]
   },
   "include": ["test/*.js"]

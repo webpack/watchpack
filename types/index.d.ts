@@ -23,9 +23,9 @@ declare class Watchpack extends EventEmitter<{
 	aggregated: [changes: Changes, removals: Removals];
 }> {
 	/**
-	 * @param {WatchOptions} options options
+	 * @param {WatchOptions=} options options
 	 */
-	constructor(options: WatchOptions);
+	constructor(options?: WatchOptions | undefined);
 	/** @type {WatchOptions} */
 	options: WatchOptions;
 	aggregateTimeout: number;

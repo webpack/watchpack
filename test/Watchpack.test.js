@@ -7,6 +7,10 @@ const TestHelper = require("./helpers/TestHelper");
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
 
+/** @typedef {import("../lib/index").Entry} Entry */
+/** @typedef {import("../lib/index").Changes} Changes */
+
+// eslint-disable-next-line jest/no-confusing-set-timeout
 jest.setTimeout(10000);
 
 describe("Watchpack", () => {
@@ -152,6 +156,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -198,6 +203,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -345,6 +351,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -375,6 +382,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -400,6 +408,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -435,6 +444,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -459,6 +469,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -483,6 +494,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -508,6 +520,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -538,6 +551,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -563,6 +577,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -591,6 +606,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -600,9 +616,13 @@ describe("Watchpack", () => {
 			expect([...changes]).toEqual([path.join(fixtures, "dir")]);
 			expect(changeEvents).toEqual([path.join(fixtures, "dir", "sub", "a")]);
 			const times = w.getTimeInfoEntries();
-			const dir = times.get(path.join(fixtures, "dir"));
-			const sub = times.get(path.join(fixtures, "dir", "sub"));
-			const a = times.get(path.join(fixtures, "dir", "sub", "a"));
+			const dir = /** @type {Entry} */ (times.get(path.join(fixtures, "dir")));
+			const sub =
+				/** @type {Entry} */
+				(times.get(path.join(fixtures, "dir", "sub")));
+			const a =
+				/** @type {Entry} */
+				(times.get(path.join(fixtures, "dir", "sub", "a")));
 			expect(typeof dir).toBe("object");
 			expect(Object.prototype.hasOwnProperty.call(dir, "safeTime")).toBe(true);
 			expect(sub.safeTime).toBeGreaterThanOrEqual(a.safeTime);
@@ -624,6 +644,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -757,6 +778,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -791,6 +813,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
 		});
+		/** @type {string[]} */
 		const changeEvents = [];
 		w.on("change", (file) => {
 			if (changeEvents[changeEvents.length - 1] === file) return;
@@ -800,9 +823,13 @@ describe("Watchpack", () => {
 			expect([...changes]).toEqual([path.join(fixtures, "dir")]);
 			expect(changeEvents).toEqual([path.join(fixtures, "dir", "sub()", "a")]);
 			const times = w.getTimeInfoEntries();
-			const dir = times.get(path.join(fixtures, "dir"));
-			const sub = times.get(path.join(fixtures, "dir", "sub()"));
-			const a = times.get(path.join(fixtures, "dir", "sub()", "a"));
+			const dir = /** @type {Entry} */ (times.get(path.join(fixtures, "dir")));
+			const sub =
+				/** @type {Entry} */
+				(times.get(path.join(fixtures, "dir", "sub()")));
+			const a =
+				/** @type {Entry} */
+				(times.get(path.join(fixtures, "dir", "sub()", "a")));
 			expect(sub.safeTime).toBeGreaterThanOrEqual(a.safeTime);
 			expect(dir.safeTime).toBeGreaterThanOrEqual(sub.safeTime);
 			w.close();
@@ -988,6 +1015,7 @@ describe("Watchpack", () => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 3000,
 		});
+		/** @type {string[]} */
 		const removeEvents = [];
 		w.on("remove", (file) => {
 			if (removeEvents[removeEvents.length - 1] === file) return;
@@ -999,6 +1027,7 @@ describe("Watchpack", () => {
 				path.join(fixtures, "a"),
 				path.join(fixtures, "b"),
 			]);
+			// @ts-expect-error for testing
 			if (!+process.env.WATCHPACK_POLLING) {
 				expect(removeEvents).toEqual([
 					path.join(fixtures, "a"),
@@ -1320,9 +1349,9 @@ describe("Watchpack", () => {
 			});
 
 			/**
-			 * @param {string[]} files files
-			 * @param {string[]} dirs dirs
-			 * @param {(changes: string[]) => void} callback callback
+			 * @param {string | string[]} files files
+			 * @param {string | string[]} dirs dirs
+			 * @param {(changes: Changes) => void} callback callback
 			 * @param {() => void} ready ready callback
 			 */
 			function expectWatchEvent(files, dirs, callback, ready) {
@@ -1331,8 +1360,15 @@ describe("Watchpack", () => {
 					followSymlinks: true,
 				});
 
-				// eslint-disable-next-line unicorn/prefer-spread
-				w.watch([].concat(files), [].concat(dirs), Date.now());
+				if (typeof files === "string") {
+					files = [files];
+				}
+
+				if (typeof dirs === "string") {
+					dirs = [dirs];
+				}
+
+				w.watch([...files], [...dirs], Date.now());
 
 				let active = false;
 				let closed = false;

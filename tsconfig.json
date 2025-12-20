@@ -8,7 +8,7 @@
     "noEmit": true,
     "strict": true,
     "alwaysStrict": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "esModuleInterop": true
   },
   "include": ["lib/**/*.js"]
