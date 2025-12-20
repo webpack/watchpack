@@ -1,7 +1,7 @@
 "use strict";
 
 const path = require("path");
-const OrgDirectoryWatcher = require("../lib/DirectoryWatcher");
+const DirectoryWatcher = require("../lib/DirectoryWatcher");
 const getWatcherManager = require("../lib/getWatcherManager");
 const TestHelper = require("./helpers/TestHelper");
 
@@ -17,7 +17,7 @@ const openWatchers = [];
  * @returns {DirectoryWatcherTest} directory watcher
  */
 function DirectoryWatcherTest(directoryPath, options) {
-	const directoryWatcher = new OrgDirectoryWatcher(
+	const directoryWatcher = new DirectoryWatcher(
 		getWatcherManager(options),
 		directoryPath,
 		options,

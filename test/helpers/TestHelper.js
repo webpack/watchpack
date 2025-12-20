@@ -1,6 +1,6 @@
 "use strict";
 
-/** global expect */
+/* global expect */
 
 const fs = require("fs");
 const path = require("path");

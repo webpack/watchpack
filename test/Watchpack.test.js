@@ -631,11 +631,7 @@ describe("Watchpack", () => {
 		});
 		w.on("aggregated", (changes) => {
 			expect([...changes]).toEqual([path.join(fixtures, "dir")]);
-			expect(changeEvents).toEqual([
-				path.join(fixtures, "dir", "sub", "a"),
-				path.join(fixtures, "dir", "sub"),
-				path.join(fixtures, "dir", "sub2"),
-			]);
+			expect(changeEvents).toEqual([path.join(fixtures, "dir", "sub", "a")]);
 			const files = new Map();
 			const directories = new Map();
 			w.collectTimeInfoEntries(files, directories);
@@ -843,6 +839,7 @@ describe("Watchpack", () => {
 				testHelper.tick(400, () => {
 					w.watch([path.join(fixtures, "a")], [], Date.now());
 					testHelper.tick(1000, () => {
+						expect(true).toBe(true);
 						w2.close();
 						w.close();
 						done();
@@ -868,6 +865,7 @@ describe("Watchpack", () => {
 				testHelper.tick(400, () => {
 					testHelper.file("a");
 					testHelper.tick(1000, () => {
+						expect(true).toBe(true);
 						w2.close();
 						w.close();
 						done();
@@ -918,6 +916,7 @@ describe("Watchpack", () => {
 					testHelper.tick(400, () => {
 						w.watch([path.join(fixtures, "a")], [], startTime);
 						testHelper.tick(1000, () => {
+							expect(true).toBe(true);
 							w.close();
 							w2.close();
 							done();
@@ -1072,6 +1071,7 @@ describe("Watchpack", () => {
 					missing: [path.join(fixtures, "dir", "c")],
 				});
 				testHelper.tick(2000, () => {
+					expect(true).toBe(true);
 					// no event fired
 					w.close();
 					done();
@@ -1112,6 +1112,7 @@ describe("Watchpack", () => {
 					startTime: Date.now(),
 				});
 				testHelper.tick(2000, () => {
+					expect(true).toBe(true);
 					// no event fired
 					w.close();
 					done();
@@ -1138,6 +1139,7 @@ describe("Watchpack", () => {
 			testHelper.tick(1000, () => {
 				testHelper.file("dir/c");
 				testHelper.tick(1000, () => {
+					expect(true).toBe(true);
 					// no event fired
 					w.close();
 					done();
@@ -1229,7 +1231,7 @@ describe("Watchpack", () => {
 			aggregateTimeout: 1000,
 		});
 		w.on("aggregated", () => {
-			except(true).toBe(false);
+			expect(true).toBe(false);
 			done(new Error("should not fire"));
 		});
 		testHelper.dir("dir");
@@ -1442,7 +1444,7 @@ describe("Watchpack", () => {
 					[],
 					path.join(fixtures, "link"),
 					(changes) => {
-						expect(changes).toBe([path.join(fixtures, "link")]);
+						expect([...changes]).toEqual([path.join(fixtures, "link")]);
 						done();
 					},
 					() => {

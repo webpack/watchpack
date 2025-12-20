@@ -19,7 +19,7 @@ try {
 jest.setTimeout(10000);
 
 if (fsIsCaseInsensitive) {
-	describe("Casing", () => {
+	describe("casing", () => {
 		beforeEach(testHelper.before);
 
 		afterEach(testHelper.after);
@@ -114,6 +114,12 @@ if (fsIsCaseInsensitive) {
 					testHelper.rename(testFile, testFileRename);
 				});
 			});
+		});
+	});
+} else {
+	describe("casing (no tests)", () => {
+		it("pass", () => {
+			expect(true).toBe(true);
 		});
 	});
 }
