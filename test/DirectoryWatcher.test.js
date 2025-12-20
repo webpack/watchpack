@@ -231,19 +231,14 @@ describe("DirectoryWatcher", () => {
 
 	if (!Number(process.env.WATCHPACK_POLLING)) {
 		it("should log errors emitted from watcher to stderr", (done) => {
-			let errorLogged = false;
-			const oldStderr = process.stderr.write;
-			process.stderr.write = function write(_a) {
-				errorLogged = true;
-			};
+			const errorSpy = jest.spyOn(console, "error");
 			const directoryWatcher = new DirectoryWatcherTest(fixtures, {});
 			const a = directoryWatcher.watch(path.join(fixtures, "a"));
 			directoryWatcher.watcher.emit("error", "error_message");
 
 			testHelper.tick(() => {
 				a.close();
-				process.stderr.write = oldStderr;
-				expect(errorLogged).toBe(true);
+				expect(errorSpy).toHaveBeenCalled();
 				done();
 			});
 		});

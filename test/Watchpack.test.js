@@ -604,7 +604,7 @@ describe("Watchpack", () => {
 			const sub = times.get(path.join(fixtures, "dir", "sub"));
 			const a = times.get(path.join(fixtures, "dir", "sub", "a"));
 			expect(typeof dir).toBe("object");
-			expect(dir.safeTime).toBeDefine();
+			expect(Object.prototype.hasOwnProperty.call(dir, "safeTime")).toBe(true);
 			expect(sub.safeTime).toBeGreaterThanOrEqual(a.safeTime);
 			expect(dir.safeTime).toBeGreaterThanOrEqual(sub.safeTime);
 			w.close();

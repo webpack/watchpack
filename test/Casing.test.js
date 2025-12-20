@@ -59,7 +59,7 @@ if (fsIsCaseInsensitive) {
 				const files = w.getTimeInfoEntries();
 				w.close();
 
-				changes.has(path.join(fixtures, dir)).should.be.eql(true);
+				expect(changes).toContain(path.join(fixtures, dir));
 
 				for (const file of files.keys()) {
 					if (file.endsWith("hello.txt")) {
