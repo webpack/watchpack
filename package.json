@@ -33,8 +33,9 @@
     "fmt:base": "prettier --cache --ignore-unknown .",
     "pretest": "npm run lint",
     "test": "npm run test:coverage",
-    "test:only": "jest",
-    "test:watch": "npm run test:only -- --watch",
+    "test:base": "jest --runInBand",
+    "test:only": "npm run test:base",
+    "test:watch": "npm run test:base -- --watch",
     "test:coverage": "npm run test:only -- --collectCoverageFrom=\"lib/**/*.js\" --coverage"
   },
   "dependencies": {
