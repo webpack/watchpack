@@ -41,6 +41,9 @@ describe("Assumption", function assumptionTest() {
 		let maxDiffAfter = -Infinity;
 		let sumDiffAfter = 0;
 
+		/**
+		 * @returns {void}
+		 */
 		function afterMeasure() {
 			// eslint-disable-next-line no-console
 			console.log(
@@ -96,6 +99,9 @@ describe("Assumption", function assumptionTest() {
 		let maxDiffAfter = -Infinity;
 		let sumDiffAfter = 0;
 
+		/**
+		 * @returns {void}
+		 */
 		function afterMeasure() {
 			// eslint-disable-next-line no-console
 			console.log(
@@ -116,6 +122,9 @@ describe("Assumption", function assumptionTest() {
 			done();
 		}
 
+		/**
+		 * @returns {void}
+		 */
 		function checkMtime() {
 			before = Date.now();
 			testHelper.file("a");
@@ -162,6 +171,9 @@ describe("Assumption", function assumptionTest() {
 			let maxDiffAfter = -Infinity;
 			let sumDiffAfter = 0;
 
+			/**
+			 * @returns {void}
+			 */
 			function afterMeasure() {
 				// eslint-disable-next-line no-console
 				console.log(
@@ -182,6 +194,9 @@ describe("Assumption", function assumptionTest() {
 				done();
 			}
 
+			/**
+			 * @returns {void}
+			 */
 			function checkMtime() {
 				before = Date.now();
 				testHelper.file("a");

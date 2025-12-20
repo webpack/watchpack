@@ -5,7 +5,7 @@ require("should");
 
 const path = require("path");
 const TestHelper = require("./helpers/TestHelper");
-const Watchpack = require("../lib/watchpack");
+const Watchpack = require("../lib");
 
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
@@ -1307,6 +1307,12 @@ describe("Watchpack", function watchpackTest() {
 				testHelper.tick(1000, done);
 			});
 
+			/**
+			 * @param {string[]} files files
+			 * @param {string[]} dirs dirs
+			 * @param {(changes: string[]) => void} callback callback
+			 * @param {() => void} ready ready callback
+			 */
 			function expectWatchEvent(files, dirs, callback, ready) {
 				const w = new Watchpack({
 					aggregateTimeout: 500,

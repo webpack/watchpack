@@ -25,6 +25,10 @@ const checkAllWatcherClosed = () => {
 	watchEventSource.getNumberOfWatchers().should.be.eql(0);
 };
 
+/**
+ * @param {string} testdir testdir
+ * @constructor
+ */
 function TestHelper(testdir) {
 	this.testdir = testdir;
 	const self = this;

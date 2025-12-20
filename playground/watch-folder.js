@@ -5,6 +5,11 @@ const Watchpack = require("../");
 
 const folder = path.join(__dirname, "folder");
 
+/**
+ * @param {string} name name
+ * @param {string[]} files files
+ * @param {string} folders folders
+ */
 function startWatcher(name, files, folders) {
 	const w = new Watchpack({
 		aggregateTimeout: 3000,

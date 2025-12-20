@@ -5,7 +5,7 @@ require("should");
 
 const path = require("path");
 const TestHelper = require("./helpers/TestHelper");
-const Watchpack = require("../lib/watchpack");
+const Watchpack = require("../lib");
 const watchEventSource = require("../lib/watchEventSource");
 const should = require("should");
 

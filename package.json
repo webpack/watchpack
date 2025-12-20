@@ -2,21 +2,29 @@
   "name": "watchpack",
   "version": "2.4.4",
   "description": "",
-  "main": "./lib/watchpack.js",
+  "main": "lib/index.js",
   "directories": {
     "test": "test"
   },
-  "files": ["lib/"],
+  "types": "types/index.js",
+  "files": [
+    "lib/"
+  ],
   "scripts": {
-    "lint": "npm run lint:code",
+    "lint": "npm run lint:code && npm run lint:types && npm run lint:declarations && npm run fmt:check",
     "lint:code": "eslint --cache .",
+    "lint:types": "tsc",
+    "lint:declarations": "npm run fix:declarations && git diff --exit-code ./types",
+    "fix": "npm run fix:code && npm run fix:declarations",
+    "fix:code": "npm run lint:code -- --fix",
+    "fix:declarations": "tsc --noEmit false --declaration --emitDeclarationOnly --outDir types && npm run fmt -- ./types",
     "fmt": "npm run fmt:base -- --log-level warn --write",
     "fmt:check": "npm run fmt:base -- --check",
     "fmt:base": "prettier --cache --ignore-unknown .",
-    "test:only": "mocha",
-    "test:coverage": "nyc --reporter=lcov node_modules/mocha/bin/_mocha",
     "pretest": "npm run lint",
-    "test": "mocha"
+    "test": "mocha",
+    "test:only": "mocha",
+    "test:coverage": "nyc --reporter=lcov node_modules/mocha/bin/_mocha"
   },
   "repository": {
     "type": "git",
@@ -32,6 +40,10 @@
     "@eslint/js": "^9.28.0",
     "@eslint/markdown": "^6.5.0",
     "@stylistic/eslint-plugin": "^4.4.1",
+    "@types/glob-to-regexp": "^0.4.4",
+    "@types/graceful-fs": "^4.1.9",
+    "@types/jest": "^27.5.1",
+    "@types/node": "^24.10.4",
     "coveralls": "^3.0.0",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
@@ -48,6 +60,7 @@
     "prettier": "^3.5.3",
     "rimraf": "^2.6.2",
     "should": "^8.3.1",
+    "typescript": "^5.9.3",
     "write-file-atomic": "^3.0.1"
   },
   "dependencies": {
