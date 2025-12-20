@@ -1,5 +1,7 @@
 "use strict";
 
+/** global expect */
+
 const fs = require("fs");
 const path = require("path");
 const rimraf = require("rimraf");
@@ -20,9 +22,9 @@ watcherManagerModule = (options) => {
 
 const checkAllWatcherClosed = () => {
 	for (const watcherManager of allWatcherManager) {
-		[...watcherManager.directoryWatchers.keys()].should.be.eql([]);
+		expect(...watcherManager.directoryWatchers.keys()).toEqual([]);
 	}
-	watchEventSource.getNumberOfWatchers().should.be.eql(0);
+	expect(watchEventSource.getNumberOfWatchers()).toBe(0);
 };
 
 /**

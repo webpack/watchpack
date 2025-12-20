@@ -1,12 +1,9 @@
-/* globals describe it beforeEach afterEach */
 "use strict";
 
-require("should");
-
 const path = require("path");
-const TestHelper = require("./helpers/TestHelper");
-const getWatcherManager = require("../lib/getWatcherManager");
 const OrgDirectoryWatcher = require("../lib/DirectoryWatcher");
+const getWatcherManager = require("../lib/getWatcherManager");
+const TestHelper = require("./helpers/TestHelper");
 
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
@@ -17,9 +14,9 @@ const openWatchers = [];
  * @constructor
  * @param {string} directoryPath directory path
  * @param {object} options options
- * @returns {DirectoryWatcher} directory watcher
+ * @returns {DirectoryWatcherTest} directory watcher
  */
-function DirectoryWatcher(directoryPath, options) {
+function DirectoryWatcherTest(directoryPath, options) {
 	const directoryWatcher = new OrgDirectoryWatcher(
 		getWatcherManager(options),
 		directoryPath,
@@ -36,26 +33,32 @@ function DirectoryWatcher(directoryPath, options) {
 	return directoryWatcher;
 }
 
-describe("DirectoryWatcher", function directoryWatcherTest() {
-	this.timeout(10000);
-	beforeEach(testHelper.before);
-	afterEach(testHelper.after);
-	afterEach(() => {
-		for (const watchers of openWatchers) {
-			// eslint-disable-next-line no-console
-			console.log(`DirectoryWatcher (${watchers.path}) was not closed.`);
-			watchers.close();
-		}
+jest.setTimeout(10000);
+
+describe("DirectoryWatcher", () => {
+	beforeEach((done) => {
+		testHelper.before(done);
+	});
+
+	afterEach((done) => {
+		testHelper.after(() => {
+			for (const watchers of openWatchers) {
+				console.log(`DirectoryWatcher (${watchers.path}) was not closed.`);
+				watchers.close();
+			}
+
+			done();
+		});
 	});
 
 	it("should detect a file creation", (done) => {
-		const directoryWatcher = new DirectoryWatcher(fixtures, {});
+		const directoryWatcher = new DirectoryWatcherTest(fixtures, {});
 		const a = directoryWatcher.watch(path.join(fixtures, "a"));
 		a.on("change", (mtime) => {
-			mtime.should.be.type("number");
-			Object.keys(directoryWatcher.getTimes())
-				.sort()
-				.should.be.eql([path.join(fixtures, "a")]);
+			expect(typeof mtime).toBe("number");
+			expect(Object.keys(directoryWatcher.getTimes()).sort()).toEqual([
+				path.join(fixtures, "a"),
+			]);
 			a.close();
 			done();
 		});
@@ -65,12 +68,12 @@ describe("DirectoryWatcher", function directoryWatcherTest() {
 	});
 
 	it("should detect a file change", (done) => {
-		const directoryWatcher = new DirectoryWatcher(fixtures, {});
+		const directoryWatcher = new DirectoryWatcherTest(fixtures, {});
 		testHelper.file("a");
 		testHelper.tick(1000, () => {
 			const a = directoryWatcher.watch(path.join(fixtures, "a"));
 			a.on("change", (mtime) => {
-				mtime.should.be.type("number");
+				expect(typeof mtime).toBe("number");
 				a.close();
 				done();
 			});
@@ -83,9 +86,10 @@ describe("DirectoryWatcher", function directoryWatcherTest() {
 	it("should not detect a file change in initial scan", (done) => {
 		testHelper.file("a");
 		testHelper.tick(() => {
-			const directoryWatcher = new DirectoryWatcher(fixtures, {});
+			const directoryWatcher = new DirectoryWatcherTest(fixtures, {});
 			const a = directoryWatcher.watch(path.join(fixtures, "a"));
 			a.on("change", () => {
+				expect(true).toBe(false);
 				throw new Error("should not be detected");
 			});
 			testHelper.tick(() => {
@@ -100,9 +104,10 @@ describe("DirectoryWatcher", function directoryWatcherTest() {
 		testHelper.tick(1000, () => {
 			testHelper.file("a");
 			testHelper.tick(1000, () => {
-				const directoryWatcher = new DirectoryWatcher(fixtures, {});
+				const directoryWatcher = new DirectoryWatcherTest(fixtures, {});
 				const a = directoryWatcher.watch(path.join(fixtures, "a"), start);
 				a.on("change", () => {
+					expect(true).toBe(true);
 					a.close();
 					done();
 				});
@@ -113,9 +118,10 @@ describe("DirectoryWatcher", function directoryWatcherTest() {
 	it("should not detect a file change in initial scan without start date", (done) => {
 		testHelper.file("a");
 		testHelper.tick(200, () => {
-			const directoryWatcher = new DirectoryWatcher(fixtures, {});
+			const directoryWatcher = new DirectoryWatcherTest(fixtures, {});
 			const a = directoryWatcher.watch(path.join(fixtures, "a"));
 			a.on("change", (mtime, type) => {
+				expect(true).toBe(false);
 				throw new Error(
 					`should not be detected (${type} mtime=${mtime} now=${Date.now()})`,
 				);
@@ -133,15 +139,16 @@ describe("DirectoryWatcher", function directoryWatcherTest() {
 	};
 	for (const name of Object.keys(timings)) {
 		const time = timings[name];
+
 		it(`should detect multiple file changes (${name})`, (done) => {
-			const directoryWatcher = new DirectoryWatcher(fixtures, {});
+			const directoryWatcher = new DirectoryWatcherTest(fixtures, {});
 			testHelper.file("a");
 			testHelper.tick(() => {
 				const a = directoryWatcher.watch(path.join(fixtures, "a"));
 				let count = 20;
 				let wasChanged = false;
 				a.on("change", (mtime) => {
-					mtime.should.be.type("number");
+					expect(typeof mtime).toBe("number");
 					if (!wasChanged) return;
 					wasChanged = false;
 					if (count-- <= 0) {
@@ -164,9 +171,10 @@ describe("DirectoryWatcher", function directoryWatcherTest() {
 
 	it("should detect a file removal", (done) => {
 		testHelper.file("a");
-		const directoryWatcher = new DirectoryWatcher(fixtures, {});
+		const directoryWatcher = new DirectoryWatcherTest(fixtures, {});
 		const a = directoryWatcher.watch(path.join(fixtures, "a"));
 		a.on("remove", () => {
+			expect(true).toBe(true);
 			a.close();
 			done();
 		});
@@ -192,7 +200,7 @@ describe("DirectoryWatcher", function directoryWatcherTest() {
 				for (const [, w] of wm.directoryWatchers) {
 					w.close();
 				}
-				initialMissing.should.be.eql(true);
+				expect(initialMissing).toBe(true);
 				done();
 			});
 		});
@@ -215,7 +223,7 @@ describe("DirectoryWatcher", function directoryWatcherTest() {
 				for (const [, w] of wm.directoryWatchers) {
 					w.close();
 				}
-				initialMissing.should.be.eql(false);
+				expect(initialMissing).toBe(false);
 				done();
 			});
 		});
@@ -228,14 +236,14 @@ describe("DirectoryWatcher", function directoryWatcherTest() {
 			process.stderr.write = function write(_a) {
 				errorLogged = true;
 			};
-			const directoryWatcher = new DirectoryWatcher(fixtures, {});
+			const directoryWatcher = new DirectoryWatcherTest(fixtures, {});
 			const a = directoryWatcher.watch(path.join(fixtures, "a"));
 			directoryWatcher.watcher.emit("error", "error_message");
 
 			testHelper.tick(() => {
 				a.close();
 				process.stderr.write = oldStderr;
-				errorLogged.should.be.true();
+				expect(errorLogged).toBe(true);
 				done();
 			});
 		});
