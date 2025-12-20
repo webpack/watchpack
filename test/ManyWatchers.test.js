@@ -51,7 +51,7 @@ describe("ManyWatchers", () => {
 			});
 			w.on("aggregated", (changes) => {
 				console.timeEnd("detecting change event");
-				expect(changes).toEqual([path.join(fixtures, "4096/900/file")]);
+				expect([...changes]).toEqual([path.join(fixtures, "4096/900/file")]);
 				w.close();
 				done();
 			});
