@@ -118,7 +118,7 @@ declare namespace Watchpack {
 		EventType,
 		Entry,
 		OnlySafeTimeEntry,
-		ExistanceOnlyTimeEntry,
+		ExistenceOnlyTimeEntry,
 		TimeInfoEntries,
 		Changes,
 		Removals,
@@ -227,10 +227,10 @@ type Entry = {
 type OnlySafeTimeEntry = {
 	safeTime: number;
 };
-type ExistanceOnlyTimeEntry = {};
+type ExistenceOnlyTimeEntry = {};
 type TimeInfoEntries = Map<
 	string,
-	Entry | OnlySafeTimeEntry | ExistanceOnlyTimeEntry | null
+	Entry | OnlySafeTimeEntry | ExistenceOnlyTimeEntry | null
 >;
 type Changes = Set<string>;
 type Removals = Set<string>;

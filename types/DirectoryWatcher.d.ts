@@ -184,7 +184,7 @@ declare namespace DirectoryWatcher {
 		EventType,
 		TimeInfoEntries,
 		Entry,
-		ExistanceOnlyTimeEntry,
+		ExistenceOnlyTimeEntry,
 		OnlySafeTimeEntry,
 		EventMap,
 		WatcherManager,
@@ -244,18 +244,18 @@ import watchEventSource = require("./watchEventSource");
 /** @typedef {import("./index").EventType} EventType */
 /** @typedef {import("./index").TimeInfoEntries} TimeInfoEntries */
 /** @typedef {import("./index").Entry} Entry */
-/** @typedef {import("./index").ExistanceOnlyTimeEntry} ExistanceOnlyTimeEntry */
+/** @typedef {import("./index").ExistenceOnlyTimeEntry} ExistenceOnlyTimeEntry */
 /** @typedef {import("./index").OnlySafeTimeEntry} OnlySafeTimeEntry */
 /** @typedef {import("./index").EventMap} EventMap */
 /** @typedef {import("./getWatcherManager").WatcherManager} WatcherManager */
 /** @typedef {import("./watchEventSource").Watcher} EventSourceWatcher */
-/** @type {ExistanceOnlyTimeEntry} */
-declare const EXISTANCE_ONLY_TIME_ENTRY: ExistanceOnlyTimeEntry;
+/** @type {ExistenceOnlyTimeEntry} */
+declare const EXISTANCE_ONLY_TIME_ENTRY: ExistenceOnlyTimeEntry;
 type IgnoredFunction = import("./index").IgnoredFunction;
 type EventType = import("./index").EventType;
 type TimeInfoEntries = import("./index").TimeInfoEntries;
 type Entry = import("./index").Entry;
-type ExistanceOnlyTimeEntry = import("./index").ExistanceOnlyTimeEntry;
+type ExistenceOnlyTimeEntry = import("./index").ExistenceOnlyTimeEntry;
 type OnlySafeTimeEntry = import("./index").OnlySafeTimeEntry;
 type EventMap = import("./index").EventMap;
 type WatcherManager = import("./getWatcherManager").WatcherManager;
