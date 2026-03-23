@@ -49,15 +49,14 @@
     "@changesets/get-github-info": "^0.8.0",
     "@types/glob-to-regexp": "^0.4.4",
     "@types/graceful-fs": "^4.1.9",
-    "@types/jest": "^27.5.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.10.4",
     "eslint": "^9.39.2",
-    "eslint-config-webpack": "^4.7.3",
-    "jest": "^27.5.1",
+    "eslint-config-webpack": "^4.9.3",
+    "jest": "^30.3.0",
     "prettier": "^3.7.4",
-    "rimraf": "^2.6.2",
     "typescript": "^5.9.3",
-    "write-file-atomic": "^3.0.1"
+    "write-file-atomic": "^7.0.1"
   },
   "engines": {
     "node": ">=10.13.0"
