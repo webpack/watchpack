@@ -48,7 +48,7 @@
     "@types/glob-to-regexp": "^0.4.4",
     "@types/graceful-fs": "^4.1.9",
     "@types/jest": "^27.5.1",
-    "@types/node": "^24.10.4",
+    "@types/node": "^25.5.0",
     "eslint": "^9.39.2",
     "eslint-config-webpack": "^4.7.3",
     "jest": "^27.5.1",
