@@ -118,11 +118,11 @@ class TestHelper {
 		// eslint-disable-next-line n/no-unsupported-features/node-builtins
 		if (typeof fs.rmSync === "function") {
 			// eslint-disable-next-line n/no-unsupported-features/node-builtins
-			fs.rmSync(path, { recursive: true });
+			fs.rmSync(path, { force: true, recursive: true });
 			return;
 		}
 
-		fs.rmdirSync(path, { recursive: true });
+		fs.rmdirSync(path, { force: true, recursive: true });
 	}
 
 	/**
