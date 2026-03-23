@@ -55,7 +55,7 @@
     "prettier": "^3.7.4",
     "rimraf": "^2.6.2",
     "typescript": "^5.9.3",
-    "write-file-atomic": "^3.0.1"
+    "write-file-atomic": "^7.0.1"
   },
   "engines": {
     "node": ">=10.13.0"
