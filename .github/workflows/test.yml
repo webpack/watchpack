@@ -84,7 +84,7 @@ jobs:
           cache: "npm"
 
       - run: |
-          npm install --save-dev jest@^27 write-file-atomic@^3
+          npm install --save-dev jest@^27 write-file-atomic@^3 rimraf@^2
           npm install --ignore-engines
         if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x' || matrix.node-version == '18.x'
 

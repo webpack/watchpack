@@ -34,25 +34,6 @@ const checkAllWatcherClosed = () => {
 	expect(watchEventSource.getNumberOfWatchers()).toBe(0);
 };
 
-/**
- * @param {string} dirPath directory path
- */
-function rmdirRecursiveSync(dirPath) {
-	if (fs.existsSync(dirPath)) {
-		for (const file of fs.readdirSync(dirPath)) {
-			const curPath = path.join(dirPath, file);
-
-			if (fs.lstatSync(curPath).isDirectory()) {
-				rmdirRecursiveSync(curPath);
-			} else {
-				fs.unlinkSync(curPath);
-			}
-		}
-
-		fs.rmdirSync(dirPath);
-	}
-}
-
 class TestHelper {
 	/**
 	 * @param {string} testdir testdir
@@ -141,7 +122,9 @@ class TestHelper {
 			return;
 		}
 
-		rmdirRecursiveSync(path);
+		// For very old Node.js versions
+		// eslint-disable-next-line import/no-unresolved
+		require("rimraf").sync(this.testdir);
 	}
 
 	/**
