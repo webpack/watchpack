@@ -122,7 +122,9 @@ class TestHelper {
 			return;
 		}
 
-		fs.rmdirSync(path, { recursive: true });
+		if (fs.existsSync(path)) {
+			fs.rmdirSync(path, { recursive: true });
+		}
 	}
 
 	/**
