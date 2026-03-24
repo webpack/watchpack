@@ -38,7 +38,9 @@
     "test:base": "jest --runInBand",
     "test:only": "npm run test:base",
     "test:watch": "npm run test:base -- --watch",
-    "test:coverage": "npm run test:base -- --collectCoverageFrom=\"lib/**/*.js\" --coverage"
+    "test:coverage": "npm run test:base -- --collectCoverageFrom=\"lib/**/*.js\" --coverage",
+    "version": "changeset version",
+    "release": "changeset publish"
   },
   "dependencies": {
     "glob-to-regexp": "^0.4.1",
