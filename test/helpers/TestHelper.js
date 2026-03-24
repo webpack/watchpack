@@ -123,6 +123,7 @@ class TestHelper {
 		}
 
 		// For very old Node.js versions
+		// @ts-expect-error for old Node.js versions
 		// eslint-disable-next-line import/no-unresolved
 		require("rimraf").sync(this.testdir);
 	}
