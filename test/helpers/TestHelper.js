@@ -5,8 +5,6 @@
 const fs = require("fs");
 const path = require("path");
 // @ts-expect-error no need extra types
-const rimraf = require("rimraf");
-// @ts-expect-error no need extra types
 const writeFileAtomic = require("write-file-atomic");
 
 /** @typedef {import("../../lib/getWatcherManager").DirectoryWatcherOptions} DirectoryWatcherOptions */
@@ -69,7 +67,7 @@ class TestHelper {
 	before(done) {
 		checkAllWatcherClosed();
 		this.tick(400, () => {
-			rimraf.sync(this.testdir);
+			this.rm(this.testdir);
 			fs.mkdirSync(this.testdir);
 			done();
 		});
@@ -83,7 +81,7 @@ class TestHelper {
 
 		const del = () => {
 			try {
-				rimraf.sync(this.testdir);
+				this.rm(this.testdir);
 			} catch (err) {
 				if (i++ > 20) throw err;
 				this.tick(100, del.bind(this));
@@ -111,6 +109,23 @@ class TestHelper {
 	 */
 	rename(orig, dest) {
 		fs.renameSync(path.join(this.testdir, orig), path.join(this.testdir, dest));
+	}
+
+	/**
+	 * @param {string} path path to remove
+	 */
+	rm(path) {
+		// eslint-disable-next-line n/no-unsupported-features/node-builtins
+		if (typeof fs.rmSync === "function") {
+			// eslint-disable-next-line n/no-unsupported-features/node-builtins
+			fs.rmSync(path, { force: true, recursive: true });
+			return;
+		}
+
+		// For very old Node.js versions
+		// @ts-expect-error for old Node.js versions
+		// eslint-disable-next-line import/no-unresolved
+		require("rimraf").sync(path);
 	}
 
 	/**
@@ -180,7 +195,7 @@ class TestHelper {
 	 * @param {string} name name
 	 */
 	remove(name) {
-		rimraf.sync(path.join(this.testdir, name));
+		this.rm(path.join(this.testdir, name));
 	}
 
 	getNumberOfWatchers() {

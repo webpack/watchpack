@@ -83,11 +83,13 @@ jobs:
           architecture: ${{ steps.calculate_architecture.outputs.result }}
           cache: "npm"
 
-      - run: npm install --ignore-engines
-        if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x'
+      - run: |
+          npm install --save-dev jest@^27 write-file-atomic@^3 rimraf@^2
+          npm install --ignore-engines
+        if: matrix.node-version == '10.x' || matrix.node-version == '12.x' || matrix.node-version == '14.x' || matrix.node-version == '16.x' || matrix.node-version == '18.x'
 
       - run: npm ci
-        if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x'
+        if: matrix.node-version != '10.x' && matrix.node-version != '12.x' && matrix.node-version != '14.x' && matrix.node-version != '16.x' && matrix.node-version != '18.x'
 
       - run: npm run test:coverage
         env:
