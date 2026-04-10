@@ -10,7 +10,7 @@
     "verbatimModuleSyntax": true,
     "rewriteRelativeImportExtensions": true,
 
-    "types": ["node", "jest"],
+    "types": ["node"],
 
     "rootDir": "./lib",
     "outDir": "./types",

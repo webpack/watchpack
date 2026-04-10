@@ -25,7 +25,7 @@
     "lint": "npm run lint:code && npm run lint:types && npm run lint:types-test && npm run lint:declarations && npm run fmt:check",
     "lint:code": "eslint --cache .",
     "lint:types": "tsc --noEmit",
-    "lint:types-test": "tsc -p tsconfig.types.test.json",
+    "lint:types-test": "tsc -p tsconfig.types.test.json --noEmit",
     "lint:declarations": "npm run fix:declarations && git diff --exit-code ./types",
     "fix": "npm run fix:code && npm run fix:declarations",
     "fix:code": "npm run lint:code -- --fix",
