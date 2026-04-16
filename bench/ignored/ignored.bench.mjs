@@ -2,11 +2,9 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 */
 
-import { Bench } from "tinybench";
-import { withCodSpeed } from "@codspeed/tinybench-plugin";
-import { createRequire } from "module";
+import { createBench, moduleRequire, runIfMain } from "../helpers.mjs";
 
-const require = createRequire(import.meta.url);
+const require = moduleRequire(import.meta.url);
 // Require the internal helpers via the package entry to avoid duplication.
 // We re-implement the call paths through the public Watchpack constructor
 // which normalizes ignored exactly once per options object.
@@ -54,7 +52,7 @@ const DEEP_PATHS = Array.from({ length: 10 }, (_, i) => {
 	return `/${segments.join("/")}`;
 });
 
-const bench = withCodSpeed(new Bench({ name: "ignored", time: 200 }));
+const bench = createBench("ignored");
 
 const noneMatcher = buildIgnored({});
 const regexpMatcher = buildIgnored({
@@ -124,7 +122,4 @@ bench
 
 export default bench;
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-	await bench.run();
-	console.table(bench.table());
-}
+await runIfMain(import.meta.url, bench);

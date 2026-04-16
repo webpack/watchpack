@@ -2,11 +2,9 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 */
 
-import { Bench } from "tinybench";
-import { withCodSpeed } from "@codspeed/tinybench-plugin";
-import { createRequire } from "module";
+import { createBench, moduleRequire, runIfMain } from "../helpers.mjs";
 
-const require = createRequire(import.meta.url);
+const require = moduleRequire(import.meta.url);
 const reducePlan = require("../../lib/reducePlan.js");
 
 const ROOT = process.platform === "win32" ? "C:\\root" : "/root";
@@ -73,7 +71,7 @@ const veryDeepPlan = buildDeepPlan(80, 2);
 const flatPlan = buildFlatPlan(500);
 const flatLargePlan = buildFlatPlan(5000);
 
-const bench = withCodSpeed(new Bench({ name: "reducePlan", time: 200 }));
+const bench = createBench("reducePlan");
 
 bench
 	.add("under limit (no-op, n=50, limit=100)", () => {
@@ -115,7 +113,4 @@ bench
 
 export default bench;
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-	await bench.run();
-	console.table(bench.table());
-}
+await runIfMain(import.meta.url, bench);

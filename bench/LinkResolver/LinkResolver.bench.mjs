@@ -2,11 +2,9 @@
 	MIT License http://www.opensource.org/licenses/mit-license.php
 */
 
-import { Bench } from "tinybench";
-import { withCodSpeed } from "@codspeed/tinybench-plugin";
-import { createRequire } from "module";
+import { createBench, moduleRequire, runIfMain } from "../helpers.mjs";
 
-const require = createRequire(import.meta.url);
+const require = moduleRequire(import.meta.url);
 const LinkResolver = require("../../lib/LinkResolver.js");
 
 // LinkResolver does real sync filesystem work via fs.readlinkSync.
@@ -47,7 +45,7 @@ for (const p of shallowPaths) warmResolver.resolve(p);
 for (const p of mediumPaths) warmResolver.resolve(p);
 for (const p of deepPaths) warmResolver.resolve(p);
 
-const bench = withCodSpeed(new Bench({ name: "LinkResolver", time: 200 }));
+const bench = createBench("LinkResolver");
 
 bench
 	.add("cold resolve shallow paths (depth=1, n=100)", () => {
@@ -71,7 +69,4 @@ bench
 
 export default bench;
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-	await bench.run();
-	console.table(bench.table());
-}
+await runIfMain(import.meta.url, bench);

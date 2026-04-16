@@ -6,21 +6,15 @@
 	groups and so that running a single suite locally is cheap.
 */
 
+import { runSuites } from "./helpers.mjs";
 import ignoredBench from "./ignored/ignored.bench.mjs";
 import reducePlanBench from "./reducePlan/reducePlan.bench.mjs";
 import linkResolverBench from "./LinkResolver/LinkResolver.bench.mjs";
 import watchpackBench from "./watchpack/normalizeOptions.bench.mjs";
 
-const suites = [
+await runSuites([
 	ignoredBench,
 	reducePlanBench,
 	linkResolverBench,
 	watchpackBench,
-];
-
-for (const suite of suites) {
-	process.stdout.write(`\n== ${suite.name ?? "bench"} ==\n`);
-	// eslint-disable-next-line no-await-in-loop
-	await suite.run();
-	console.table(suite.table());
-}
+]);
