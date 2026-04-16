@@ -38,6 +38,22 @@ const UNIX_PATHS = [
 
 const WINDOWS_PATHS = UNIX_PATHS.map((p) => p.replace(/\//g, "\\"));
 
+// Mixed unix/windows paths simulate a cross-platform tool (for example a test
+// runner) that normalises some paths to posix before passing them in while
+// leaving others in native form.
+const MIXED_PATHS = UNIX_PATHS.map((p, i) =>
+	i % 2 === 0 ? p : p.replace(/\//g, "\\"),
+);
+
+// Deep monorepo style paths: hundreds of segments, node_modules sprinkled
+// deep. Benchmarks the worst-case scan distance for the regex matcher.
+const DEEP_PATHS = Array.from({ length: 10 }, (_, i) => {
+	const segments = Array.from({ length: 15 }, (_, j) => `level${j}`);
+	segments.push(i === 3 ? "node_modules" : `leaf${i}`);
+	segments.push("index.js");
+	return `/${segments.join("/")}`;
+});
+
 const bench = withCodSpeed(new Bench({ name: "ignored", time: 200 }));
 
 const noneMatcher = buildIgnored({});
@@ -66,6 +82,8 @@ const functionMatcher = buildIgnored({
 	ignored: (p) => p.includes("node_modules") || p.includes(".git"),
 });
 
+const singletonArrayMatcher = buildIgnored({ ignored: ["**/node_modules"] });
+
 bench
 	.add("ignored=undefined (noop) unix paths", () => {
 		for (const p of UNIX_PATHS) noneMatcher(p);
@@ -76,8 +94,17 @@ bench
 	.add("ignored=regexp windows paths", () => {
 		for (const p of WINDOWS_PATHS) regexpMatcher(p);
 	})
+	.add("ignored=regexp mixed-separator paths", () => {
+		for (const p of MIXED_PATHS) regexpMatcher(p);
+	})
+	.add("ignored=regexp deep paths", () => {
+		for (const p of DEEP_PATHS) regexpMatcher(p);
+	})
 	.add("ignored=string unix paths", () => {
 		for (const p of UNIX_PATHS) stringMatcher(p);
+	})
+	.add("ignored=array[1] unix paths", () => {
+		for (const p of UNIX_PATHS) singletonArrayMatcher(p);
 	})
 	.add("ignored=array[2] unix paths", () => {
 		for (const p of UNIX_PATHS) smallArrayMatcher(p);
@@ -87,6 +114,9 @@ bench
 	})
 	.add("ignored=array[10] windows paths", () => {
 		for (const p of WINDOWS_PATHS) largeArrayMatcher(p);
+	})
+	.add("ignored=array[10] deep paths", () => {
+		for (const p of DEEP_PATHS) largeArrayMatcher(p);
 	})
 	.add("ignored=function unix paths", () => {
 		for (const p of UNIX_PATHS) functionMatcher(p);

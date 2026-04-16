@@ -67,8 +67,11 @@ const buildFlatPlan = (count) => {
 const smallPlan = buildWidePlan(50, 10);
 const mediumPlan = buildWidePlan(500, 20);
 const largePlan = buildWidePlan(2000, 25);
+const hugePlan = buildWidePlan(10000, 40);
 const deepPlan = buildDeepPlan(30, 3);
+const veryDeepPlan = buildDeepPlan(80, 2);
 const flatPlan = buildFlatPlan(500);
+const flatLargePlan = buildFlatPlan(5000);
 
 const bench = withCodSpeed(new Bench({ name: "reducePlan", time: 200 }));
 
@@ -85,14 +88,29 @@ bench
 	.add("medium plan light reduction (n=500, limit=400)", () => {
 		reducePlan(mediumPlan, 400);
 	})
+	.add("medium plan barely over (n=500, limit=499)", () => {
+		reducePlan(mediumPlan, 499);
+	})
 	.add("large plan reduction (n=2000, limit=100)", () => {
 		reducePlan(largePlan, 100);
+	})
+	.add("large plan aggressive (n=2000, limit=10)", () => {
+		reducePlan(largePlan, 10);
+	})
+	.add("huge plan reduction (n=10000, limit=500)", () => {
+		reducePlan(hugePlan, 500);
 	})
 	.add("deep plan reduction (depth=30, limit=20)", () => {
 		reducePlan(deepPlan, 20);
 	})
+	.add("very deep plan (depth=80, limit=40)", () => {
+		reducePlan(veryDeepPlan, 40);
+	})
 	.add("flat plan reduction (n=500 in one dir, limit=50)", () => {
 		reducePlan(flatPlan, 50);
+	})
+	.add("flat large plan (n=5000 in one dir, limit=100)", () => {
+		reducePlan(flatLargePlan, 100);
 	});
 
 export default bench;
