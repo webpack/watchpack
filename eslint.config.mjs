@@ -3,6 +3,12 @@ import config from "eslint-config-webpack";
 
 export default defineConfig([
 	{
+		// Benchmarks are ESM-only (tinybench is ESM) and use top-level await
+		// plus import.meta which the shared CJS config does not expect. They
+		// are not shipped with the package so lint them out.
+		ignores: ["bench/**"],
+	},
+	{
 		extends: [config],
 		rules: {
 			// TODO remove in the next major release
