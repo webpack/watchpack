@@ -1,19 +1,26 @@
-name: CodSpeed
+name: Benchmarks
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
-  # Allow running on demand from the Actions tab.
+    branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  # Required for OIDC authentication with CodSpeed.
+  id-token: write
+
 jobs:
-  benchmarks:
-    name: Run benchmarks
+  benchmark:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -28,7 +35,8 @@ jobs:
       - run: npm ci
 
       - name: Run benchmarks
-        uses: CodSpeedHQ/action@v4
+        uses: CodSpeedHQ/action@fa0c9b1770f933c1bc025c83a9b42946b102f4e6 # v4.10.4
         with:
-          run: npm run bench
+          run: npm run benchmark
+          mode: "simulation"
           token: ${{ secrets.CODSPEED_TOKEN }}

@@ -39,11 +39,7 @@
     "test:only": "npm run test:base",
     "test:watch": "npm run test:base -- --watch",
     "test:coverage": "npm run test:base -- --collectCoverageFrom=\"lib/**/*.js\" --coverage",
-    "bench": "node bench/index.mjs",
-    "bench:ignored": "node bench/ignored/ignored.bench.mjs",
-    "bench:reducePlan": "node bench/reducePlan/reducePlan.bench.mjs",
-    "bench:LinkResolver": "node bench/LinkResolver/LinkResolver.bench.mjs",
-    "bench:watchpack": "node bench/watchpack/normalizeOptions.bench.mjs",
+    "benchmark": "node --max-old-space-size=4096 --hash-seed=1 --random-seed=1 --no-opt --predictable --predictable-gc-schedule --interpreted-frames-native-stack --allow-natives-syntax --expose-gc --no-concurrent-sweeping ./bench/run.mjs",
     "version": "changeset version",
     "release": "changeset publish"
   },
@@ -54,7 +50,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
     "@changesets/get-github-info": "^0.8.0",
-    "@codspeed/tinybench-plugin": "^5.2.0",
+    "@codspeed/core": "^5.2.0",
     "@types/glob-to-regexp": "^0.4.4",
     "@types/graceful-fs": "^4.1.9",
     "@types/jest": "^30.0.0",
