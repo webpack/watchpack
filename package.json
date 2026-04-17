@@ -39,7 +39,7 @@
     "test:only": "npm run test:base",
     "test:watch": "npm run test:base -- --watch",
     "test:coverage": "npm run test:base -- --collectCoverageFrom=\"lib/**/*.js\" --coverage",
-    "benchmark": "node --max-old-space-size=4096 --hash-seed=1 --random-seed=1 --no-opt --predictable --predictable-gc-schedule --interpreted-frames-native-stack --allow-natives-syntax --expose-gc --no-concurrent-sweeping ./bench/run.mjs",
+    "benchmark": "node --max-old-space-size=4096 --hash-seed=1 --random-seed=1 --no-opt --predictable --predictable-gc-schedule --interpreted-frames-native-stack --allow-natives-syntax --expose-gc --no-concurrent-sweeping ./benchmark/run.mjs",
     "version": "changeset version",
     "release": "changeset publish"
   },
