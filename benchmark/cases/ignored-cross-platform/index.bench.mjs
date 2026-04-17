@@ -9,10 +9,7 @@
  * has its own CodSpeed trend line.
  */
 
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const Watchpack = require("../../../lib/index.js");
+import Watchpack from "../../../lib/index.js";
 
 const UNIX_PATHS = [
 	"/home/user/project/src/index.js",
@@ -27,9 +24,9 @@ const UNIX_PATHS = [
 	"/home/user/project/package.json",
 ];
 
-const WINDOWS_PATHS = UNIX_PATHS.map((p) => p.replace(/\//g, "\\"));
-const MIXED_PATHS = UNIX_PATHS.map((p, i) =>
-	i % 2 === 0 ? p : p.replace(/\//g, "\\"),
+const WINDOWS_PATHS = UNIX_PATHS.map((path) => path.replace(/\//g, "\\"));
+const MIXED_PATHS = UNIX_PATHS.map((path, i) =>
+	i % 2 === 0 ? path : path.replace(/\//g, "\\"),
 );
 
 // Simulates a monorepo deep-path batch: each path has ~17 segments so the
@@ -42,8 +39,8 @@ const DEEP_PATHS = Array.from({ length: 10 }, (_, i) => {
 });
 
 /**
- * @param {import("../../../lib/index").WatchOptions} options
- * @returns {(item: string) => boolean}
+ * @param {import("../../../lib/index").WatchOptions} options options
+ * @returns {(item: string) => boolean} true when ignored, otherwise false
  */
 const buildIgnored = (options) => new Watchpack(options).watcherOptions.ignored;
 
@@ -61,7 +58,7 @@ const LARGE_ARRAY_IGNORED = [
 ];
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	const regexpMatcher = buildIgnored({
@@ -70,21 +67,21 @@ export default function register(bench) {
 	const arrayMatcher = buildIgnored({ ignored: LARGE_ARRAY_IGNORED });
 
 	bench.add("ignored-cross-platform: regex against windows paths", () => {
-		for (const p of WINDOWS_PATHS) regexpMatcher(p);
+		for (const path of WINDOWS_PATHS) regexpMatcher(path);
 	});
 	bench.add("ignored-cross-platform: regex against mixed separators", () => {
-		for (const p of MIXED_PATHS) regexpMatcher(p);
+		for (const path of MIXED_PATHS) regexpMatcher(path);
 	});
 	bench.add("ignored-cross-platform: regex against deep posix paths", () => {
-		for (const p of DEEP_PATHS) regexpMatcher(p);
+		for (const path of DEEP_PATHS) regexpMatcher(path);
 	});
 	bench.add("ignored-cross-platform: array[10] against windows paths", () => {
-		for (const p of WINDOWS_PATHS) arrayMatcher(p);
+		for (const path of WINDOWS_PATHS) arrayMatcher(path);
 	});
 	bench.add(
 		"ignored-cross-platform: array[10] against deep posix paths",
 		() => {
-			for (const p of DEEP_PATHS) arrayMatcher(p);
+			for (const path of DEEP_PATHS) arrayMatcher(path);
 		},
 	);
 }

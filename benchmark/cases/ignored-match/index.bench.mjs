@@ -8,10 +8,7 @@
  * batch dominates per-rebuild time in large projects.
  */
 
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const Watchpack = require("../../../lib/index.js");
+import Watchpack from "../../../lib/index.js";
 
 const UNIX_PATHS = [
 	"/home/user/project/src/index.js",
@@ -29,13 +26,13 @@ const UNIX_PATHS = [
 /**
  * Reach into a Watchpack instance to get at the normalized matcher without
  * duplicating the option-compilation logic.
- * @param {import("../../../lib/index").WatchOptions} options
- * @returns {(item: string) => boolean}
+ * @param {import("../../../lib/index").WatchOptions} options options
+ * @returns {(item: string) => boolean} true when ignored, otherwise false
  */
 const buildIgnored = (options) => new Watchpack(options).watcherOptions.ignored;
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	const noneMatcher = buildIgnored({});
@@ -62,28 +59,28 @@ export default function register(bench) {
 		],
 	});
 	const functionMatcher = buildIgnored({
-		ignored: (p) => p.includes("node_modules") || p.includes(".git"),
+		ignored: (path) => path.includes("node_modules") || path.includes(".git"),
 	});
 
 	bench.add("ignored-match: no ignored option (noop fast path)", () => {
-		for (const p of UNIX_PATHS) noneMatcher(p);
+		for (const path of UNIX_PATHS) noneMatcher(path);
 	});
 	bench.add("ignored-match: regex matcher", () => {
-		for (const p of UNIX_PATHS) regexpMatcher(p);
+		for (const path of UNIX_PATHS) regexpMatcher(path);
 	});
 	bench.add("ignored-match: glob string matcher", () => {
-		for (const p of UNIX_PATHS) stringMatcher(p);
+		for (const path of UNIX_PATHS) stringMatcher(path);
 	});
 	bench.add("ignored-match: array[1] matcher", () => {
-		for (const p of UNIX_PATHS) singletonArrayMatcher(p);
+		for (const path of UNIX_PATHS) singletonArrayMatcher(path);
 	});
 	bench.add("ignored-match: array[2] matcher", () => {
-		for (const p of UNIX_PATHS) smallArrayMatcher(p);
+		for (const path of UNIX_PATHS) smallArrayMatcher(path);
 	});
 	bench.add("ignored-match: array[10] matcher", () => {
-		for (const p of UNIX_PATHS) largeArrayMatcher(p);
+		for (const path of UNIX_PATHS) largeArrayMatcher(path);
 	});
 	bench.add("ignored-match: function matcher", () => {
-		for (const p of UNIX_PATHS) functionMatcher(p);
+		for (const path of UNIX_PATHS) functionMatcher(path);
 	});
 }

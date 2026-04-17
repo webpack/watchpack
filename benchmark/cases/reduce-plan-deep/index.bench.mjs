@@ -11,10 +11,7 @@
  * spine and very few siblings per rung.
  */
 
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const reducePlan = require("../../../lib/reducePlan.js");
+import reducePlan from "../../../lib/reducePlan.js";
 
 const ROOT = process.platform === "win32" ? "C:\\root" : "/root";
 const SEP = process.platform === "win32" ? "\\" : "/";
@@ -41,7 +38,7 @@ const deepPlan = buildDeepPlan(30, 3);
 const veryDeepPlan = buildDeepPlan(80, 2);
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	bench.add("reduce-plan-deep: depth=30, leaves=3, limit=20", () => {

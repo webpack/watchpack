@@ -1,15 +1,13 @@
 #!/usr/bin/env node
 /*
- * Benchmark entry point for watchpack.
+ * Benchmark entry point for enhanced-resolve.
  *
  * Discovers every directory under ./cases/ that contains an `index.bench.mjs`
  * file, calls its default-exported `register(bench, ctx)` function to
- * populate tinybench tasks, then runs them all. Case selection can be
- * restricted with `BENCH_FILTER` or a positional CLI arg — a case is kept
- * iff its directory name contains the filter substring.
+ * populate tinybench tasks, then runs them all.
  *
- * The bench is wrapped with a local `withCodSpeed()` bridge so the same
- * entry point works for:
+ * The bench is wrapped with a local `withCodSpeed()` bridge (ported from
+ * webpack) so the same entry point works for:
  *   - local development (`npm run benchmark`) -> wall-clock measurements
  *     printed to the terminal; the wrapper detects that CodSpeed is not
  *     active and returns the bench untouched
@@ -28,22 +26,24 @@ import { withCodSpeed } from "./with-codspeed.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const casesPath = path.join(__dirname, "cases");
 
-// Filter expression from CLI or env (e.g. `npm run benchmark -- ignored`).
-// A case is included if its directory name contains this substring. Empty
-// means "include everything".
+/**
+ * Filter expression from CLI or env (e.g. `npm run benchmark -- realistic`).
+ * A case is included if its directory name contains this substring. Empty
+ * means "include everything".
+ */
 const filter = process.env.BENCH_FILTER || process.argv[2] || "";
 
 const bench = withCodSpeed(
 	new Bench({
-		name: "watchpack",
+		name: "enhanced-resolve",
 		now: hrtimeNow,
 		throws: true,
 		warmup: true,
 		warmupIterations: 2,
 		// Kept deliberately low: each task's body already loops over many
-		// operations, and we want wall-clock runs to finish in a few seconds.
-		// CodSpeed's simulation mode ignores this and instruments exactly one
-		// iteration per task.
+		// resolve calls, and we want wall-clock runs to finish in a few
+		// seconds. CodSpeed's simulation mode ignores this and instruments
+		// exactly one iteration per task.
 		iterations: 10,
 	}),
 );
@@ -66,20 +66,17 @@ if (caseDirs.length === 0) {
 for (const caseName of caseDirs) {
 	const benchFile = path.join(casesPath, caseName, "index.bench.mjs");
 	try {
-		// eslint-disable-next-line no-await-in-loop
 		await fs.access(benchFile);
 	} catch {
 		console.warn(`[skip] ${caseName}: no index.bench.mjs`);
 		continue;
 	}
-	// eslint-disable-next-line no-await-in-loop
 	const mod = await import(pathToFileURL(benchFile).href);
 	if (typeof mod.default !== "function") {
 		throw new Error(
 			`${caseName}/index.bench.mjs must export a default function`,
 		);
 	}
-	// eslint-disable-next-line no-await-in-loop
 	await mod.default(bench, {
 		caseName,
 		caseDir: path.join(casesPath, caseName),
@@ -96,6 +93,8 @@ await bench.run();
 const rows = bench.tasks.map((task) => {
 	const r = task.result;
 	if (!r) return { name: task.name, status: "no result" };
+	// tinybench v6 result shape: latency/throughput objects, no top-level
+	// hz / samples. `latency` fields are in ms already.
 	const lat = r.latency;
 	const tp = r.throughput;
 	return {

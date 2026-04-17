@@ -12,10 +12,7 @@
  * process from leaking timers even though no watchers have been attached.
  */
 
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const Watchpack = require("../../../lib/index.js");
+import Watchpack from "../../../lib/index.js";
 
 const optionsNone = {};
 const optionsWithRegExp = { ignored: /node_modules|\.git/ };
@@ -35,10 +32,10 @@ const optionsWithLargeArray = {
 		"**/*.log",
 	],
 };
-const optionsWithFn = { ignored: (p) => p.includes("node_modules") };
+const optionsWithFn = { ignored: (path) => path.includes("node_modules") };
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	bench.add("watchpack-construction: no ignored option", () => {

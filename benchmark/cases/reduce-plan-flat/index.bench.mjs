@@ -8,10 +8,7 @@
  * "pages" or "generated" directory with hundreds of entries).
  */
 
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const reducePlan = require("../../../lib/reducePlan.js");
+import reducePlan from "../../../lib/reducePlan.js";
 
 const ROOT = process.platform === "win32" ? "C:\\root" : "/root";
 const SEP = process.platform === "win32" ? "\\" : "/";
@@ -32,7 +29,7 @@ const flatMediumPlan = buildFlatPlan(500);
 const flatLargePlan = buildFlatPlan(5000);
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	bench.add("reduce-plan-flat: n=500 in one dir, limit=50", () => {

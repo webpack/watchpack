@@ -14,19 +14,16 @@
  * instrumentation noisy.
  */
 
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const LinkResolver = require("../../../lib/LinkResolver.js");
+import LinkResolver from "../../../lib/LinkResolver.js";
 
 const SEP = process.platform === "win32" ? "\\" : "/";
 const ROOT =
 	process.platform === "win32" ? "C:\\nonexistent_bench" : "/nonexistent_bench";
 
 const makePath = (depth) => {
-	let p = ROOT;
-	for (let i = 0; i < depth; i++) p += `${SEP}level${i}`;
-	return p;
+	let path = ROOT;
+	for (let i = 0; i < depth; i++) path += `${SEP}level${i}`;
+	return path;
 };
 
 const shallowPaths = Array.from(
@@ -43,31 +40,31 @@ const deepPaths = Array.from(
 );
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	// Pre-populated resolver for the warm/cache-hit measurements.
 	const warmResolver = new LinkResolver();
-	for (const p of shallowPaths) warmResolver.resolve(p);
-	for (const p of mediumPaths) warmResolver.resolve(p);
-	for (const p of deepPaths) warmResolver.resolve(p);
+	for (const path of shallowPaths) warmResolver.resolve(path);
+	for (const path of mediumPaths) warmResolver.resolve(path);
+	for (const path of deepPaths) warmResolver.resolve(path);
 
 	bench.add("link-resolver: cold shallow batch (depth=1, n=100)", () => {
 		const resolver = new LinkResolver();
-		for (const p of shallowPaths) resolver.resolve(p);
+		for (const path of shallowPaths) resolver.resolve(path);
 	});
 	bench.add("link-resolver: cold medium batch (depth=5, n=100)", () => {
 		const resolver = new LinkResolver();
-		for (const p of mediumPaths) resolver.resolve(p);
+		for (const path of mediumPaths) resolver.resolve(path);
 	});
 	bench.add("link-resolver: cold deep batch (depth=15, n=50)", () => {
 		const resolver = new LinkResolver();
-		for (const p of deepPaths) resolver.resolve(p);
+		for (const path of deepPaths) resolver.resolve(path);
 	});
 	bench.add("link-resolver: warm shallow batch (cache hit, n=100)", () => {
-		for (const p of shallowPaths) warmResolver.resolve(p);
+		for (const path of shallowPaths) warmResolver.resolve(path);
 	});
 	bench.add("link-resolver: warm deep batch (cache hit, n=50)", () => {
-		for (const p of deepPaths) warmResolver.resolve(p);
+		for (const path of deepPaths) warmResolver.resolve(path);
 	});
 }

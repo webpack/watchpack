@@ -57,15 +57,21 @@ function getCallingFile() {
 	return path.relative(repoRoot, file);
 }
 
+// eslint-disable-next-line jsdoc/require-property
+/** @typedef {object} EXPECTED_OBJECT */
+
 /**
- * @typedef {{ uri: string, fn: Fn, opts: object | undefined }} TaskMeta
+ * @typedef {{ uri: string, fn: Fn, opts: EXPECTED_OBJECT | undefined }} TaskMeta
+ */
+
+/**
  * @type {WeakMap<Bench, Map<string, TaskMeta>>}
  */
 const metaMap = new WeakMap();
 
 /**
- * @param {Bench} bench
- * @returns {Map<string, TaskMeta>}
+ * @param {Bench} bench bench
+ * @returns {Map<string, TaskMeta>} task meta
  */
 function getOrCreateMeta(bench) {
 	let m = metaMap.get(bench);
@@ -79,9 +85,8 @@ function getOrCreateMeta(bench) {
 /**
  * Wrap a tinybench Bench so that CodSpeed simulation mode instruments each
  * task. In "disabled" and "walltime" modes the bench is returned as-is.
- *
- * @param {Bench} bench
- * @returns {Bench}
+ * @param {Bench} bench bench
+ * @returns {Bench} bench
  */
 export function withCodSpeed(bench) {
 	const mode = getCodspeedRunnerMode();
@@ -111,16 +116,18 @@ export function withCodSpeed(bench) {
 	};
 
 	/**
-	 * @param {Fn} fn
-	 * @param {boolean} isAsync
-	 * @returns {Fn}
+	 * @param {Fn} fn function
+	 * @param {boolean} isAsync true when is async, otherwise false
+	 * @returns {Fn} wrapper function
 	 */
 	const wrapFrame = (fn, isAsync) => {
 		if (isAsync) {
+			// eslint-disable-next-line camelcase
 			return async function __codspeed_root_frame__() {
 				await fn();
 			};
 		}
+		// eslint-disable-next-line camelcase
 		return function __codspeed_root_frame__() {
 			fn();
 		};
@@ -133,14 +140,12 @@ export function withCodSpeed(bench) {
 
 			// Warm-up: run the body a few times to stabilise caches / JIT.
 			for (let i = 0; i < bench.iterations - 1; i++) {
-				// eslint-disable-next-line no-await-in-loop
 				await m.fn();
 			}
 
 			// Instrumented run.
 			global.gc?.();
 			InstrumentHooks.startBenchmark();
-			// eslint-disable-next-line no-await-in-loop
 			await wrapFrame(m.fn, true)();
 			InstrumentHooks.stopBenchmark();
 			InstrumentHooks.setExecutedBenchmark(process.pid, m.uri);

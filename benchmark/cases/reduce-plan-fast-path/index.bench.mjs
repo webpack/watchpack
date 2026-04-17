@@ -12,10 +12,7 @@
  * own trend line instead of hiding under a 10ms huge-plan benchmark.
  */
 
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const reducePlan = require("../../../lib/reducePlan.js");
+import reducePlan from "../../../lib/reducePlan.js";
 
 const ROOT = process.platform === "win32" ? "C:\\root" : "/root";
 const SEP = process.platform === "win32" ? "\\" : "/";
@@ -43,7 +40,7 @@ const smallPlan = buildWidePlan(50, 10);
 const mediumPlan = buildWidePlan(500, 20);
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	bench.add("reduce-plan-fast-path: under limit (n=50, limit=100)", () => {

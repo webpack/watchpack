@@ -11,10 +11,7 @@
  * Three magnitudes: small (50), medium (500), large (2000), huge (10000).
  */
 
-import { createRequire } from "module";
-
-const require = createRequire(import.meta.url);
-const reducePlan = require("../../../lib/reducePlan.js");
+import reducePlan from "../../../lib/reducePlan.js";
 
 const ROOT = process.platform === "win32" ? "C:\\root" : "/root";
 const SEP = process.platform === "win32" ? "\\" : "/";
@@ -44,7 +41,7 @@ const largePlan = buildWidePlan(2000, 25);
 const hugePlan = buildWidePlan(10000, 40);
 
 /**
- * @param {import('tinybench').Bench} bench
+ * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	bench.add("reduce-plan-wide: small plan (n=50, limit=10)", () => {
