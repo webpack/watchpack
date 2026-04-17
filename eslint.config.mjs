@@ -41,4 +41,17 @@ export default defineConfig([
 			"n/prefer-node-protocol": "off",
 		},
 	},
+	{
+		files: ["benchmark/**/*"],
+		languageOptions: {
+			ecmaVersion: "latest",
+		},
+		rules: {
+			"no-console": "off",
+			"n/hashbang": "off",
+			"n/no-unsupported-features/node-builtins": "off",
+			"n/no-unsupported-features/es-syntax": "off",
+			"n/no-process-exit": "off",
+		},
+	},
 ]);
