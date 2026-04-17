@@ -25,7 +25,7 @@ jobs:
       - run: npm ci
 
       - name: Cache eslint result
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .eslintcache
           key: lint-eslint-${{ runner.os }}-node-${{ hashFiles('**/package-lock.json', '**/eslint.config.mjs') }}
@@ -65,7 +65,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         id: calculate_architecture
         with:
           result-encoding: string
