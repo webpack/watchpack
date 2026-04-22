@@ -48,6 +48,8 @@ declare class DirectoryWatcher extends EventEmitter<{
 	filesWithoutCase: Map<string, number>;
 	/** @type {Map<string, Watcher<DirectoryWatcherEvents> | boolean>} */
 	directories: Map<string, Watcher<DirectoryWatcherEvents> | boolean>;
+	/** @type {Map<string, Watcher<FileWatcherEvents>>} */
+	symlinkTargetWatchers: Map<string, Watcher<FileWatcherEvents>>;
 	lastWatchEvent: number;
 	initialScan: boolean;
 	ignored: import("./index").IgnoredFunction;
@@ -121,6 +123,13 @@ declare class DirectoryWatcher extends EventEmitter<{
 	 * @param {string} directoryPath directory path
 	 */
 	createNestedWatcher(directoryPath: string): void;
+	/**
+	 * Set up a watcher for the resolved real path of a symlink discovered
+	 * inside this directory, so that changes to the target are surfaced as
+	 * changes to the symlink path.
+	 * @param {string} symlinkPath path to the symlink inside this directory
+	 */
+	watchSymlinkTarget(symlinkPath: string): void;
 	/**
 	 * @param {boolean} flag true when nested, otherwise false
 	 */
