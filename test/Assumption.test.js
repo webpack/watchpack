@@ -237,29 +237,34 @@ describe("Assumption", () => {
 		});
 	}
 
-	it("should not fire events in subdirectories", (done) => {
-		testHelper.dir("watch-test-directory");
-		testHelper.tick(500, () => {
-			const watcher = (watcherToClose = fs.watch(fixtures));
-			watcher.on("change", (arg, arg2) => {
-				expect(true).toBe(false);
-				done(new Error(`should not be emitted ${arg} ${arg2}`));
-				// @ts-expect-error for tests
-				done = function () {};
-			});
-			watcher.on("error", (err) => {
-				done(err);
-				// @ts-expect-error for tests
-				done = function () {};
-			});
+	// On Windows, non-recursive `fs.watch` fires a change event when a
+	// subdirectory's mtime changes (for example, when a file is created
+	// inside). Skip this assumption check there.
+	if (!IS_WIN) {
+		it("should not fire events in subdirectories", (done) => {
+			testHelper.dir("watch-test-directory");
 			testHelper.tick(500, () => {
-				testHelper.file("watch-test-directory/watch-test-file");
+				const watcher = (watcherToClose = fs.watch(fixtures));
+				watcher.on("change", (arg, arg2) => {
+					expect(true).toBe(false);
+					done(new Error(`should not be emitted ${arg} ${arg2}`));
+					// @ts-expect-error for tests
+					done = function () {};
+				});
+				watcher.on("error", (err) => {
+					done(err);
+					// @ts-expect-error for tests
+					done = function () {};
+				});
 				testHelper.tick(500, () => {
-					done();
+					testHelper.file("watch-test-directory/watch-test-file");
+					testHelper.tick(500, () => {
+						done();
+					});
 				});
 			});
 		});
-	});
+	}
 
 	if (SUPPORTS_RECURSIVE_WATCHING) {
 		it("should fire events in subdirectories (recursive)", (done) => {
@@ -272,20 +277,41 @@ describe("Assumption", () => {
 				}));
 				/** @type {string[]} */
 				const events = [];
-				watcher.once("change", () => {
-					testHelper.tick(1000, () => {
-						expect(
-							events.some((item) =>
-								/watch-test-directory[/\\]watch-test-file/.test(item),
-							),
-						).toBe(true);
+				const matches = () =>
+					events.some((item) =>
+						/watch-test-directory[/\\]watch-test-file/.test(item),
+					);
+				let timedOut = false;
+				// Poll for the expected event instead of relying on a fixed wait
+				// window. Windows recursive fs.watch can deliver events for the
+				// overwritten file with noticeable delay under CI load.
+				const pollTimeout = setTimeout(() => {
+					timedOut = true;
+				}, 5000);
+				/**
+				 * @returns {void}
+				 */
+				const check = () => {
+					if (matches()) {
+						clearTimeout(pollTimeout);
 						done();
-					});
+						return;
+					}
+					if (timedOut) {
+						expect(matches()).toBe(true);
+						done();
+						return;
+					}
+					testHelper.tick(100, check);
+				};
+				watcher.once("change", () => {
+					testHelper.tick(200, check);
 				});
 				watcher.on("change", (type, filename) => {
 					events.push(/** @type {string} */ (filename));
 				});
 				watcher.on("error", (err) => {
+					clearTimeout(pollTimeout);
 					done(err);
 					// @ts-expect-error for tests
 					done = function () {};
@@ -318,20 +344,38 @@ describe("Assumption", () => {
 				}));
 				/** @type {string[]} */
 				const events = [];
-				watcher.once("change", () => {
-					testHelper.tick(1000, () => {
-						expect(
-							events.some((item) =>
-								/watch-test-directory[/\\]watch-test-file/.test(item),
-							),
-						).toBe(true);
+				const matches = () =>
+					events.some((item) =>
+						/watch-test-directory[/\\]watch-test-file/.test(item),
+					);
+				let timedOut = false;
+				const pollTimeout = setTimeout(() => {
+					timedOut = true;
+				}, 5000);
+				/**
+				 * @returns {void}
+				 */
+				const check = () => {
+					if (matches()) {
+						clearTimeout(pollTimeout);
 						done();
-					});
+						return;
+					}
+					if (timedOut) {
+						expect(matches()).toBe(true);
+						done();
+						return;
+					}
+					testHelper.tick(100, check);
+				};
+				watcher.once("change", () => {
+					testHelper.tick(200, check);
 				});
 				watcher.on("change", (type, filename) => {
 					events.push(/** @type {string} */ (filename));
 				});
 				watcher.on("error", (err) => {
+					clearTimeout(pollTimeout);
 					done(err);
 					// @ts-expect-error for tests
 					done = function () {};
