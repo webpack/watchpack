@@ -49,16 +49,6 @@ const wp = new Watchpack({
 	// ignored: (entry) => boolean - an arbitrary function which must return truthy to ignore an entry
 	// For all cases expect the arbitrary function the path will have path separator normalized to '/'.
 	// All subdirectories are ignored too
-
-	busyRetries: 3,
-	// number of retries when fs.lstat returns EBUSY (default: 3)
-	// EBUSY is transient on Windows when an anti-virus scanner, indexer or editor
-	// briefly holds a handle on the file. Retrying prevents watchpack from
-	// reporting a spurious `remove` event (and from appearing to stop watching
-	// the file). Set to `false` or `0` to disable retrying.
-
-	busyRetryDelay: 100,
-	// delay in milliseconds between EBUSY retries (default: 100)
 });
 
 // Watchpack.prototype.watch({
@@ -141,3 +131,12 @@ const fileTimesOld = wp.getTimes();
 // this include timestamps from files not directly watched
 // key: absolute path, value: timestamp as number
 ```
+
+## Environment variables
+
+- `WATCHPACK_POLLING`: when set, overrides the `poll` option (see above).
+- `WATCHPACK_RETRIES`: number of times to retry `fs.lstat` when it returns
+  `EBUSY` (default: `3`). Useful on Windows where anti-virus scanners,
+  indexers or editors briefly lock files — without retries watchpack would
+  see a spurious `remove` and stop tracking the file. Set to `0` or
+  `"false"` to disable retrying.

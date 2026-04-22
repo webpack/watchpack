@@ -1,5 +1,5 @@
 ---
-"watchpack": minor
+"watchpack": patch
 ---
 
 fix: retry `fs.lstat` on transient `EBUSY` errors instead of flagging the
@@ -15,12 +15,8 @@ was re-scanned.
 
 `DirectoryWatcher` now retries `lstat` up to three times (100 ms apart)
 before giving up, and does not emit a remove when the only reason the
-file could not be stat'd was `EBUSY`. This matches the behaviour of
-other popular file watchers.
+file could not be stat'd was `EBUSY`.
 
-Two new options are exposed on `Watchpack` and `DirectoryWatcher`:
-
-- `busyRetries`: number of retries on `EBUSY` (default: `3`). Set to
-  `false` or `0` to disable retrying and restore the previous behaviour.
-- `busyRetryDelay`: delay in milliseconds between retries (default:
-  `100`).
+The retry count is controlled by the `WATCHPACK_RETRIES` environment
+variable (default: `3`; set to `0` or `"false"` to disable retrying and
+restore the previous behaviour).

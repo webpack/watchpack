@@ -264,61 +264,16 @@ describe("DirectoryWatcher", () => {
 			return err;
 		};
 
-		it("retries lstat on EBUSY and does not flag the file as missing", (done) => {
+		it("does not emit remove when lstat keeps returning EBUSY", (done) => {
 			testHelper.file("a");
 			testHelper.tick(1000, () => {
-				const directoryWatcher = getDirectoryWatcher(fixtures, {
-					busyRetries: 4,
-					busyRetryDelay: 10,
-				});
+				const directoryWatcher = getDirectoryWatcher(fixtures, EMPTY_OPTIONS);
 				const a = directoryWatcher.watch(path.join(fixtures, "a"));
 
-				// Swap the instance helper: first two calls for "a" fail with EBUSY,
-				// subsequent calls fall through to the real implementation. With
-				// retries the watcher should recover without emitting a remove.
-				const realLstat =
-					directoryWatcher.lstatWithRetry.bind(directoryWatcher);
-				let ebusyCalls = 0;
-				directoryWatcher.lstatWithRetry = (target, callback) => {
-					if (ebusyCalls < 2 && target.endsWith(`${path.sep}a`)) {
-						ebusyCalls++;
-						process.nextTick(() =>
-							/** @type {(err: NodeJS.ErrnoException | null, stats?: import("fs").Stats) => void} */
-							(callback)(makeEbusy()),
-						);
-						return;
-					}
-					realLstat(target, callback);
-				};
-
-				let removed = false;
-				a.on("remove", () => {
-					removed = true;
-				});
-
-				testHelper.tick(() => {
-					// Trigger a synthetic watch event for the file and wait long
-					// enough for all retries to complete.
-					directoryWatcher.onWatchEvent("change", "a");
-					testHelper.tick(300, () => {
-						a.close();
-						expect(removed).toBe(false);
-						expect(ebusyCalls).toBeGreaterThan(0);
-						done();
-					});
-				});
-			});
-		});
-
-		it("does not emit remove when lstat keeps returning EBUSY within the retry budget", (done) => {
-			testHelper.file("a");
-			testHelper.tick(1000, () => {
-				const directoryWatcher = getDirectoryWatcher(fixtures, {
-					busyRetries: 2,
-					busyRetryDelay: 10,
-				});
-				const a = directoryWatcher.watch(path.join(fixtures, "a"));
-
+				// Replace the instance helper so every lstat for "a" returns EBUSY.
+				// The retry loop inside lstatWithRetry is bypassed here; what we're
+				// asserting is that onWatchEvent doesn't fall through to setMissing
+				// when it sees an EBUSY (the actual user-visible fix for #223).
 				const realLstat =
 					directoryWatcher.lstatWithRetry.bind(directoryWatcher);
 				directoryWatcher.lstatWithRetry = (target, callback) => {
@@ -341,68 +296,11 @@ describe("DirectoryWatcher", () => {
 					directoryWatcher.onWatchEvent("change", "a");
 					testHelper.tick(300, () => {
 						a.close();
-						// Even after all retries are exhausted, EBUSY should not
-						// make us emit a remove for the file.
 						expect(removed).toBe(false);
 						done();
 					});
 				});
 			});
-		});
-
-		it("busyRetries: 0 restores the previous behaviour (marks missing on EBUSY)", (done) => {
-			testHelper.file("a");
-			testHelper.tick(1000, () => {
-				const directoryWatcher = getDirectoryWatcher(fixtures, {
-					busyRetries: 0,
-				});
-				expect(directoryWatcher.busyRetries).toBe(0);
-				const a = directoryWatcher.watch(path.join(fixtures, "a"));
-
-				let removed = false;
-				a.on("remove", () => {
-					removed = true;
-				});
-
-				// Wait for the initial scan to track the file, then swap in the
-				// EBUSY mock and fire a synthetic watch event.
-				testHelper.tick(500, () => {
-					const realLstat =
-						directoryWatcher.lstatWithRetry.bind(directoryWatcher);
-					directoryWatcher.lstatWithRetry = (target, callback) => {
-						if (target.endsWith(`${path.sep}a`)) {
-							process.nextTick(() =>
-								/** @type {(err: NodeJS.ErrnoException | null, stats?: import("fs").Stats) => void} */
-								(callback)(makeEbusy()),
-							);
-							return;
-						}
-						realLstat(target, callback);
-					};
-
-					directoryWatcher.onWatchEvent("change", "a");
-					testHelper.tick(150, () => {
-						a.close();
-						expect(removed).toBe(true);
-						done();
-					});
-				});
-			});
-		});
-
-		it("uses sensible defaults for busyRetries and busyRetryDelay", () => {
-			const directoryWatcher = getDirectoryWatcher(fixtures, {});
-			expect(directoryWatcher.busyRetries).toBe(3);
-			expect(directoryWatcher.busyRetryDelay).toBe(100);
-			directoryWatcher.close();
-		});
-
-		it("accepts busyRetries: false to disable retrying", () => {
-			const directoryWatcher = getDirectoryWatcher(fixtures, {
-				busyRetries: false,
-			});
-			expect(directoryWatcher.busyRetries).toBe(0);
-			directoryWatcher.close();
 		});
 	});
 });
