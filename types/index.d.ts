@@ -195,6 +195,14 @@ type WatcherOptions = {
 	 * true when need to enable polling mode for watching, otherwise false
 	 */
 	poll?: (number | boolean) | undefined;
+	/**
+	 * number of retries on EBUSY (default: 3). Use `false` or `0` to disable retrying and restore the previous behavior.
+	 */
+	busyRetries?: (number | boolean) | undefined;
+	/**
+	 * delay in milliseconds between EBUSY retries (default: 100)
+	 */
+	busyRetryDelay?: number | undefined;
 };
 type WatchOptions = WatcherOptions & {
 	aggregateTimeout?: number;
@@ -212,6 +220,14 @@ type NormalizedWatchOptions = {
 	 * true when need to enable polling mode for watching, otherwise false
 	 */
 	poll?: (number | boolean) | undefined;
+	/**
+	 * number of retries on EBUSY
+	 */
+	busyRetries?: (number | boolean) | undefined;
+	/**
+	 * delay in milliseconds between EBUSY retries
+	 */
+	busyRetryDelay?: number | undefined;
 };
 type EventType =
 	| `scan (${string})`

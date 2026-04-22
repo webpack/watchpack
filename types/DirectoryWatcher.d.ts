@@ -10,6 +10,8 @@ export = DirectoryWatcher;
  * @property {boolean=} followSymlinks true when need to resolve symlinks and watch symlink and real file, otherwise false
  * @property {IgnoredFunction=} ignored ignore some files from watching (glob pattern or regexp)
  * @property {number | boolean=} poll true when need to enable polling mode for watching, otherwise false
+ * @property {number | boolean=} busyRetries number of retries on EBUSY (default: 3). Use `false` or `0` to disable retrying.
+ * @property {number=} busyRetryDelay delay in milliseconds between retries on EBUSY (default: 100)
  */
 /**
  * @extends {EventEmitter<{ [K in keyof WatchpackEvents]: Parameters<WatchpackEvents[K]> }>}
@@ -54,6 +56,10 @@ declare class DirectoryWatcher extends EventEmitter<{
 	nestedWatching: boolean;
 	/** @type {number | false} */
 	polledWatching: number | false;
+	/** @type {number} */
+	busyRetries: number;
+	/** @type {number} */
+	busyRetryDelay: number;
 	/** @type {undefined | NodeJS.Timeout} */
 	timeout: undefined | NodeJS.Timeout;
 	/** @type {null | InitialScanRemoved} */
@@ -134,6 +140,20 @@ declare class DirectoryWatcher extends EventEmitter<{
 		target: string,
 		startTime?: number | undefined,
 	): Watcher<DirectoryWatcherEvents> | Watcher<FileWatcherEvents>;
+	/**
+	 * Call fs.lstat with retries on EBUSY. Transient EBUSY errors are common
+	 * on Windows when another process (AV scanner, indexer, editor) holds an
+	 * open handle on the file. See webpack/watchpack#223, #44.
+	 * @param {string} target target path
+	 * @param {(err: NodeJS.ErrnoException | null, stats: import("fs").Stats) => void} callback callback
+	 */
+	lstatWithRetry(
+		target: string,
+		callback: (
+			err: NodeJS.ErrnoException | null,
+			stats: import("fs").Stats,
+		) => void,
+	): void;
 	/**
 	 * @param {EventType} eventType event type
 	 * @param {string=} filename filename
@@ -330,4 +350,12 @@ type DirectoryWatcherOptions = {
 	 * true when need to enable polling mode for watching, otherwise false
 	 */
 	poll?: (number | boolean) | undefined;
+	/**
+	 * number of retries on EBUSY (default: 3). Use `false` or `0` to disable retrying.
+	 */
+	busyRetries?: (number | boolean) | undefined;
+	/**
+	 * delay in milliseconds between retries on EBUSY (default: 100)
+	 */
+	busyRetryDelay?: number | undefined;
 };
