@@ -272,20 +272,41 @@ describe("Assumption", () => {
 				}));
 				/** @type {string[]} */
 				const events = [];
-				watcher.once("change", () => {
-					testHelper.tick(1000, () => {
-						expect(
-							events.some((item) =>
-								/watch-test-directory[/\\]watch-test-file/.test(item),
-							),
-						).toBe(true);
+				const matches = () =>
+					events.some((item) =>
+						/watch-test-directory[/\\]watch-test-file/.test(item),
+					);
+				let timedOut = false;
+				// Poll for the expected event instead of relying on a fixed wait
+				// window. Windows recursive fs.watch can deliver events for the
+				// overwritten file with noticeable delay under CI load.
+				const pollTimeout = setTimeout(() => {
+					timedOut = true;
+				}, 5000);
+				/**
+				 * @returns {void}
+				 */
+				const check = () => {
+					if (matches()) {
+						clearTimeout(pollTimeout);
 						done();
-					});
+						return;
+					}
+					if (timedOut) {
+						expect(matches()).toBe(true);
+						done();
+						return;
+					}
+					testHelper.tick(100, check);
+				};
+				watcher.once("change", () => {
+					testHelper.tick(200, check);
 				});
 				watcher.on("change", (type, filename) => {
 					events.push(/** @type {string} */ (filename));
 				});
 				watcher.on("error", (err) => {
+					clearTimeout(pollTimeout);
 					done(err);
 					// @ts-expect-error for tests
 					done = function () {};
@@ -318,20 +339,38 @@ describe("Assumption", () => {
 				}));
 				/** @type {string[]} */
 				const events = [];
-				watcher.once("change", () => {
-					testHelper.tick(1000, () => {
-						expect(
-							events.some((item) =>
-								/watch-test-directory[/\\]watch-test-file/.test(item),
-							),
-						).toBe(true);
+				const matches = () =>
+					events.some((item) =>
+						/watch-test-directory[/\\]watch-test-file/.test(item),
+					);
+				let timedOut = false;
+				const pollTimeout = setTimeout(() => {
+					timedOut = true;
+				}, 5000);
+				/**
+				 * @returns {void}
+				 */
+				const check = () => {
+					if (matches()) {
+						clearTimeout(pollTimeout);
 						done();
-					});
+						return;
+					}
+					if (timedOut) {
+						expect(matches()).toBe(true);
+						done();
+						return;
+					}
+					testHelper.tick(100, check);
+				};
+				watcher.once("change", () => {
+					testHelper.tick(200, check);
 				});
 				watcher.on("change", (type, filename) => {
 					events.push(/** @type {string} */ (filename));
 				});
 				watcher.on("error", (err) => {
+					clearTimeout(pollTimeout);
 					done(err);
 					// @ts-expect-error for tests
 					done = function () {};
