@@ -140,23 +140,15 @@ declare class DirectoryWatcher extends EventEmitter<{
 	 * open handle on the file. See webpack/watchpack#223, #44.
 	 *
 	 * The retry count is taken from the `WATCHPACK_RETRIES` env var (default
-	 * 3, set to "0" or "false" to disable retrying). The fast path is a
-	 * single `fs.lstat` call with no timer, no extra closures beyond the one
-	 * inline callback; retries are only allocated if an EBUSY is actually
-	 * observed.
+	 * 3, set to "0" or "false" to disable retrying). The hot path is a
+	 * single `fs.lstat` call with one inline callback; the timer and the
+	 * recursive call are only scheduled when an EBUSY is actually observed.
 	 * @param {string} target target path
 	 * @param {(err: NodeJS.ErrnoException | null, stats: import("fs").Stats) => void} callback callback
+	 * @param {number=} remaining retries remaining (defaults to `BUSY_RETRIES`)
 	 * @private
 	 */
 	private _lstatWithRetry;
-	/**
-	 * Slow-path companion to `_lstatWithRetry`, only invoked after an EBUSY.
-	 * @param {string} target target path
-	 * @param {number} remaining retries remaining
-	 * @param {(err: NodeJS.ErrnoException | null, stats: import("fs").Stats) => void} callback callback
-	 * @private
-	 */
-	private _retryLstatOnBusy;
 	/**
 	 * @param {EventType} eventType event type
 	 * @param {string=} filename filename
