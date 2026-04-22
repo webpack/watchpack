@@ -271,12 +271,15 @@ describe("DirectoryWatcher", () => {
 				const a = directoryWatcher.watch(path.join(fixtures, "a"));
 
 				// Replace the instance helper so every lstat for "a" returns EBUSY.
-				// The retry loop inside lstatWithRetry is bypassed here; what we're
-				// asserting is that onWatchEvent doesn't fall through to setMissing
-				// when it sees an EBUSY (the actual user-visible fix for #223).
+				// The retry loop inside _lstatWithRetry is bypassed here; what
+				// we're asserting is that onWatchEvent doesn't fall through to
+				// setMissing when it sees an EBUSY (the actual user-visible fix
+				// for #223).
 				const realLstat =
-					directoryWatcher.lstatWithRetry.bind(directoryWatcher);
-				directoryWatcher.lstatWithRetry = (target, callback) => {
+					// @ts-expect-error reaching into a private method for test
+					directoryWatcher._lstatWithRetry.bind(directoryWatcher);
+				// @ts-expect-error reaching into a private method for test
+				directoryWatcher._lstatWithRetry = (target, callback) => {
 					if (target.endsWith(`${path.sep}a`)) {
 						process.nextTick(() =>
 							/** @type {(err: NodeJS.ErrnoException | null, stats?: import("fs").Stats) => void} */
