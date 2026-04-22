@@ -237,29 +237,34 @@ describe("Assumption", () => {
 		});
 	}
 
-	it("should not fire events in subdirectories", (done) => {
-		testHelper.dir("watch-test-directory");
-		testHelper.tick(500, () => {
-			const watcher = (watcherToClose = fs.watch(fixtures));
-			watcher.on("change", (arg, arg2) => {
-				expect(true).toBe(false);
-				done(new Error(`should not be emitted ${arg} ${arg2}`));
-				// @ts-expect-error for tests
-				done = function () {};
-			});
-			watcher.on("error", (err) => {
-				done(err);
-				// @ts-expect-error for tests
-				done = function () {};
-			});
+	// On Windows, non-recursive `fs.watch` fires a change event when a
+	// subdirectory's mtime changes (for example, when a file is created
+	// inside). Skip this assumption check there.
+	if (!IS_WIN) {
+		it("should not fire events in subdirectories", (done) => {
+			testHelper.dir("watch-test-directory");
 			testHelper.tick(500, () => {
-				testHelper.file("watch-test-directory/watch-test-file");
+				const watcher = (watcherToClose = fs.watch(fixtures));
+				watcher.on("change", (arg, arg2) => {
+					expect(true).toBe(false);
+					done(new Error(`should not be emitted ${arg} ${arg2}`));
+					// @ts-expect-error for tests
+					done = function () {};
+				});
+				watcher.on("error", (err) => {
+					done(err);
+					// @ts-expect-error for tests
+					done = function () {};
+				});
 				testHelper.tick(500, () => {
-					done();
+					testHelper.file("watch-test-directory/watch-test-file");
+					testHelper.tick(500, () => {
+						done();
+					});
 				});
 			});
 		});
-	});
+	}
 
 	if (SUPPORTS_RECURSIVE_WATCHING) {
 		it("should fire events in subdirectories (recursive)", (done) => {
