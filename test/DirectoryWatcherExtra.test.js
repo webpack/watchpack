@@ -5,6 +5,7 @@ const DirectoryWatcher = require("../lib/DirectoryWatcher");
 const getWatcherManager = require("../lib/getWatcherManager");
 const TestHelper = require("./helpers/TestHelper");
 
+/** @typedef {import("../lib/DirectoryWatcher")} DirectoryWatcherType */
 /** @typedef {import("../lib/DirectoryWatcher").DirectoryWatcherOptions} DirectoryWatcherOptions */
 
 /** @type {DirectoryWatcherOptions} */
@@ -51,7 +52,9 @@ describe("DirectoryWatcher extra coverage", () => {
 	});
 
 	it("watcher.checkStartTime handles startTime branches", () => {
-		const fakeDir = {};
+		const fakeDir = /** @type {DirectoryWatcherType} */ (
+			/** @type {unknown} */ ({})
+		);
 		const watcher = new DirectoryWatcher.Watcher(fakeDir, "/tmp/x", 100);
 		expect(watcher.startTime).toBe(100);
 		// start time < mtime => true
@@ -403,11 +406,16 @@ describe("DirectoryWatcher extra coverage", () => {
 		expect(dw.nestedWatching).toBe(true);
 		// Add a fake directory with a closable watcher
 		let closed = false;
-		dw.directories.set(path.join(fixtures, "d1"), {
-			close() {
-				closed = true;
-			},
-		});
+		dw.directories.set(
+			path.join(fixtures, "d1"),
+			/** @type {import("../lib/DirectoryWatcher").Watcher<import("../lib/DirectoryWatcher").DirectoryWatcherEvents>} */ (
+				/** @type {unknown} */ ({
+					close() {
+						closed = true;
+					},
+				})
+			),
+		);
 		dw.setNestedWatching(false);
 		expect(closed).toBe(true);
 		expect(dw.nestedWatching).toBe(false);
@@ -591,7 +599,7 @@ describe("DirectoryWatcher extra coverage", () => {
 		const target = path.join(fixtures, "removed-during-scan");
 		// Still in initial scan
 		expect(dw.initialScan).toBe(true);
-		dw.initialScanRemoved.add(target);
+		/** @type {Set<string>} */ (dw.initialScanRemoved).add(target);
 		const w = dw.watch(target);
 		let gotRemove = false;
 		w.on("remove", () => {

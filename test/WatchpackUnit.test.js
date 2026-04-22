@@ -59,6 +59,7 @@ describe("Watchpack unit", () => {
 	});
 
 	it("should accept a function ignored option", () => {
+		/** @type {(entry: string) => boolean} */
 		const ignored = (entry) => entry.includes("skip");
 		const w = new Watchpack({ ignored });
 		expect(w.watcherOptions.ignored).toBe(ignored);
@@ -186,7 +187,12 @@ describe("Watchpack unit", () => {
 			w.close();
 			done();
 		});
-		w._onChange("/tmp/item", 1, undefined, "change");
+		w._onChange(
+			"/tmp/item",
+			1,
+			/** @type {string} */ (/** @type {unknown} */ (undefined)),
+			"change",
+		);
 	});
 
 	it("_onRemove falls back to item when file is falsy", (done) => {
@@ -196,7 +202,11 @@ describe("Watchpack unit", () => {
 			w.close();
 			done();
 		});
-		w._onRemove("/tmp/item", undefined, "change");
+		w._onRemove(
+			"/tmp/item",
+			/** @type {string} */ (/** @type {unknown} */ (undefined)),
+			"change",
+		);
 	});
 
 	it("_onTimeout emits aggregated and clears state", (done) => {
@@ -262,6 +272,16 @@ describe("Watchpack unit", () => {
 });
 
 describe("Watchpack internal watcher classes", () => {
+	/**
+	 * @template T
+	 * @param {T | undefined} v value
+	 * @returns {T} value narrowed to non-undefined
+	 */
+	const ensure = (v) => {
+		if (v === undefined) throw new Error("value is undefined");
+		return v;
+	};
+
 	it("watchpackFileWatcher.update handles single-file -> array transition", () => {
 		const { EventEmitter } = require("events");
 
@@ -275,8 +295,7 @@ describe("Watchpack internal watcher classes", () => {
 		// an internal use by watching a path
 		const file = path.join(__dirname, "fixtures", "nonexistent-xxx");
 		w.watch([file], []);
-		const fw = w.fileWatchers.get(file);
-		expect(fw).toBeDefined();
+		const fw = ensure(w.fileWatchers.get(file));
 		expect(fw.files).toEqual([file]);
 
 		// Single -> same single: no-op branch
@@ -308,8 +327,7 @@ describe("Watchpack internal watcher classes", () => {
 		const w = new Watchpack();
 		const dir = path.join(__dirname, "fixtures", "dir-nonexistent-x");
 		w.watch([], [dir]);
-		const dw = w.directoryWatchers.get(dir);
-		expect(dw).toBeDefined();
+		const dw = ensure(w.directoryWatchers.get(dir));
 		expect(dw.directories).toEqual([dir]);
 
 		dw.update(dir);
@@ -334,8 +352,7 @@ describe("Watchpack internal watcher classes", () => {
 		const w = new Watchpack();
 		const file = path.join(__dirname, "fixtures", "init-missing");
 		w.watch([file], []);
-		const fw = w.fileWatchers.get(file);
-		expect(fw).toBeDefined();
+		const fw = ensure(w.fileWatchers.get(file));
 		// Simulate multiple tracked files
 		fw.files = [file, `${file}-2`];
 		let removeCount = 0;
@@ -351,8 +368,7 @@ describe("Watchpack internal watcher classes", () => {
 		const w = new Watchpack();
 		const file = path.join(__dirname, "fixtures", "change-multi");
 		w.watch([file], []);
-		const fw = w.fileWatchers.get(file);
-		expect(fw).toBeDefined();
+		const fw = ensure(w.fileWatchers.get(file));
 		fw.files = [file, `${file}-2`];
 		let changeCount = 0;
 		w.on("change", () => {
@@ -367,14 +383,14 @@ describe("Watchpack internal watcher classes", () => {
 		const w = new Watchpack();
 		const file = path.join(__dirname, "fixtures", "remove-multi");
 		w.watch([file], []);
-		const fw = w.fileWatchers.get(file);
-		expect(fw).toBeDefined();
+		const fw = ensure(w.fileWatchers.get(file));
 		fw.files = [file, `${file}-2`];
 		let removeCount = 0;
 		w.on("remove", () => {
 			removeCount++;
 		});
-		fw.watcher.emit("remove", "remove");
+		/** @type {import("events").EventEmitter} */
+		(fw.watcher).emit("remove", "remove");
 		expect(removeCount).toBe(2);
 		w.close();
 	});
@@ -385,8 +401,7 @@ describe("Watchpack internal watcher classes", () => {
 		const dirB = path.join(__dirname, "fixtures", "dir-same");
 		// Watching the same directory twice exercises the addToMap array branch
 		w.watch([], [dirA, dirB]);
-		const dw = w.directoryWatchers.get(dirA);
-		expect(dw).toBeDefined();
+		const dw = ensure(w.directoryWatchers.get(dirA));
 		// Two entries with same key become an array
 		expect(Array.isArray(dw.directories) ? dw.directories.length : 1).toBe(2);
 		w.close();
@@ -397,8 +412,7 @@ describe("Watchpack internal watcher classes", () => {
 		const dir = path.join(__dirname, "fixtures", "dir-triple");
 		// Three identical entries exercise the Array.isArray -> push branch
 		w.watch([], [dir, dir, dir]);
-		const dw = w.directoryWatchers.get(dir);
-		expect(dw).toBeDefined();
+		const dw = ensure(w.directoryWatchers.get(dir));
 		expect(Array.isArray(dw.directories) ? dw.directories.length : 1).toBe(3);
 		w.close();
 	});
@@ -454,8 +468,7 @@ describe("Watchpack internal watcher classes", () => {
 		const w = new Watchpack();
 		const dir = path.join(__dirname, "fixtures", "dir-events");
 		w.watch([], [dir]);
-		const dw = w.directoryWatchers.get(dir);
-		expect(dw).toBeDefined();
+		const dw = ensure(w.directoryWatchers.get(dir));
 		dw.directories = [dir, `${dir}-2`];
 
 		let changeCount = 0;
@@ -474,7 +487,8 @@ describe("Watchpack internal watcher classes", () => {
 		expect(removeCount).toBe(2);
 
 		removeCount = 0;
-		dw.watcher.emit("remove", "remove");
+		/** @type {import("events").EventEmitter} */
+		(dw.watcher).emit("remove", "remove");
 		expect(removeCount).toBe(2);
 
 		w.close();

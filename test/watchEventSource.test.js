@@ -62,12 +62,13 @@ describe("watchEventSource", () => {
 		testHelper.dir("shared");
 		const watched = path.join(fixtures, "shared");
 		testHelper.tick(300, () => {
-			let a;
-			let b;
+			/** @type {import("../lib/watchEventSource").Watcher[]} */
+			const created = [];
 			watchEventSource.batch(() => {
-				a = watchEventSource.watch(watched);
-				b = watchEventSource.watch(watched);
+				created.push(watchEventSource.watch(watched));
+				created.push(watchEventSource.watch(watched));
 			});
+			const [a, b] = created;
 			// Both watchers should fire on change
 			let countA = 0;
 			let countB = 0;
@@ -128,9 +129,18 @@ describe("watchEventSource", () => {
 describe("watchEventSource.createHandleChangeEvent", () => {
 	const { EventEmitter } = require("events");
 
+	/**
+	 * @returns {import("fs").FSWatcher} a minimal FSWatcher stand-in
+	 */
+	const makeFakeWatcher = () =>
+		/** @type {import("fs").FSWatcher} */ (
+			/** @type {unknown} */ (new EventEmitter())
+		);
+
 	it("forwards non-self-rename events unchanged", () => {
-		const watcher = new EventEmitter();
+		const watcher = makeFakeWatcher();
 		const filePath = "/tmp/my-dir";
+		/** @type {[string, string][]} */
 		const received = [];
 		const handle = watchEventSource.createHandleChangeEvent(
 			watcher,
@@ -144,8 +154,9 @@ describe("watchEventSource.createHandleChangeEvent", () => {
 	});
 
 	it("forwards rename events for relative filenames", () => {
-		const watcher = new EventEmitter();
+		const watcher = makeFakeWatcher();
 		const filePath = "/tmp/my-dir";
+		/** @type {[string, string][]} */
 		const received = [];
 		const handle = watchEventSource.createHandleChangeEvent(
 			watcher,
@@ -159,18 +170,22 @@ describe("watchEventSource.createHandleChangeEvent", () => {
 	});
 
 	it("suppresses self-rename events on non-osx platforms and emits EPERM", () => {
-		const origPlatform = Object.getOwnPropertyDescriptor(process, "platform");
+		const origPlatform =
+			/** @type {PropertyDescriptor} */
+			(Object.getOwnPropertyDescriptor(process, "platform"));
 		Object.defineProperty(process, "platform", { value: "linux" });
 		try {
 			// The createHandleChangeEvent closure captured IS_OSX at module load
 			// time, so we cannot retroactively override it. We still exercise the
 			// branch by calling on linux, where IS_OSX was false at load time.
-			const watcher = new EventEmitter();
+			const watcher = makeFakeWatcher();
 			const filePath = path.resolve("/tmp/some-dir");
+			/** @type {NodeJS.ErrnoException | undefined} */
 			let errorSeen;
 			watcher.on("error", (err) => {
-				errorSeen = err;
+				errorSeen = /** @type {NodeJS.ErrnoException} */ (err);
 			});
+			/** @type {[string, string][]} */
 			const received = [];
 			const handle = watchEventSource.createHandleChangeEvent(
 				watcher,

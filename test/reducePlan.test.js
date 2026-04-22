@@ -20,7 +20,9 @@ describe("reducePlan", () => {
 		const result = reducePlan(plan, 10);
 		// Both entries remain as separate groups
 		expect(result.size).toBe(2);
-		const first = result.get(path.join(root, "a", "b"));
+		const first =
+			/** @type {Map<string, string>} */
+			(result.get(path.join(root, "a", "b")));
 		expect(first).toBeInstanceOf(Map);
 		expect(first.get("v1")).toBe(path.join(root, "a", "b"));
 	});
