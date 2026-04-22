@@ -13,6 +13,13 @@ const EMPTY_OPTIONS = {};
 const fixtures = path.join(__dirname, "fixtures");
 const testHelper = new TestHelper(fixtures);
 
+// The WATCHPACK_POLLING env var unconditionally overrides options.poll in
+// DirectoryWatcher's constructor, so tests that assert the effect of the
+// `poll` option have to be skipped when it is set.
+const FORCES_POLLING = Boolean(
+	process.env.WATCHPACK_POLLING && process.env.WATCHPACK_POLLING !== "false",
+);
+
 // eslint-disable-next-line jest/no-confusing-set-timeout
 jest.setTimeout(20000);
 
@@ -280,34 +287,39 @@ describe("DirectoryWatcher extra coverage", () => {
 		dw.close();
 	});
 
-	it("directoryWatcher constructor accepts no options", () => {
-		const dw = new DirectoryWatcher(getWatcherManager({}), fixtures);
-		expect(dw.polledWatching).toBe(false);
-		expect(dw.ignored("anything")).toBe(false);
-		dw.close();
-	});
+	// The WATCHPACK_POLLING env var forces options.poll, so the next three
+	// assertions about the effect of the `poll` option only hold when no
+	// env var override is active.
+	if (!FORCES_POLLING) {
+		it("directoryWatcher constructor accepts no options", () => {
+			const dw = new DirectoryWatcher(getWatcherManager({}), fixtures);
+			expect(dw.polledWatching).toBe(false);
+			expect(dw.ignored("anything")).toBe(false);
+			dw.close();
+		});
 
-	it("directoryWatcher with poll:true defaults to 5007ms", () => {
-		const options = { poll: true };
-		const dw = new DirectoryWatcher(
-			getWatcherManager(options),
-			fixtures,
-			options,
-		);
-		expect(dw.polledWatching).toBe(5007);
-		dw.close();
-	});
+		it("directoryWatcher with poll:true defaults to 5007ms", () => {
+			const options = { poll: true };
+			const dw = new DirectoryWatcher(
+				getWatcherManager(options),
+				fixtures,
+				options,
+			);
+			expect(dw.polledWatching).toBe(5007);
+			dw.close();
+		});
 
-	it("directoryWatcher with poll:number uses that number", () => {
-		const options = { poll: 123 };
-		const dw = new DirectoryWatcher(
-			getWatcherManager(options),
-			fixtures,
-			options,
-		);
-		expect(dw.polledWatching).toBe(123);
-		dw.close();
-	});
+		it("directoryWatcher with poll:number uses that number", () => {
+			const options = { poll: 123 };
+			const dw = new DirectoryWatcher(
+				getWatcherManager(options),
+				fixtures,
+				options,
+			);
+			expect(dw.polledWatching).toBe(123);
+			dw.close();
+		});
+	}
 
 	it("forEachWatcher should noop if no watcher registered for path", () => {
 		const dw = new DirectoryWatcher(
