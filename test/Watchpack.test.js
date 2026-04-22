@@ -428,9 +428,13 @@ describe("Watchpack", () => {
 		testHelper.file(path.join("dir", "a"));
 		testHelper.tick(() => {
 			w.watch([], [path.join(fixtures, "dir")]);
-			testHelper.tick(() => {
+			// Windows' ReadDirectoryChangesW can reorder rapid events, so give
+			// each operation enough separation that the watcher observes them
+			// in source order and we exit the initial scan before the first
+			// change.
+			testHelper.tick(500, () => {
 				testHelper.remove(path.join("dir", "a"));
-				testHelper.tick(() => {
+				testHelper.tick(500, () => {
 					testHelper.file(path.join("dir", "b"));
 					testHelper.tick(500, () => {
 						testHelper.file(path.join("dir", "a"));

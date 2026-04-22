@@ -138,10 +138,14 @@ describe("DirectoryWatcher", () => {
 		});
 	});
 
+	const IS_OSX = require("os").platform() === "darwin";
+
 	/** @type {Record<"slow" | "fast", number>} */
+	// FSEvents coalesces rapid changes, so on macOS the "fast" case needs a
+	// larger interval or consecutive writes will be dropped.
 	const timings = {
 		slow: 300,
-		fast: 50,
+		fast: IS_OSX ? 150 : 50,
 	};
 	for (const name of Object.keys(timings)) {
 		const time = timings[/** @type {keyof typeof timings} */ (name)];

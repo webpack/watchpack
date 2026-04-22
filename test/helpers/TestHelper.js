@@ -12,6 +12,8 @@ const writeFileAtomic = require("write-file-atomic");
 
 const watchEventSource = require("../../lib/watchEventSource");
 
+const IS_OSX = require("os").platform() === "darwin";
+
 require("../../lib/getWatcherManager");
 let watcherManagerModule =
 	require.cache[require.resolve("../../lib/getWatcherManager")];
@@ -48,7 +50,10 @@ class TestHelper {
 	 */
 	tick(arg, fn) {
 		// if polling is set, ensure the tick is longer than the polling interval.
-		const defaultTick = (Number(process.env.WATCHPACK_POLLING) || 100) + 10;
+		// On macOS the FSEvents dispatch cycle is ~100-500ms, so use a larger
+		// default tick there to keep fs.watch-based tests stable.
+		const defaultTick =
+			(Number(process.env.WATCHPACK_POLLING) || (IS_OSX ? 250 : 100)) + 10;
 
 		if (typeof arg === "function") {
 			fn = arg;
@@ -66,7 +71,7 @@ class TestHelper {
 	 */
 	before(done) {
 		checkAllWatcherClosed();
-		this.tick(400, () => {
+		this.tick(IS_OSX ? 700 : 400, () => {
 			this.rm(this.testdir);
 			fs.mkdirSync(this.testdir);
 			done();
@@ -88,10 +93,10 @@ class TestHelper {
 				return;
 			}
 			checkAllWatcherClosed();
-			this.tick(300, done);
+			this.tick(IS_OSX ? 500 : 300, done);
 		};
 
-		this.tick(300, () => {
+		this.tick(IS_OSX ? 500 : 300, () => {
 			del();
 		});
 	}
