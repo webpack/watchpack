@@ -257,4 +257,58 @@ describe("DirectoryWatcher", () => {
 			});
 		});
 	}
+
+	describe("EBUSY retry handling (#223)", () => {
+		/**
+		 * @returns {NodeJS.ErrnoException} EBUSY error
+		 */
+		const makeEbusy = () => {
+			const err = /** @type {NodeJS.ErrnoException} */ (new Error("EBUSY"));
+			err.code = "EBUSY";
+			return err;
+		};
+
+		it("does not emit remove when lstat keeps returning EBUSY", (done) => {
+			testHelper.file("a");
+			testHelper.tick(1000, () => {
+				const directoryWatcher = getDirectoryWatcher(fixtures, EMPTY_OPTIONS);
+				const a = directoryWatcher.watch(path.join(fixtures, "a"));
+
+				let removed = false;
+				a.on("remove", () => {
+					removed = true;
+				});
+
+				// Wait for the initial scan to finish with the real lstat, then
+				// hijack graceful-fs's lstat so every call for "a" returns EBUSY
+				// and assert that onWatchEvent does not fall through to a remove.
+				testHelper.tick(500, () => {
+					const fs = require("graceful-fs");
+
+					const originalLstat = fs.lstat;
+					// eslint-disable-next-line jsdoc/reject-any-type
+					/** @type {any} */ (fs).lstat = (
+						/** @type {string} */ target,
+						/** @type {(err: NodeJS.ErrnoException | null) => void} */ cb,
+					) => {
+						if (target.endsWith(`${path.sep}a`)) {
+							process.nextTick(() => cb(makeEbusy()));
+							return;
+						}
+						originalLstat(target, cb);
+					};
+
+					directoryWatcher.onWatchEvent("change", "a");
+					// 3 retries × 100 ms + buffer.
+					testHelper.tick(800, () => {
+						// eslint-disable-next-line jsdoc/reject-any-type
+						/** @type {any} */ (fs).lstat = originalLstat;
+						a.close();
+						expect(removed).toBe(false);
+						done();
+					});
+				});
+			});
+		});
+	});
 });

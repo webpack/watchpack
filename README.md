@@ -131,3 +131,12 @@ const fileTimesOld = wp.getTimes();
 // this include timestamps from files not directly watched
 // key: absolute path, value: timestamp as number
 ```
+
+## Environment variables
+
+- `WATCHPACK_POLLING`: when set, overrides the `poll` option (see above).
+- `WATCHPACK_RETRIES`: number of times to retry `fs.lstat` when it returns
+  `EBUSY` (default: `3`). Useful on Windows where anti-virus scanners,
+  indexers or editors briefly lock files — without retries watchpack would
+  see a spurious `remove` and stop tracking the file. Set to `0` or
+  `"false"` to disable retrying.
