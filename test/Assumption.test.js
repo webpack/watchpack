@@ -136,6 +136,11 @@ describe("Assumption", () => {
 		const watcher = (watcherToClose = fs.watch(fixtures));
 		testHelper.tick(100, () => {
 			watcher.on("change", (type, filename) => {
+				// fs.watch can fire spurious events with no filename, or with
+				// the watched directory's own basename (on macOS / Node >= 22
+				// when the directory itself is touched). We only care about
+				// the file this test writes to.
+				if (filename !== "a") return;
 				const stats = fs.statSync(
 					path.join(fixtures, /** @type {string} */ (filename)),
 				);
@@ -212,6 +217,11 @@ describe("Assumption", () => {
 			}));
 			testHelper.tick(100, () => {
 				watcher.on("change", (type, filename) => {
+					// fs.watch can fire spurious events with no filename, or
+					// with the watched directory's own basename (on macOS /
+					// Node >= 22 when the directory itself is touched). We
+					// only care about the file this test writes to.
+					if (filename !== "a") return;
 					const stats = fs.statSync(
 						path.join(fixtures, /** @type {string} */ (filename)),
 					);
