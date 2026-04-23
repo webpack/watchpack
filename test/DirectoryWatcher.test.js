@@ -270,34 +270,35 @@ describe("DirectoryWatcher", () => {
 				const directoryWatcher = getDirectoryWatcher(fixtures, EMPTY_OPTIONS);
 				const a = directoryWatcher.watch(path.join(fixtures, "a"));
 
-				// Replace the instance helper so every lstat for "a" returns EBUSY.
-				// The retry loop inside _lstatWithRetry is bypassed here; what
-				// we're asserting is that onWatchEvent doesn't fall through to
-				// setMissing when it sees an EBUSY (the actual user-visible fix
-				// for #223).
-				const realLstat =
-					// @ts-expect-error reaching into a private method for test
-					directoryWatcher._lstatWithRetry.bind(directoryWatcher);
-				// @ts-expect-error reaching into a private method for test
-				directoryWatcher._lstatWithRetry = (target, callback) => {
-					if (target.endsWith(`${path.sep}a`)) {
-						process.nextTick(() =>
-							/** @type {(err: NodeJS.ErrnoException | null, stats?: import("fs").Stats) => void} */
-							(callback)(makeEbusy()),
-						);
-						return;
-					}
-					realLstat(target, callback);
-				};
-
 				let removed = false;
 				a.on("remove", () => {
 					removed = true;
 				});
 
-				testHelper.tick(() => {
+				// Wait for the initial scan to finish with the real lstat, then
+				// hijack graceful-fs's lstat so every call for "a" returns EBUSY
+				// and assert that onWatchEvent does not fall through to a remove.
+				testHelper.tick(500, () => {
+					const fs = require("graceful-fs");
+
+					const originalLstat = fs.lstat;
+					// eslint-disable-next-line jsdoc/reject-any-type
+					/** @type {any} */ (fs).lstat = (
+						/** @type {string} */ target,
+						/** @type {(err: NodeJS.ErrnoException | null) => void} */ cb,
+					) => {
+						if (target.endsWith(`${path.sep}a`)) {
+							process.nextTick(() => cb(makeEbusy()));
+							return;
+						}
+						originalLstat(target, cb);
+					};
+
 					directoryWatcher.onWatchEvent("change", "a");
-					testHelper.tick(300, () => {
+					// 3 retries × 100 ms + buffer.
+					testHelper.tick(800, () => {
+						// eslint-disable-next-line jsdoc/reject-any-type
+						/** @type {any} */ (fs).lstat = originalLstat;
 						a.close();
 						expect(removed).toBe(false);
 						done();

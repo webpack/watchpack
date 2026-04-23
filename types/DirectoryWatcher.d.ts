@@ -135,21 +135,6 @@ declare class DirectoryWatcher extends EventEmitter<{
 		startTime?: number | undefined,
 	): Watcher<DirectoryWatcherEvents> | Watcher<FileWatcherEvents>;
 	/**
-	 * Call fs.lstat with retries on EBUSY. Transient EBUSY errors are common
-	 * on Windows when another process (AV scanner, indexer, editor) holds an
-	 * open handle on the file. See webpack/watchpack#223, #44.
-	 *
-	 * The retry count is taken from the `WATCHPACK_RETRIES` env var (default
-	 * 3, set to "0" or "false" to disable retrying). The hot path is a
-	 * single `fs.lstat` call with one inline callback; the timer and the
-	 * recursive call are only scheduled when an EBUSY is actually observed.
-	 * @param {string} target target path
-	 * @param {(err: NodeJS.ErrnoException | null, stats: import("fs").Stats) => void} callback callback
-	 * @param {number=} remaining retries remaining (defaults to `BUSY_RETRIES`)
-	 * @private
-	 */
-	private _lstatWithRetry;
-	/**
 	 * @param {EventType} eventType event type
 	 * @param {string=} filename filename
 	 */
