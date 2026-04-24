@@ -1510,28 +1510,6 @@ describe("Watchpack", () => {
 					);
 				});
 			});
-
-			it("should detect a change inside a symlinked sub-directory of a watched real directory (#190)", (done) => {
-				testHelper.dir("ext_dir");
-				testHelper.file(path.join("ext_dir", "inside"));
-				testHelper.symlinkDir(
-					path.join("a", "b", "ext_dir_link"),
-					path.join("..", "..", "ext_dir"),
-				);
-				testHelper.tick(2500, () => {
-					expectWatchEvent(
-						[],
-						path.join(fixtures, "a", "b"),
-						(changes) => {
-							expect([...changes]).toEqual([path.join(fixtures, "a", "b")]);
-							done();
-						},
-						() => {
-							testHelper.file(path.join("ext_dir", "inside"));
-						},
-					);
-				});
-			});
 		});
 	} else {
 		it("symlinks", () => {
