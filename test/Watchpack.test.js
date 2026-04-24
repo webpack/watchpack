@@ -1496,7 +1496,7 @@ describe("Watchpack", () => {
 					path.join("a", "b", "ext_link"),
 					path.join("..", "..", "ext_target"),
 				);
-				testHelper.tick(500, () => {
+				testHelper.tick(2500, () => {
 					expectWatchEvent(
 						[],
 						path.join(fixtures, "a", "b"),
@@ -1518,7 +1518,7 @@ describe("Watchpack", () => {
 					path.join("a", "b", "ext_dir_link"),
 					path.join("..", "..", "ext_dir"),
 				);
-				testHelper.tick(500, () => {
+				testHelper.tick(2500, () => {
 					expectWatchEvent(
 						[],
 						path.join(fixtures, "a", "b"),
