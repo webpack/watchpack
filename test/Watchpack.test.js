@@ -1514,6 +1514,28 @@ describe("Watchpack", () => {
 					);
 				});
 			});
+
+			it("should detect a change inside a symlinked directory nested in a watched real directory (#190)", (done) => {
+				testHelper.dir("ext_dir");
+				testHelper.file(path.join("ext_dir", "inner"));
+				testHelper.symlinkDir(
+					path.join("a", "b", "ext_dir_link"),
+					path.join("..", "..", "ext_dir"),
+				);
+				testHelper.tick(2500, () => {
+					expectWatchEvent(
+						[],
+						path.join(fixtures, "a", "b"),
+						(changes) => {
+							expect([...changes]).toEqual([path.join(fixtures, "a", "b")]);
+							done();
+						},
+						() => {
+							testHelper.file(path.join("ext_dir", "inner"));
+						},
+					);
+				});
+			});
 		});
 	} else {
 		it("symlinks", () => {
