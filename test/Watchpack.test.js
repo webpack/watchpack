@@ -1578,6 +1578,32 @@ describe("Watchpack", () => {
 				});
 			});
 
+			it("should not recurse infinitely when a symlinked directory points to one of its ancestors (#231 cycle guard)", (done) => {
+				// fixtures/a/b/cycle is a symlink to ".." (i.e. fixtures/a). Without
+				// a cycle guard, descent would walk a/b/cycle -> a/b/cycle/b ->
+				// a/b/cycle/b/cycle -> ... creating an unbounded chain of watchers.
+				testHelper.symlinkDir(path.join("a", "b", "cycle"), "..");
+				testHelper.tick(500, () => {
+					const w = new WatchpackTest({
+						aggregateTimeout: 500,
+						followSymlinks: true,
+					});
+
+					w.watch([], [path.join(fixtures, "a", "b")], Date.now());
+
+					testHelper.tick(2000, () => {
+						// With the guard the descent stops at the cycle, so the
+						// `WatcherManager` only tracks a small, bounded number of
+						// `DirectoryWatcher`s. Without it, every recursion level adds
+						// a new entry and the size grows into the hundreds within
+						// a couple of seconds (locally observed: 2500+ at 2s).
+						expect(w.watcherManager.directoryWatchers.size).toBeLessThan(10);
+						w.close();
+						done();
+					});
+				});
+			});
+
 			it("should evaluate `ignored` against the symlink path for files inside a symlinked directory (#231)", (done) => {
 				testHelper.dir("ext_dir");
 				testHelper.file(path.join("ext_dir", "inner"));
