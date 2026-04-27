@@ -1536,6 +1536,107 @@ describe("Watchpack", () => {
 					);
 				});
 			});
+
+			it("should report the symlink path (not the resolved target) for files inside a symlinked directory (#231)", (done) => {
+				testHelper.dir("ext_dir");
+				testHelper.file(path.join("ext_dir", "inner"));
+				testHelper.symlinkDir(
+					path.join("a", "b", "ext_dir_link"),
+					path.join("..", "..", "ext_dir"),
+				);
+				testHelper.tick(2500, () => {
+					const w = new WatchpackTest({
+						aggregateTimeout: 500,
+						followSymlinks: true,
+					});
+
+					/** @type {string[]} */
+					const fileChanges = [];
+					w.on("change", (file) => {
+						fileChanges.push(file);
+					});
+
+					w.watch([], [path.join(fixtures, "a", "b")], Date.now());
+
+					testHelper.tick(1000, () => {
+						testHelper.file(path.join("ext_dir", "inner"));
+						testHelper.tick(2000, () => {
+							const symlinkPath = path.join(
+								fixtures,
+								"a",
+								"b",
+								"ext_dir_link",
+								"inner",
+							);
+							const resolvedPath = path.join(fixtures, "ext_dir", "inner");
+							expect(fileChanges).toContain(symlinkPath);
+							expect(fileChanges).not.toContain(resolvedPath);
+							w.close();
+							done();
+						});
+					});
+				});
+			});
+
+			it("should evaluate `ignored` against the symlink path for files inside a symlinked directory (#231)", (done) => {
+				testHelper.dir("ext_dir");
+				testHelper.file(path.join("ext_dir", "inner"));
+				testHelper.symlinkDir(
+					path.join("a", "b", "ext_dir_link"),
+					path.join("..", "..", "ext_dir"),
+				);
+				testHelper.tick(2500, () => {
+					const allowedPrefix = path.join(fixtures, "a", "b");
+					const allowedWithSep = allowedPrefix + path.sep;
+					/** @type {string[]} */
+					const ignoredQueries = [];
+					const w = new WatchpackTest({
+						aggregateTimeout: 500,
+						followSymlinks: true,
+						// Mirror issue #231 example 2: allow only the watched root, the
+						// ancestors of `a/b`, `a/b` itself, and anything under it. The
+						// resolved target `fixtures/ext_dir/...` lies outside this allowlist.
+						ignored: (entry) => {
+							ignoredQueries.push(entry);
+							if (entry === allowedPrefix) return false;
+							if (entry.startsWith(allowedWithSep)) return false;
+							// allow ancestors of the allowed prefix so we can descend into it
+							if (allowedWithSep.startsWith(entry + path.sep)) return false;
+							return true;
+						},
+					});
+
+					/** @type {string[]} */
+					const fileChanges = [];
+					w.on("change", (file) => {
+						fileChanges.push(file);
+					});
+
+					w.watch([], [fixtures], Date.now());
+
+					testHelper.tick(1000, () => {
+						testHelper.file(path.join("ext_dir", "inner"));
+						testHelper.tick(2000, () => {
+							const symlinkPath = path.join(
+								fixtures,
+								"a",
+								"b",
+								"ext_dir_link",
+								"inner",
+							);
+							const resolvedPath = path.join(fixtures, "ext_dir", "inner");
+							expect(fileChanges).toContain(symlinkPath);
+							expect(fileChanges).not.toContain(resolvedPath);
+							// `ignored` must have been queried with the symlink-preserving
+							// path so the user's allowlist works as documented in #231.
+							expect(ignoredQueries).toContain(symlinkPath);
+							expect(ignoredQueries).not.toContain(resolvedPath);
+							w.close();
+							done();
+						});
+					});
+				});
+			});
 		});
 	} else {
 		it("symlinks", () => {
