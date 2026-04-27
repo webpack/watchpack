@@ -273,11 +273,12 @@ describe("DirectoryWatcher", () => {
 
 		// On WSL, scanning `/mnt/c` lists files like `pagefile.sys` whose lstat
 		// returns EACCES; on native Windows + Node ≥22.17 the same paths now
-		// return EINVAL via libuv. Either flavor used to print
-		// "Watchpack Error (initial scan): …"; both should now be silent.
+		// return EINVAL via libuv; on Linux a lstat that traverses an
+		// unmounted device entry (e.g. `/efi`) returns ENODEV. All used to
+		// print "Watchpack Error (initial scan): …"; all should be silent.
 		const lstatCodes = IS_WIN
-			? ["EACCES", "EPERM", "EINVAL"]
-			: ["EACCES", "EPERM"];
+			? ["EACCES", "EPERM", "ENODEV", "EINVAL"]
+			: ["EACCES", "EPERM", "ENODEV"];
 		for (const code of lstatCodes) {
 			it(`does not log when an item lstat returns ${code} during initial scan`, (done) => {
 				testHelper.file("a");
@@ -319,7 +320,9 @@ describe("DirectoryWatcher", () => {
 			});
 		}
 
-		const readdirCodes = IS_WIN ? ["EACCES", "EINVAL"] : ["EACCES"];
+		const readdirCodes = IS_WIN
+			? ["EACCES", "ENODEV", "EINVAL"]
+			: ["EACCES", "ENODEV"];
 		for (const code of readdirCodes) {
 			it(`does not log when readdir on the watched directory returns ${code}`, (done) => {
 				const fs = require("graceful-fs");
