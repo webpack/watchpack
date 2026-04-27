@@ -1,5 +1,5 @@
 ---
-"watchpack": patch
+"watchpack": major
 ---
 
 fix: do not emit spurious initial-scan `change` events for files and
@@ -18,3 +18,10 @@ The `startTime` filter now compares against the raw `mtime`/`birthtime`
 instead, so only entries actually modified at or after `startTime`
 trigger a change event. The `change` event payload (and the existing
 `safeTime` semantics for consumers) are unchanged.
+
+**Breaking change:** consumers that relied on receiving initial-scan
+`change` events for files created within `FS_ACCURACY` of `startTime`
+(for example, to invalidate caches for files that were touched
+immediately before watching began) will no longer receive those events.
+The "outdated on attach" code path in `watch()` is unaffected and still
+uses `safeTime` semantics.
