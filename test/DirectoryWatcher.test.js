@@ -258,6 +258,107 @@ describe("DirectoryWatcher", () => {
 		});
 	}
 
+	describe("permission error suppression (#187)", () => {
+		/**
+		 * @param {string} code error code to attach
+		 * @returns {NodeJS.ErrnoException} fabricated errno error
+		 */
+		const makeErr = (code) => {
+			const err = /** @type {NodeJS.ErrnoException} */ (new Error(code));
+			err.code = code;
+			return err;
+		};
+
+		const IS_WIN = require("os").platform() === "win32";
+
+		// On WSL, scanning `/mnt/c` lists files like `pagefile.sys` whose lstat
+		// returns EACCES; on native Windows + Node ≥22.17 the same paths now
+		// return EINVAL via libuv. Either flavor used to print
+		// "Watchpack Error (initial scan): …"; both should now be silent.
+		const lstatCodes = IS_WIN
+			? ["EACCES", "EPERM", "EINVAL"]
+			: ["EACCES", "EPERM"];
+		for (const code of lstatCodes) {
+			it(`does not log when an item lstat returns ${code} during initial scan`, (done) => {
+				testHelper.file("a");
+				testHelper.tick(() => {
+					const fs = require("graceful-fs");
+
+					const originalLstat = fs.lstat;
+
+					// eslint-disable-next-line jsdoc/reject-any-type
+					/** @type {any} */ (fs).lstat = (
+						/** @type {string} */ target,
+						/** @type {(err: NodeJS.ErrnoException | null) => void} */ cb,
+					) => {
+						if (target.endsWith(`${path.sep}a`)) {
+							process.nextTick(() => cb(makeErr(code)));
+							return;
+						}
+						originalLstat(target, cb);
+					};
+
+					const errorSpy = jest
+						.spyOn(console, "error")
+						.mockImplementation(() => {});
+					const directoryWatcher = getDirectoryWatcher(fixtures, EMPTY_OPTIONS);
+					const a = directoryWatcher.watch(path.join(fixtures, "a"));
+
+					testHelper.tick(500, () => {
+						// eslint-disable-next-line jsdoc/reject-any-type
+						/** @type {any} */ (fs).lstat = originalLstat;
+						a.close();
+						const printed = errorSpy.mock.calls
+							.map((call) => String(call[0]))
+							.filter((msg) => msg.includes("initial scan"));
+						errorSpy.mockRestore();
+						expect(printed).toEqual([]);
+						done();
+					});
+				});
+			});
+		}
+
+		const readdirCodes = IS_WIN ? ["EACCES", "EINVAL"] : ["EACCES"];
+		for (const code of readdirCodes) {
+			it(`does not log when readdir on the watched directory returns ${code}`, (done) => {
+				const fs = require("graceful-fs");
+
+				const originalReaddir = fs.readdir;
+
+				// eslint-disable-next-line jsdoc/reject-any-type
+				/** @type {any} */ (fs).readdir = (
+					/** @type {string} */ target,
+					/** @type {(err: NodeJS.ErrnoException | null) => void} */ cb,
+				) => {
+					if (target === fixtures) {
+						process.nextTick(() => cb(makeErr(code)));
+						return;
+					}
+					originalReaddir(target, cb);
+				};
+
+				const errorSpy = jest
+					.spyOn(console, "error")
+					.mockImplementation(() => {});
+				const directoryWatcher = getDirectoryWatcher(fixtures, EMPTY_OPTIONS);
+				const a = directoryWatcher.watch(path.join(fixtures, "a"));
+
+				testHelper.tick(500, () => {
+					// eslint-disable-next-line jsdoc/reject-any-type
+					/** @type {any} */ (fs).readdir = originalReaddir;
+					a.close();
+					const printed = errorSpy.mock.calls
+						.map((call) => String(call[0]))
+						.filter((msg) => msg.includes("initial scan"));
+					errorSpy.mockRestore();
+					expect(printed).toEqual([]);
+					done();
+				});
+			});
+		}
+	});
+
 	describe("EBUSY retry handling (#223)", () => {
 		/**
 		 * @returns {NodeJS.ErrnoException} EBUSY error
