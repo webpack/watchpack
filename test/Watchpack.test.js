@@ -1493,6 +1493,27 @@ describe("Watchpack", () => {
 					},
 				);
 			});
+
+			it("should detect a change to a symlink target file inside a watched real directory (#190)", (done) => {
+				testHelper.file("ext_target");
+				testHelper.symlinkFile(
+					path.join("a", "b", "ext_link"),
+					path.join("..", "..", "ext_target"),
+				);
+				testHelper.tick(2500, () => {
+					expectWatchEvent(
+						[],
+						path.join(fixtures, "a", "b"),
+						(changes) => {
+							expect([...changes]).toEqual([path.join(fixtures, "a", "b")]);
+							done();
+						},
+						() => {
+							testHelper.file("ext_target");
+						},
+					);
+				});
+			});
 		});
 	} else {
 		it("symlinks", () => {

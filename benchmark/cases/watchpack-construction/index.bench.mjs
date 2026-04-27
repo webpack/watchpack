@@ -10,9 +10,17 @@
  *
  * `.close()` is invoked after every construction to keep the outer test
  * process from leaking timers even though no watchers have been attached.
+ *
+ * Each benchmark body constructs BATCH instances in a loop. A single
+ * construction is ~100 µs, so one instrumented iteration would be too short
+ * for CodSpeed simulation mode to measure with low variance — batching
+ * amortizes per-sample overhead (GC, JIT state, timer resolution) and
+ * stabilizes CI-reported numbers.
  */
 
 import Watchpack from "../../../lib/index.js";
+
+const BATCH = 100;
 
 const optionsNone = {};
 const optionsWithRegExp = { ignored: /node_modules|\.git/ };
@@ -35,30 +43,39 @@ const optionsWithLargeArray = {
 const optionsWithFn = { ignored: (path) => path.includes("node_modules") };
 
 /**
+ * @param {object} options watchpack options reused across the batch
+ */
+const run = (options) => {
+	for (let i = 0; i < BATCH; i++) {
+		new Watchpack(options).close();
+	}
+};
+
+/**
  * @param {import("tinybench").Bench} bench bench
  */
 export default function register(bench) {
 	bench.add("watchpack-construction: no ignored option", () => {
-		new Watchpack(optionsNone).close();
+		run(optionsNone);
 	});
 	bench.add("watchpack-construction: regex ignored", () => {
-		new Watchpack(optionsWithRegExp).close();
+		run(optionsWithRegExp);
 	});
 	bench.add("watchpack-construction: glob string ignored", () => {
-		new Watchpack(optionsWithString).close();
+		run(optionsWithString);
 	});
 	bench.add("watchpack-construction: array[2] ignored", () => {
-		new Watchpack(optionsWithSmallArray).close();
+		run(optionsWithSmallArray);
 	});
 	bench.add("watchpack-construction: array[10] ignored", () => {
-		new Watchpack(optionsWithLargeArray).close();
+		run(optionsWithLargeArray);
 	});
 	bench.add("watchpack-construction: function ignored", () => {
-		new Watchpack(optionsWithFn).close();
+		run(optionsWithFn);
 	});
 	bench.add("watchpack-construction: cached options (WeakMap hit)", () => {
 		// Same options object every iteration exercises the WeakMap cache
 		// installed on the options by `cachedNormalizeOptions`.
-		new Watchpack(optionsWithLargeArray).close();
+		run(optionsWithLargeArray);
 	});
 }
