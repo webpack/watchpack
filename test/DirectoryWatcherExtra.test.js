@@ -193,6 +193,27 @@ describe("DirectoryWatcher extra coverage", () => {
 		});
 	});
 
+	it("onWatcherError does not emit 'error' for EPERM or ENOENT (matches console suppression on Windows dir-rename / Linux dir-delete)", (done) => {
+		const dw = new DirectoryWatcher(
+			getWatcherManager(EMPTY_OPTIONS),
+			fixtures,
+			EMPTY_OPTIONS,
+		);
+		const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+		const w = dw.watch(path.join(fixtures, "a"));
+		/** @type {NodeJS.ErrnoException[]} */
+		const received = [];
+		w.on("error", (err) => received.push(err));
+		dw.onWatcherError(Object.assign(new Error("perm"), { code: "EPERM" }));
+		dw.onWatcherError(Object.assign(new Error("ent"), { code: "ENOENT" }));
+		expect(received).toHaveLength(0);
+		errorSpy.mockRestore();
+		testHelper.tick(100, () => {
+			dw.close();
+			done();
+		});
+	});
+
 	it("onWatcherError emits 'error' to subscribed watchers", (done) => {
 		const dw = new DirectoryWatcher(
 			getWatcherManager(EMPTY_OPTIONS),
