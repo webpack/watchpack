@@ -204,6 +204,7 @@ import { EventEmitter } from "events";
  * @property {(type: EventType) => void} initial-missing initial missing event
  * @property {(mtime: number, type: EventType, initial: boolean) => void} change change event
  * @property {(type: EventType) => void} remove remove event
+ * @property {(err: Error | NodeJS.ErrnoException) => void} error error event
  * @property {() => void} closed closed event
  */
 /**
@@ -211,6 +212,7 @@ import { EventEmitter } from "events";
  * @property {(type: EventType) => void} initial-missing initial missing event
  * @property {((file: string, mtime: number, type: EventType, initial: boolean) => void)} change change event
  * @property {(type: EventType) => void} remove remove event
+ * @property {(err: Error | NodeJS.ErrnoException) => void} error error event
  * @property {() => void} closed closed event
  */
 /**
@@ -276,6 +278,10 @@ type FileWatcherEvents = {
 	 */
 	remove: (type: EventType) => void;
 	/**
+	 * error event
+	 */
+	error: (err: Error | NodeJS.ErrnoException) => void;
+	/**
 	 * closed event
 	 */
 	closed: () => void;
@@ -298,6 +304,10 @@ type DirectoryWatcherEvents = {
 	 * remove event
 	 */
 	remove: (type: EventType) => void;
+	/**
+	 * error event
+	 */
+	error: (err: Error | NodeJS.ErrnoException) => void;
 	/**
 	 * closed event
 	 */

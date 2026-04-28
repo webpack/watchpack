@@ -4,6 +4,7 @@ export = Watchpack;
  * @property {(file: string, mtime: number, type: EventType) => void} change change event
  * @property {(file: string, type: EventType) => void} remove remove event
  * @property {(changes: Changes, removals: Removals) => void} aggregated aggregated event
+ * @property {(err: Error | NodeJS.ErrnoException) => void} error error event
  */
 /**
  * @extends {EventEmitter<{ [K in keyof WatchpackEvents]: Parameters<WatchpackEvents[K]> }>}
@@ -21,6 +22,10 @@ declare class Watchpack extends EventEmitter<{
 	 * aggregated event
 	 */
 	aggregated: [changes: Changes, removals: Removals];
+	/**
+	 * error event
+	 */
+	error: [err: Error | NodeJS.ErrnoException];
 }> {
 	/**
 	 * @param {WatchOptions=} options options
@@ -101,6 +106,15 @@ declare class Watchpack extends EventEmitter<{
 	 * @param {EventType} type type
 	 */
 	_onRemove(item: string, file: string, type: EventType): void;
+	/**
+	 * Surface a watcher error to the consumer. EventEmitter throws when an
+	 * `error` event is emitted with no listener attached, which would be a
+	 * breaking change for consumers that didn't subscribe before — so only
+	 * emit when somebody is listening. The DirectoryWatcher already logs to
+	 * stderr as a fallback, so silent observers still see the failure.
+	 * @param {Error | NodeJS.ErrnoException} err error
+	 */
+	_onError(err: Error | NodeJS.ErrnoException): void;
 }
 declare namespace Watchpack {
 	export {
@@ -258,4 +272,8 @@ type WatchpackEvents = {
 	 * aggregated event
 	 */
 	aggregated: (changes: Changes, removals: Removals) => void;
+	/**
+	 * error event
+	 */
+	error: (err: Error | NodeJS.ErrnoException) => void;
 };

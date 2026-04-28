@@ -193,6 +193,79 @@ describe("DirectoryWatcher extra coverage", () => {
 		});
 	});
 
+	it("onWatcherError emits 'error' to subscribed watchers", (done) => {
+		const dw = new DirectoryWatcher(
+			getWatcherManager(EMPTY_OPTIONS),
+			fixtures,
+			EMPTY_OPTIONS,
+		);
+		const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+		const w = dw.watch(path.join(fixtures, "a"));
+		/** @type {NodeJS.ErrnoException[]} */
+		const received = [];
+		w.on("error", (err) => received.push(err));
+		const err = Object.assign(new Error("emfile"), { code: "EMFILE" });
+		dw.onWatcherError(err);
+		expect(received).toHaveLength(1);
+		expect(received[0]).toBe(err);
+		errorSpy.mockRestore();
+		testHelper.tick(100, () => {
+			dw.close();
+			done();
+		});
+	});
+
+	it("onWatcherError enriches ENOSPC with max_user_watches hint", (done) => {
+		const dw = new DirectoryWatcher(
+			getWatcherManager(EMPTY_OPTIONS),
+			fixtures,
+			EMPTY_OPTIONS,
+		);
+		const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+		const w = dw.watch(path.join(fixtures, "a"));
+		/** @type {NodeJS.ErrnoException | undefined} */
+		let received;
+		w.on("error", (err) => {
+			received = err;
+		});
+		const err = Object.assign(
+			new Error("ENOSPC: System limit for number of file watchers reached"),
+			{ code: "ENOSPC" },
+		);
+		dw.onWatcherError(err);
+		expect(received).toBeDefined();
+		expect(/** @type {NodeJS.ErrnoException} */ (received).code).toBe("ENOSPC");
+		expect(/** @type {NodeJS.ErrnoException} */ (received).message).toContain(
+			"max_user_watches",
+		);
+		errorSpy.mockRestore();
+		testHelper.tick(100, () => {
+			dw.close();
+			done();
+		});
+	});
+
+	it("onWatcherError does not double-append max_user_watches hint", (done) => {
+		const dw = new DirectoryWatcher(
+			getWatcherManager(EMPTY_OPTIONS),
+			fixtures,
+			EMPTY_OPTIONS,
+		);
+		const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+		const err = Object.assign(
+			new Error("ENOSPC: already mentions max_user_watches limit"),
+			{ code: "ENOSPC" },
+		);
+		const before = err.message;
+		dw.onWatcherError(err);
+		expect(err.message).toBe(before);
+		errorSpy.mockRestore();
+		testHelper.tick(100, () => {
+			dw.close();
+			done();
+		});
+	});
+
 	it("onWatcherError with no error is a no-op", () => {
 		const dw = new DirectoryWatcher(
 			getWatcherManager(EMPTY_OPTIONS),

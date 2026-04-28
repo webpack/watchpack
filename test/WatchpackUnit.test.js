@@ -379,6 +379,44 @@ describe("Watchpack internal watcher classes", () => {
 		w.close();
 	});
 
+	it("watchpackFileWatcher.error forwards to watchpack.error event", () => {
+		const w = new Watchpack();
+		const file = path.join(__dirname, "fixtures", "error-fwd-file");
+		w.watch([file], []);
+		const fw = ensure(w.fileWatchers.get(file));
+		/** @type {NodeJS.ErrnoException[]} */
+		const received = [];
+		w.on("error", (err) => received.push(err));
+		const err = Object.assign(new Error("boom"), { code: "EMFILE" });
+		/** @type {import("events").EventEmitter} */
+		(fw.watcher).emit("error", err);
+		expect(received).toEqual([err]);
+		w.close();
+	});
+
+	it("watchpackDirectoryWatcher.error forwards to watchpack.error event", () => {
+		const w = new Watchpack();
+		const dir = path.join(__dirname, "fixtures", "error-fwd-dir");
+		w.watch([], [dir]);
+		const dw = ensure(w.directoryWatchers.get(dir));
+		/** @type {NodeJS.ErrnoException[]} */
+		const received = [];
+		w.on("error", (err) => received.push(err));
+		const err = Object.assign(new Error("nospc"), { code: "ENOSPC" });
+		/** @type {import("events").EventEmitter} */
+		(dw.watcher).emit("error", err);
+		expect(received).toEqual([err]);
+		w.close();
+	});
+
+	it("_onError is a no-op when no listener is attached (no unhandled error throw)", () => {
+		const w = new Watchpack();
+		expect(() =>
+			w._onError(Object.assign(new Error("ignored"), { code: "EMFILE" })),
+		).not.toThrow();
+		w.close();
+	});
+
 	it("watchpackFileWatcher.remove emits for each tracked file", () => {
 		const w = new Watchpack();
 		const file = path.join(__dirname, "fixtures", "remove-multi");
