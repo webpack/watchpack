@@ -61,7 +61,7 @@
     "prettier": "^3.7.4",
     "tinybench": "^6.0.0",
     "typescript": "^6.0.2",
-    "write-file-atomic": "^7.0.1"
+    "write-file-atomic": "^8.0.0"
   },
   "engines": {
     "node": ">=10.13.0"
