@@ -1154,6 +1154,38 @@ describe("Watchpack", () => {
 		});
 	});
 
+	it("should not report changes in initial scan when start time is provided and items were created shortly before (#295)", (done) => {
+		const w = new WatchpackTest({
+			aggregateTimeout: 100,
+		});
+		w.on("aggregated", () => {
+			done(new Error("should not fire"));
+		});
+		testHelper.dir("dir");
+		testHelper.dir("dir/sub");
+		testHelper.file("dir/sub/nested");
+		testHelper.file("dir/file");
+		// Use a short tick (~100 ms) to mimic the real-world scenario where
+		// callers create files and then `await` something before calling
+		// `watch({ startTime: Date.now() })`. The previous behaviour added
+		// `FS_ACCURACY` (up to 2000 ms) to each entry's `safeTime` and
+		// compared the inflated value against `startTime`, which incorrectly
+		// flagged everything that was created within `FS_ACCURACY` before
+		// `startTime`.
+		testHelper.tick(() => {
+			w.watch({
+				directories: [path.join(fixtures, "dir")],
+				startTime: Date.now(),
+			});
+			testHelper.tick(2000, () => {
+				expect(true).toBe(true);
+				// no event fired
+				w.close();
+				done();
+			});
+		});
+	});
+
 	it("should not report changes to a folder watched as file when items are added", (done) => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 100,

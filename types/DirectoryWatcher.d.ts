@@ -209,7 +209,7 @@ import { EventEmitter } from "events";
 /**
  * @typedef {object} DirectoryWatcherEvents
  * @property {(type: EventType) => void} initial-missing initial missing event
- * @property {((file: string, mtime: number, type: EventType, initial: boolean) => void)} change change event
+ * @property {((file: string, mtime: number, type: EventType, initial: boolean, rawTimestamp?: number) => void)} change change event
  * @property {(type: EventType) => void} remove remove event
  * @property {() => void} closed closed event
  */
@@ -293,6 +293,7 @@ type DirectoryWatcherEvents = {
 		mtime: number,
 		type: EventType,
 		initial: boolean,
+		rawTimestamp?: number,
 	) => void;
 	/**
 	 * remove event
