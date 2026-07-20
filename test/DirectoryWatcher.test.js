@@ -360,6 +360,52 @@ describe("DirectoryWatcher", () => {
 				});
 			});
 		}
+
+		const watchEventCodes = IS_WIN
+			? ["EACCES", "ENODEV", "EINVAL"]
+			: ["EACCES", "ENODEV"];
+		for (const code of watchEventCodes) {
+			it(`does not log when lstat returns ${code} for a watch event`, (done) => {
+				testHelper.file("a");
+				testHelper.tick(1000, () => {
+					const directoryWatcher = getDirectoryWatcher(fixtures, EMPTY_OPTIONS);
+					const a = directoryWatcher.watch(path.join(fixtures, "a"));
+
+					testHelper.tick(500, () => {
+						const fs = require("graceful-fs");
+
+						const originalLstat = fs.lstat;
+						// eslint-disable-next-line jsdoc/reject-any-type
+						/** @type {any} */ (fs).lstat = (
+							/** @type {string} */ target,
+							/** @type {(err: NodeJS.ErrnoException | null) => void} */ cb,
+						) => {
+							if (target.endsWith(`${path.sep}a`)) {
+								process.nextTick(() => cb(makeErr(code)));
+								return;
+							}
+							originalLstat(target, cb);
+						};
+
+						const errorSpy = jest
+							.spyOn(console, "error")
+							.mockImplementation(() => {});
+						directoryWatcher.onWatchEvent("change", "a");
+						testHelper.tick(500, () => {
+							// eslint-disable-next-line jsdoc/reject-any-type
+							/** @type {any} */ (fs).lstat = originalLstat;
+							a.close();
+							const printed = errorSpy.mock.calls
+								.map((call) => String(call[0]))
+								.filter((msg) => msg.includes("Watchpack Error (stats)"));
+							errorSpy.mockRestore();
+							expect(printed).toEqual([]);
+							done();
+						});
+					});
+				});
+			});
+		}
 	});
 
 	describe("EBUSY retry handling (#223)", () => {
