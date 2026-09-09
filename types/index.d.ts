@@ -35,7 +35,7 @@ type FileWatcherEvents = import("./DirectoryWatcher").FileWatcherEvents;
 type EventMap = Record<string, (...args: any[]) => any>;
 type Watcher<T extends EventMap> = import("./DirectoryWatcher").Watcher<T>;
 type IgnoredFunction = (item: string) => boolean;
-type Ignored = string[] | RegExp | string | IgnoredFunction;
+type Ignored = (string | RegExp)[] | RegExp | string | IgnoredFunction;
 type WatcherOptions = {
 	/**
 	 * true when need to resolve symlinks and watch symlink and real file, otherwise false

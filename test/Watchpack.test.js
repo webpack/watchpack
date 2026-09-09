@@ -281,6 +281,61 @@ describe("Watchpack", () => {
 		});
 	});
 
+	it("should not watch ignored files in a directory (mixed glob and regexp)", (done) => {
+		const w = new WatchpackTest({
+			aggregateTimeout: 300,
+			ignored: ["**/.cache", /generated$/],
+		});
+		let changeEvents = 0;
+		let aggregatedEvents = 0;
+		w.on("change", () => {
+			changeEvents++;
+		});
+		w.on("aggregated", () => {
+			aggregatedEvents++;
+		});
+		testHelper.dir("dir");
+		testHelper.dir(path.join("dir", ".cache"));
+		testHelper.tick(200, () => {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(200, () => {
+				testHelper.file(path.join("dir", ".cache", "a"));
+				testHelper.file(path.join("dir", "generated"));
+				testHelper.tick(1000, () => {
+					expect(changeEvents).toBe(0);
+					expect(aggregatedEvents).toBe(0);
+					w.close();
+					done();
+				});
+			});
+		});
+	});
+
+	it("should still watch non-ignored files in a directory (mixed glob and regexp)", (done) => {
+		const w = new WatchpackTest({
+			aggregateTimeout: 300,
+			ignored: ["**/.cache", /generated$/],
+		});
+		let changeEvents = 0;
+		w.on("change", (file) => {
+			expect(file).toBe(path.join(fixtures, "dir", "watched"));
+			changeEvents++;
+		});
+		w.on("aggregated", (changes) => {
+			expect([...changes]).toEqual([path.join(fixtures, "dir")]);
+			expect(changeEvents).toBeGreaterThan(0);
+			w.close();
+			done();
+		});
+		testHelper.dir("dir");
+		testHelper.tick(200, () => {
+			w.watch([], [path.join(fixtures, "dir")]);
+			testHelper.tick(200, () => {
+				testHelper.file(path.join("dir", "watched"));
+			});
+		});
+	});
+
 	it("should watch a file when ignore is empty array", (done) => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,
