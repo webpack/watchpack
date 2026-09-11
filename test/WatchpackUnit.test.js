@@ -98,6 +98,30 @@ describe("Watchpack unit", () => {
 		w.close();
 	});
 
+	it("should accept a mixed array of globs and RegExps", () => {
+		const w = new Watchpack({ ignored: ["**/.cache", /generated/] });
+		expect(w.watcherOptions.ignored("/project/.cache")).toBe(true);
+		expect(w.watcherOptions.ignored("/project/.cache/file.js")).toBe(true);
+		expect(w.watcherOptions.ignored("/project/generated.js")).toBe(true);
+		expect(w.watcherOptions.ignored("/project/src/index.js")).toBe(false);
+		w.close();
+	});
+
+	it("should accept an array containing only RegExps", () => {
+		const w = new Watchpack({ ignored: [/foo/, /bar/] });
+		expect(w.watcherOptions.ignored("/x/foo")).toBe(true);
+		expect(w.watcherOptions.ignored("/x/bar")).toBe(true);
+		expect(w.watcherOptions.ignored("/x/baz")).toBe(false);
+		w.close();
+	});
+
+	it("should normalize backslashes before testing RegExps in a mixed array", () => {
+		const w = new Watchpack({ ignored: ["**/foo", /\/bar$/] });
+		expect(w.watcherOptions.ignored("C:\\x\\foo")).toBe(true);
+		expect(w.watcherOptions.ignored("C:\\x\\bar")).toBe(true);
+		w.close();
+	});
+
 	it("should allow calling pause with no aggregate timer", () => {
 		const w = new Watchpack();
 		// Just calling pause without any events should be a no-op
