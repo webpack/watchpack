@@ -1043,6 +1043,60 @@ describe("Watchpack", () => {
 		});
 	});
 
+	it("should detect a past removal of a file (watched)", (done) => {
+		testHelper.file("a");
+		// one options object shares one watcher pool, as webpack does
+		const options = {};
+		const w2 = new WatchpackTest(options);
+		const w = new WatchpackTest(options);
+		w.on("aggregated", (changes, removals) => {
+			expect([...changes]).toEqual([]);
+			expect([...removals]).toEqual([path.join(fixtures, "a")]);
+			w.close();
+			w2.close();
+			done();
+		});
+		testHelper.tick(400, () => {
+			w2.watch([path.join(fixtures, "a")], []);
+			testHelper.tick(() => {
+				const startTime = Date.now();
+				testHelper.tick(() => {
+					testHelper.remove("a");
+					testHelper.tick(400, () => {
+						w.watch([path.join(fixtures, "a")], [], startTime);
+					});
+				});
+			});
+		});
+	});
+
+	it("should not detect a removal before the start time (watched)", (done) => {
+		testHelper.file("a");
+		// one options object shares one watcher pool, as webpack does
+		const options = {};
+		const w2 = new WatchpackTest(options);
+		const w = new WatchpackTest(options);
+		let aggregatedEvents = 0;
+		w.on("aggregated", () => {
+			aggregatedEvents++;
+		});
+		testHelper.tick(400, () => {
+			w2.watch([path.join(fixtures, "a")], []);
+			testHelper.tick(() => {
+				testHelper.remove("a");
+				testHelper.tick(400, () => {
+					w.watch([path.join(fixtures, "a")], [], Date.now());
+					testHelper.tick(1000, () => {
+						expect(aggregatedEvents).toBe(0);
+						w.close();
+						w2.close();
+						done();
+					});
+				});
+			});
+		});
+	});
+
 	it("should watch a single file removal", (done) => {
 		testHelper.file("a");
 		const w = new WatchpackTest({

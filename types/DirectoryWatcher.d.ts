@@ -62,6 +62,8 @@ declare class DirectoryWatcher extends EventEmitter<{
 	initialScanRemoved: null | InitialScanRemoved;
 	/** @type {undefined | number} */
 	initialScanFinished: undefined | number;
+	/** @type {Map<string, number>} */
+	removedTimes: Map<string, number>;
 	/** @type {Map<string, Set<Watcher<DirectoryWatcherEvents> | Watcher<FileWatcherEvents>>>} */
 	watchers: Map<
 		string,
