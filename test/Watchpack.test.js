@@ -1061,10 +1061,13 @@ describe("Watchpack", () => {
 			testHelper.tick(() => {
 				const startTime = Date.now();
 				testHelper.tick(() => {
-					testHelper.remove("a");
-					testHelper.tick(400, () => {
-						w.watch([path.join(fixtures, "a")], [], startTime);
+					// attach once the shared pool has seen the removal, not a live one
+					w2.once("remove", () => {
+						testHelper.tick(() => {
+							w.watch([path.join(fixtures, "a")], [], startTime);
+						});
 					});
+					testHelper.remove("a");
 				});
 			});
 		});
@@ -1083,16 +1086,18 @@ describe("Watchpack", () => {
 		testHelper.tick(400, () => {
 			w2.watch([path.join(fixtures, "a")], []);
 			testHelper.tick(() => {
-				testHelper.remove("a");
-				testHelper.tick(400, () => {
-					w.watch([path.join(fixtures, "a")], [], Date.now());
-					testHelper.tick(1000, () => {
-						expect(aggregatedEvents).toBe(0);
-						w.close();
-						w2.close();
-						done();
+				w2.once("remove", () => {
+					testHelper.tick(() => {
+						w.watch([path.join(fixtures, "a")], [], Date.now());
+						testHelper.tick(1000, () => {
+							expect(aggregatedEvents).toBe(0);
+							w.close();
+							w2.close();
+							done();
+						});
 					});
 				});
+				testHelper.remove("a");
 			});
 		});
 	});
