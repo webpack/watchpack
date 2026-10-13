@@ -72,7 +72,7 @@ declare class DirectoryWatcher extends EventEmitter<{
 	/** @type {Watcher<FileWatcherEvents> | null} */
 	parentWatcher: Watcher<FileWatcherEvents> | null;
 	/** @type {undefined | NodeJS.Timeout} */
-	danglingTimeout: undefined | NodeJS.Timeout;
+	retryTimeout: undefined | NodeJS.Timeout;
 	refs: number;
 	/** @type {Map<string, boolean>} */
 	_activeEvents: Map<string, boolean>;

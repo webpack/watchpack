@@ -1778,7 +1778,7 @@ describe("Watchpack", () => {
 				});
 			});
 
-			describe("dangling directory symlink", () => {
+			describe("path that is not a directory yet", () => {
 				const fs = require("fs");
 
 				/** @type {jest.SpyInstance} */
@@ -1823,6 +1823,26 @@ describe("Watchpack", () => {
 								expect(watchSpy).toHaveBeenCalledTimes(calls);
 								done();
 							});
+						});
+					});
+				});
+
+				it("should wait for a path that appears as a file to become a directory", (done) => {
+					const file = path.join(fixtures, "x", "file");
+					const w = new WatchpackTest({ aggregateTimeout: 100 });
+					w.on("change", (changed) => {
+						if (changed !== file) return;
+						w.close();
+						done();
+					});
+					w.watch([file], []);
+					testHelper.tick(200, () => {
+						testHelper.file("x");
+						testHelper.tick(1000, () => {
+							expect(watchSpy.mock.calls.length).toBeLessThan(20);
+							testHelper.remove("x");
+							testHelper.dir("x");
+							testHelper.file(path.join("x", "file"));
 						});
 					});
 				});
