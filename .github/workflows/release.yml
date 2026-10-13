@@ -57,9 +57,19 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.ref }}
           fetch-depth: 0
           persist-credentials: false
+
+      # actions/checkout takes only a full SHA, branch or tag; git also takes a short SHA
+      - name: Check out ${{ inputs.ref }}
+        env:
+          REF: ${{ inputs.ref }}
+        run: |
+          sha="$(git rev-parse --verify --quiet "$REF^{commit}" || git rev-parse --verify --quiet "refs/remotes/origin/$REF^{commit}")" || {
+            echo "::error::$REF is not a commit, tag or branch of this repository"
+            exit 1
+          }
+          git checkout --detach "$sha"
 
       - name: Use Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
