@@ -4,6 +4,17 @@ on:
   push:
     branches:
       - main
+  # Publishes a version that a commit carries but npm never received, e.g.
+  # after a failed release run; the checked-out commit is published as is
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Commit, tag or branch whose package.json version to publish"
+        required: true
+      dist-tag:
+        description: "npm dist-tag; anything but `latest` for a version older than the current one"
+        required: true
+        default: latest
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -14,7 +25,7 @@ permissions:
 
 jobs:
   release:
-    if: github.repository == 'webpack/watchpack'
+    if: github.repository == 'webpack/watchpack' && github.event_name == 'push'
     name: Release
     runs-on: ubuntu-latest
     outputs:
@@ -38,3 +49,48 @@ jobs:
           publish-script: npm run release
           commit-message: "chore(release): new release"
           pr-title: "chore(release): new release"
+
+  publish-ref:
+    if: github.repository == 'webpack/watchpack' && github.event_name == 'workflow_dispatch'
+    name: Publish ${{ inputs.ref }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org
+
+      - name: Check the version is unpublished and keeps `latest` moving forward
+        id: version
+        env:
+          DIST_TAG: ${{ inputs.dist-tag }}
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if npm view "watchpack@$version" version > /dev/null 2>&1; then
+            echo "::error::watchpack@$version is already on npm"
+            exit 1
+          fi
+          latest="$(npm view watchpack dist-tags.latest)"
+          if [ "$DIST_TAG" = latest ] && [ "$(printf '%s\n' "$latest" "$version" | sort -V | tail -n1)" != "$version" ]; then
+            echo "::error::$version is older than latest ($latest); pick another dist-tag"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to npm
+        env:
+          DIST_TAG: ${{ inputs.dist-tag }}
+        run: npm publish --access public --tag "$DIST_TAG"
+
+      - name: Create the tag and GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          awk -v v="$VERSION" '$0 == "## " v { found = 1; next } found && /^## / { exit } found' CHANGELOG.md > notes.md
+          gh release create "v$VERSION" --target "$(git rev-parse HEAD)" --title "v$VERSION" --notes-file notes.md
