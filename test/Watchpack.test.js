@@ -1811,16 +1811,17 @@ describe("Watchpack", () => {
 					});
 				});
 
-				it("should stop retrying once the link is removed or the watcher closed", (done) => {
+				it("should stop retrying once the link is removed", (done) => {
 					const w = new WatchpackTest({ aggregateTimeout: 100 });
 					w.watch([path.join(fixtures, "dangling", "file")], []);
 					testHelper.tick(200, () => {
 						testHelper.unlink("dangling");
+						// let the pending retry run once and fall back to waiting
 						testHelper.tick(1500, () => {
-							w.close();
 							const calls = watchSpy.mock.calls.length;
 							testHelper.tick(1500, () => {
 								expect(watchSpy).toHaveBeenCalledTimes(calls);
+								w.close();
 								done();
 							});
 						});
