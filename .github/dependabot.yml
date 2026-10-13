@@ -22,6 +22,10 @@ updates:
     open-pull-requests-limit: 20
     labels:
       - dependencies
+    ignore:
+      # v2 needs Changesets CLI v3, and `@changesets/cli` is still v2 here
+      - dependency-name: "changesets/action"
+        update-types: ["version-update:semver-major"]
     groups:
       dependencies:
         patterns:
