@@ -85,9 +85,10 @@ jobs:
             latest="$(npm view watchpack dist-tags.latest)"
             if ! node -e '
               const [version, latest] = process.argv.slice(1);
-              const parse = (v) => v.split(".").map(Number);
+              const parse = (v) => v.split("-")[0].split(".").map(Number);
               const [a, b] = [parse(version), parse(latest)];
-              const newer = !version.includes("-") && (a[0] - b[0] || a[1] - b[1] || a[2] - b[2]) > 0;
+              const diff = a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+              const newer = !version.includes("-") && (diff > 0 || (diff === 0 && latest.includes("-")));
               process.exit(newer ? 0 : 1);
             ' "$version" "$latest"; then
               echo "::error::$version is a prerelease or not newer than latest ($latest); pick another dist-tag"
