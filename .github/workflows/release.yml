@@ -58,6 +58,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref }}
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Use Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -65,19 +67,36 @@ jobs:
           node-version: lts/*
           registry-url: https://registry.npmjs.org
 
-      - name: Check the version is unpublished and keeps `latest` moving forward
+      - name: Check the commit, version and tag
         id: version
         env:
           DIST_TAG: ${{ inputs.dist-tag }}
         run: |
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::$(git rev-parse HEAD) is not on main; only reviewed commits are published"
+            exit 1
+          fi
           version="$(node -p 'require("./package.json").version')"
           if npm view "watchpack@$version" version > /dev/null 2>&1; then
             echo "::error::watchpack@$version is already on npm"
             exit 1
           fi
-          latest="$(npm view watchpack dist-tags.latest)"
-          if [ "$DIST_TAG" = latest ] && [ "$(printf '%s\n' "$latest" "$version" | sort -V | tail -n1)" != "$version" ]; then
-            echo "::error::$version is older than latest ($latest); pick another dist-tag"
+          if [ "$DIST_TAG" = latest ]; then
+            latest="$(npm view watchpack dist-tags.latest)"
+            if ! node -e '
+              const [version, latest] = process.argv.slice(1);
+              const parse = (v) => v.split(".").map(Number);
+              const [a, b] = [parse(version), parse(latest)];
+              const newer = !version.includes("-") && (a[0] - b[0] || a[1] - b[1] || a[2] - b[2]) > 0;
+              process.exit(newer ? 0 : 1);
+            ' "$version" "$latest"; then
+              echo "::error::$version is a prerelease or not newer than latest ($latest); pick another dist-tag"
+              exit 1
+            fi
+          fi
+          tagged="$(git ls-remote --tags origin "refs/tags/v$version^{}" "refs/tags/v$version" | sort -k2 | tail -n1 | cut -f1)"
+          if [ -n "$tagged" ] && [ "$tagged" != "$(git rev-parse HEAD)" ]; then
+            echo "::error::tag v$version already points to $tagged"
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
