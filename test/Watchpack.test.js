@@ -1811,9 +1811,15 @@ describe("Watchpack", () => {
 					});
 				});
 
-				it("should stop retrying once the link is removed", (done) => {
+				it("should stop retrying once the link is removed, then watch the directory created there", (done) => {
+					const file = path.join(fixtures, "dangling", "file");
 					const w = new WatchpackTest({ aggregateTimeout: 100 });
-					w.watch([path.join(fixtures, "dangling", "file")], []);
+					w.on("change", (changed) => {
+						if (changed !== file) return;
+						w.close();
+						done();
+					});
+					w.watch([file], []);
 					testHelper.tick(200, () => {
 						testHelper.unlink("dangling");
 						// let the pending retry run once and fall back to waiting
@@ -1821,8 +1827,8 @@ describe("Watchpack", () => {
 							const calls = watchSpy.mock.calls.length;
 							testHelper.tick(1500, () => {
 								expect(watchSpy).toHaveBeenCalledTimes(calls);
-								w.close();
-								done();
+								testHelper.dir("dangling");
+								testHelper.file(path.join("dangling", "file"));
 							});
 						});
 					});
