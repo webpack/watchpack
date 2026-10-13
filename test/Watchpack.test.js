@@ -1268,6 +1268,37 @@ describe("Watchpack", () => {
 		});
 	});
 
+	it("should not report directories created before start time when only directories are scanned (#295)", (done) => {
+		// A fresh module starts at the default 2000ms FS_ACCURACY, which only the
+		// stats seen during the scan can lower
+		/** @type {typeof WatchpackTest} */
+		let FreshWatchpack;
+		jest.isolateModules(() => {
+			FreshWatchpack = require("../lib");
+		});
+		testHelper.dir("dir");
+		testHelper.dir(path.join("dir", "sub"));
+		testHelper.tick(1100, () => {
+			const w = new FreshWatchpack({
+				aggregateTimeout: 100,
+			});
+			/** @type {string[]} */
+			const changes = [];
+			w.on("change", (file) => {
+				changes.push(file);
+			});
+			w.watch({
+				directories: [path.join(fixtures, "dir")],
+				startTime: Date.now(),
+			});
+			testHelper.tick(1000, () => {
+				w.close();
+				expect(changes).toEqual([]);
+				done();
+			});
+		});
+	});
+
 	it("should not report changes to a folder watched as file when items are added", (done) => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 100,
