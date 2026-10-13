@@ -1,5 +1,11 @@
 # watchpack
 
+## 2.6.1
+
+### Patch Changes
+
+- fix: stop a tight `fs.watch` retry loop behind a dangling directory symlink, and retry once a second until its target appears. (by [@alexander-akait](https://github.com/alexander-akait) in [#346](https://github.com/webpack/watchpack/pull/346))
+
 ## 2.6.0
 
 ### Minor Changes
