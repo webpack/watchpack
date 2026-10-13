@@ -1777,6 +1777,96 @@ describe("Watchpack", () => {
 					});
 				});
 			});
+
+			describe("path that is not a directory yet", () => {
+				const fs = require("fs");
+
+				/** @type {jest.SpyInstance} */
+				let watchSpy;
+
+				beforeEach(() => {
+					testHelper.symlinkDir("dangling", "missing");
+					watchSpy = jest.spyOn(fs, "watch");
+				});
+
+				afterEach(() => {
+					watchSpy.mockRestore();
+				});
+
+				it("should wait for the target without a retry loop", (done) => {
+					const link = path.join(fixtures, "dangling");
+					const file = path.join(link, "file");
+					const w = new WatchpackTest({ aggregateTimeout: 100 });
+					w.on("change", (changed) => {
+						if (changed !== file) return;
+						w.close();
+						done();
+					});
+					w.watch([file], [link]);
+					testHelper.tick(1000, () => {
+						// each attempt fails while the target is missing
+						expect(watchSpy.mock.calls.length).toBeLessThan(20);
+						testHelper.dir("missing");
+						testHelper.file(path.join("missing", "file"));
+					});
+				});
+
+				it("should stop retrying once the link is removed, then watch the directory created there", (done) => {
+					const file = path.join(fixtures, "dangling", "file");
+					const w = new WatchpackTest({ aggregateTimeout: 100 });
+					w.on("change", (changed) => {
+						if (changed !== file) return;
+						w.close();
+						done();
+					});
+					w.watch([file], []);
+					testHelper.tick(200, () => {
+						testHelper.unlink("dangling");
+						// let the pending retry run once and fall back to waiting
+						testHelper.tick(1500, () => {
+							const calls = watchSpy.mock.calls.length;
+							testHelper.tick(1500, () => {
+								expect(watchSpy).toHaveBeenCalledTimes(calls);
+								testHelper.dir("dangling");
+								testHelper.file(path.join("dangling", "file"));
+							});
+						});
+					});
+				});
+
+				it("should wait for a path that appears as a file to become a directory", (done) => {
+					const file = path.join(fixtures, "x", "file");
+					const w = new WatchpackTest({ aggregateTimeout: 100 });
+					w.on("change", (changed) => {
+						if (changed !== file) return;
+						w.close();
+						done();
+					});
+					w.watch([file], []);
+					testHelper.tick(200, () => {
+						testHelper.file("x");
+						testHelper.tick(1000, () => {
+							expect(watchSpy.mock.calls.length).toBeLessThan(20);
+							testHelper.remove("x");
+							testHelper.dir("x");
+							testHelper.file(path.join("x", "file"));
+						});
+					});
+				});
+
+				it("should stop retrying when closed while waiting for the target", (done) => {
+					const w = new WatchpackTest({ aggregateTimeout: 100 });
+					w.watch([path.join(fixtures, "dangling", "file")], []);
+					testHelper.tick(200, () => {
+						w.close();
+						const calls = watchSpy.mock.calls.length;
+						testHelper.tick(1500, () => {
+							expect(watchSpy).toHaveBeenCalledTimes(calls);
+							done();
+						});
+					});
+				});
+			});
 		});
 	} else {
 		it("symlinks", () => {

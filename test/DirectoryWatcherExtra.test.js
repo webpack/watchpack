@@ -49,6 +49,32 @@ describe("DirectoryWatcher extra coverage", () => {
 		});
 	});
 
+	it("retryWatcher keeps a single retry timer for a path that is not a directory", () => {
+		testHelper.file("not-a-dir");
+		const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+		const dw = new DirectoryWatcher(
+			getWatcherManager(EMPTY_OPTIONS),
+			path.join(fixtures, "not-a-dir"),
+			EMPTY_OPTIONS,
+		);
+		// a watcher already exists, so nothing is retried
+		dw.retryWatcher(1, "change");
+		expect(dw.retryTimeout).toBeUndefined();
+
+		/** @type {NonNullable<DirectoryWatcherType["watcher"]>} */
+		(dw.watcher).close();
+		dw.watcher = null;
+		dw.retryWatcher(1, "change");
+		const timer = dw.retryTimeout;
+		expect(timer).toBeDefined();
+		dw.retryWatcher(1, "change");
+		expect(dw.retryTimeout).toBe(timer);
+
+		dw.close();
+		expect(dw.retryTimeout).toBeUndefined();
+		errorSpy.mockRestore();
+	});
+
 	it("should expose exported Watcher class and EXISTANCE_ONLY_TIME_ENTRY", () => {
 		expect(typeof DirectoryWatcher).toBe("function");
 		expect(typeof DirectoryWatcher.Watcher).toBe("function");
