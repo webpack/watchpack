@@ -71,6 +71,8 @@ declare class DirectoryWatcher extends EventEmitter<{
 	>;
 	/** @type {Watcher<FileWatcherEvents> | null} */
 	parentWatcher: Watcher<FileWatcherEvents> | null;
+	/** @type {undefined | NodeJS.Timeout} */
+	danglingTimeout: undefined | NodeJS.Timeout;
 	refs: number;
 	/** @type {Map<string, boolean>} */
 	_activeEvents: Map<string, boolean>;
@@ -160,6 +162,12 @@ declare class DirectoryWatcher extends EventEmitter<{
 	 * @param {string} reason a reason
 	 */
 	onDirectoryRemoved(reason: string): void;
+	/**
+	 * Creates the watcher once the parent directory reports this path.
+	 * @param {number} mtime mtime
+	 * @param {EventType} type type
+	 */
+	retryWatcher(mtime: number, type: EventType): void;
 	watchInParentDirectory(): void;
 	/**
 	 * @param {boolean} initial true when initial, otherwise false

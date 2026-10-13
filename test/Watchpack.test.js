@@ -1777,6 +1777,28 @@ describe("Watchpack", () => {
 					});
 				});
 			});
+
+			it("should wait for the target of a dangling directory symlink without a retry loop", (done) => {
+				const fs = require("fs");
+
+				testHelper.symlinkDir("dangling", "missing");
+				const file = path.join(fixtures, "dangling", "file");
+				const watchSpy = jest.spyOn(fs, "watch");
+				const w = new WatchpackTest({ aggregateTimeout: 100 });
+				w.on("change", (changed) => {
+					if (changed !== file) return;
+					w.close();
+					watchSpy.mockRestore();
+					done();
+				});
+				w.watch([file], []);
+				testHelper.tick(1000, () => {
+					// each attempt fails while the target is missing
+					expect(watchSpy.mock.calls.length).toBeLessThan(20);
+					testHelper.dir("missing");
+					testHelper.file(path.join("missing", "file"));
+				});
+			});
 		});
 	} else {
 		it("symlinks", () => {
