@@ -1778,25 +1778,66 @@ describe("Watchpack", () => {
 				});
 			});
 
-			it("should wait for the target of a dangling directory symlink without a retry loop", (done) => {
+			describe("dangling directory symlink", () => {
 				const fs = require("fs");
 
-				testHelper.symlinkDir("dangling", "missing");
-				const file = path.join(fixtures, "dangling", "file");
-				const watchSpy = jest.spyOn(fs, "watch");
-				const w = new WatchpackTest({ aggregateTimeout: 100 });
-				w.on("change", (changed) => {
-					if (changed !== file) return;
-					w.close();
-					watchSpy.mockRestore();
-					done();
+				/** @type {jest.SpyInstance} */
+				let watchSpy;
+
+				beforeEach(() => {
+					testHelper.symlinkDir("dangling", "missing");
+					watchSpy = jest.spyOn(fs, "watch");
 				});
-				w.watch([file], []);
-				testHelper.tick(1000, () => {
-					// each attempt fails while the target is missing
-					expect(watchSpy.mock.calls.length).toBeLessThan(20);
-					testHelper.dir("missing");
-					testHelper.file(path.join("missing", "file"));
+
+				afterEach(() => {
+					watchSpy.mockRestore();
+				});
+
+				it("should wait for the target without a retry loop", (done) => {
+					const link = path.join(fixtures, "dangling");
+					const file = path.join(link, "file");
+					const w = new WatchpackTest({ aggregateTimeout: 100 });
+					w.on("change", (changed) => {
+						if (changed !== file) return;
+						w.close();
+						done();
+					});
+					w.watch([file], [link]);
+					testHelper.tick(1000, () => {
+						// each attempt fails while the target is missing
+						expect(watchSpy.mock.calls.length).toBeLessThan(20);
+						testHelper.dir("missing");
+						testHelper.file(path.join("missing", "file"));
+					});
+				});
+
+				it("should stop retrying once the link is removed or the watcher closed", (done) => {
+					const w = new WatchpackTest({ aggregateTimeout: 100 });
+					w.watch([path.join(fixtures, "dangling", "file")], []);
+					testHelper.tick(200, () => {
+						testHelper.unlink("dangling");
+						testHelper.tick(1500, () => {
+							w.close();
+							const calls = watchSpy.mock.calls.length;
+							testHelper.tick(1500, () => {
+								expect(watchSpy).toHaveBeenCalledTimes(calls);
+								done();
+							});
+						});
+					});
+				});
+
+				it("should stop retrying when closed while waiting for the target", (done) => {
+					const w = new WatchpackTest({ aggregateTimeout: 100 });
+					w.watch([path.join(fixtures, "dangling", "file")], []);
+					testHelper.tick(200, () => {
+						w.close();
+						const calls = watchSpy.mock.calls.length;
+						testHelper.tick(1500, () => {
+							expect(watchSpy).toHaveBeenCalledTimes(calls);
+							done();
+						});
+					});
 				});
 			});
 		});
