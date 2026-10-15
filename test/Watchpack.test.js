@@ -1404,6 +1404,34 @@ describe("Watchpack", () => {
 		});
 	});
 
+	it("should not detect file reading shortly after a write as change", (done) => {
+		const w = new WatchpackTest({
+			aggregateTimeout: 300,
+		});
+		w.on("aggregated", () => {
+			done(new Error("should not fire"));
+		});
+		testHelper.dir("dir");
+		testHelper.file(path.join("dir", "a"));
+		// An mtime off the 10ms grid keeps FS_ACCURACY at 10ms or finer, so the
+		// read lands well within the 1s margin removed in #215
+		const now = Date.now();
+		testHelper.mtime(path.join("dir", "a"), now - (now % 10) - 3);
+		testHelper.tick(() => {
+			w.watch({
+				files: [path.join(fixtures, "dir", "a")],
+			});
+			testHelper.tick(300, () => {
+				testHelper.accessFile(path.join("dir", "a"));
+				testHelper.tick(1000, () => {
+					expect(true).toBe(true);
+					w.close();
+					done();
+				});
+			});
+		});
+	});
+
 	it("should allow to reuse watchers when watch is called again", (done) => {
 		const w = new WatchpackTest({
 			aggregateTimeout: 1000,

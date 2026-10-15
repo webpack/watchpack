@@ -1,5 +1,35 @@
 # watchpack
 
+## 2.6.1
+
+### Patch Changes
+
+- fix: stop a tight `fs.watch` retry loop behind a dangling directory symlink, and retry once a second until its target appears. (by [@alexander-akait](https://github.com/alexander-akait) in [#346](https://github.com/webpack/watchpack/pull/346))
+
+## 2.6.0
+
+### Minor Changes
+
+- feat: allow the `ignored` option to be a mixed array of glob strings and (by [@stormslowly](https://github.com/stormslowly) in [#336](https://github.com/webpack/watchpack/pull/336))
+  `RegExp` instances, e.g. `ignored: ["**/.cache", /generated/]`.
+
+  Previously an array was assumed to contain only glob strings, so passing a
+  `RegExp` inside it threw `TypeError: Expected a string`. This made it
+  awkward for frameworks to append their own glob ignores to a user-supplied
+  `RegExp` ignore, since the two could not be combined in one value.
+
+  Glob strings in the array are still merged into a single `RegExp`; `RegExp`
+  items are tested as-is. Behaviour for string-only arrays, single strings,
+  single `RegExp`s and functions is unchanged.
+
+### Patch Changes
+
+- fix: report a file removed after `startTime` to a watcher attached later, as a change after `startTime` already is. (by [@alexander-akait](https://github.com/alexander-akait) in [#345](https://github.com/webpack/watchpack/pull/345))
+
+  Previously a watcher attached with a `startTime` learned of files changed since then ("outdated on attach") but not of files removed since then, so webpack missed a dependency deleted while a build ran.
+
+- Suppress `Watchpack Error (stats)` logging for `EACCES`, `ENODEV`, and Windows `EINVAL` lstat errors in the watch-event path, matching the handling in the scan paths (e.g. `pagefile.sys` on a watched drive root with Node >= 22.17) (by [@danielroe](https://github.com/danielroe) in [#326](https://github.com/webpack/watchpack/pull/326))
+
 ## 2.5.2
 
 ### Patch Changes

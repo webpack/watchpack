@@ -1,6 +1,9 @@
-import { getInfo, getInfoFromPullRequest } from "@changesets/get-github-info";
+// the package only has `exports`, which the import resolver does not read
+// eslint-disable-next-line import/no-unresolved
+import { getCommitInfo, getPullRequestInfo } from "@changesets/get-github-info";
 
 /** @typedef {import("@changesets/types").ChangelogFunctions} ChangelogFunctions */
+/** @typedef {{ commit: string | undefined, pull: string | undefined, user: string | undefined }} Links */
 
 /**
  * @returns {{ GITHUB_SERVER_URL: string }} value
@@ -29,11 +32,13 @@ const changelogFunctions = {
 			await Promise.all(
 				changesets.map(async (cs) => {
 					if (cs.commit) {
-						const { links } = await getInfo({
-							repo: options.repo,
+						const info = await getCommitInfo({
+							repo: /** @type {string} */ (options.repo),
 							commit: cs.commit,
 						});
-						return links.commit;
+						return info
+							? info.commit.markdownLink
+							: `\`${cs.commit.slice(0, 7)}\``;
 					}
 				}),
 			)
@@ -82,35 +87,27 @@ const changelogFunctions = {
 			.split("\n")
 			.map((l) => l.trimEnd());
 
-		const links = await (async () => {
-			if (prFromSummary !== undefined) {
-				let { links } = await getInfoFromPullRequest({
-					repo: options.repo,
-					pull: prFromSummary,
-				});
-				if (commitFromSummary) {
-					const shortCommitId = commitFromSummary.slice(0, 7);
-					links = {
-						...links,
-						commit: `[\`${shortCommitId}\`](${GITHUB_SERVER_URL}/${options.repo}/commit/${commitFromSummary})`,
-					};
-				}
-				return links;
+		const { repo } = /** @type {{ repo: string }} */ (options);
+		/** @type {Links} */
+		const links = { commit: undefined, pull: undefined, user: undefined };
+		if (prFromSummary !== undefined) {
+			const info = await getPullRequestInfo({ repo, pull: prFromSummary });
+			links.commit = info && info.commit && info.commit.markdownLink;
+			links.pull = info && info.pull.markdownLink;
+			links.user = info && info.author && info.author.markdownLink;
+			if (commitFromSummary) {
+				const shortCommitId = commitFromSummary.slice(0, 7);
+				links.commit = `[\`${shortCommitId}\`](${GITHUB_SERVER_URL}/${repo}/commit/${commitFromSummary})`;
 			}
-			const commitToFetchFrom = commitFromSummary || changeset.commit;
-			if (commitToFetchFrom) {
-				const { links } = await getInfo({
-					repo: options.repo,
-					commit: commitToFetchFrom,
-				});
-				return links;
-			}
-			return {
-				commit: null,
-				pull: null,
-				user: null,
-			};
-		})();
+		} else if (commitFromSummary || changeset.commit) {
+			const info = await getCommitInfo({
+				repo,
+				commit: /** @type {string} */ (commitFromSummary || changeset.commit),
+			});
+			links.commit = info && info.commit.markdownLink;
+			links.pull = info && info.pull && info.pull.markdownLink;
+			links.user = info && info.author && info.author.markdownLink;
+		}
 
 		const users = usersFromSummary.length
 			? usersFromSummary
