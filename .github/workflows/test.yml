@@ -44,6 +44,25 @@ jobs:
 
       - run: npm run lint
 
+  # TEMPORARY: measures whether macOS drops events when another watcher starts
+  fsevents-probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20.x, 22.x, 24.x]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - run: npm ci
+
+      - run: node tooling/fsevents-restart-probe.js
+
   test:
     strategy:
       fail-fast: true
