@@ -14,7 +14,8 @@ const realWatch = fs.watch;
 let dropRemovalOf;
 // @ts-expect-error for tests
 fs.watch = (...args) => {
-	const watcher = realWatch.apply(fs, /** @type {EXPECTED_ANY} */ (args));
+	// @ts-expect-error for tests
+	const watcher = realWatch.apply(fs, args);
 	const emit = watcher.emit.bind(watcher);
 	watcher.emit = (event, type, filename, ...rest) => {
 		if (
@@ -59,12 +60,12 @@ describe("Rescan after the event source restarts", () => {
 		testHelper.dir("other");
 		const file = path.join(fixtures, "a");
 		const w = new Watchpack({ aggregateTimeout: 50 });
-		/** @type {Watchpack | undefined} */
+		/** @type {InstanceType<typeof Watchpack> | undefined} */
 		let other;
 		w.on("remove", (item) => {
 			expect(item).toBe(file);
 			w.close();
-			/** @type {Watchpack} */
+			/** @type {InstanceType<typeof Watchpack>} */
 			(other).close();
 			done();
 		});
@@ -74,8 +75,9 @@ describe("Rescan after the event source restarts", () => {
 			testHelper.unlink("a");
 			testHelper.tick(() => {
 				// a watcher starting is what restarts the event source on macOS
-				other = new Watchpack({});
-				other.watch({ directories: [path.join(fixtures, "other")] });
+				const started = new Watchpack({});
+				other = started;
+				started.watch({ directories: [path.join(fixtures, "other")] });
 			});
 		});
 	});
