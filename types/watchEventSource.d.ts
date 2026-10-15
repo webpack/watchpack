@@ -13,11 +13,16 @@ export type WatcherEvents = {
 	 * error event
 	 */
 	error: (err: unknown) => void;
+	/**
+	 * rescan event, when events may have been lost
+	 */
+	rescan: () => void;
 };
 /**
  * @typedef {object} WatcherEvents
  * @property {(eventType: EventType, filename?: string) => void} change change event
  * @property {(err: unknown) => void} error error event
+ * @property {() => void} rescan rescan event, when events may have been lost
  */
 /**
  * @extends {EventEmitter<{ [K in keyof WatcherEvents]: Parameters<WatcherEvents[K]> }>}
@@ -34,6 +39,10 @@ export class Watcher extends EventEmitter<{
 	 * error event
 	 */
 	error: [err: unknown];
+	/**
+	 * rescan event, when events may have been lost
+	 */
+	rescan: [];
 }> {
 	constructor();
 	close(): void;
