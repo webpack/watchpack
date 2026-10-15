@@ -47,7 +47,13 @@ describe("Rescan after the event source restarts", () => {
 		testHelper.before(done);
 	});
 
+	/** @type {InstanceType<typeof Watchpack>[]} */
+	let watchers = [];
+
 	afterEach((done) => {
+		// closed here, not in the test, so a failure cannot leave one running
+		for (const w of watchers) w.close();
+		watchers = [];
 		testHelper.after(done);
 	});
 
@@ -60,13 +66,11 @@ describe("Rescan after the event source restarts", () => {
 		testHelper.dir("other");
 		const file = path.join(fixtures, "a");
 		const w = new Watchpack({ aggregateTimeout: 50 });
-		/** @type {InstanceType<typeof Watchpack> | undefined} */
-		let other;
+		watchers.push(w);
+		let finished = false;
 		w.on("remove", (item) => {
+			finished = true;
 			expect(item).toBe(file);
-			w.close();
-			/** @type {InstanceType<typeof Watchpack>} */
-			(other).close();
 			done();
 		});
 		w.watch({ files: [file] });
@@ -74,9 +78,11 @@ describe("Rescan after the event source restarts", () => {
 			dropRemovalOf = "a";
 			testHelper.unlink("a");
 			testHelper.tick(() => {
+				// polling reports the removal by itself, before any restart
+				if (finished) return;
 				// a watcher starting is what restarts the event source on macOS
 				const started = new Watchpack({});
-				other = started;
+				watchers.push(started);
 				started.watch({ directories: [path.join(fixtures, "other")] });
 			});
 		});
