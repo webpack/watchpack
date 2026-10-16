@@ -101,11 +101,10 @@ if (fsIsCaseInsensitive) {
 				expect(changes).toContain(path.join(fixtures, testFileRename));
 				expect(removals).not.toContain(path.join(fixtures, testFileRename));
 
-				for (const file of files.keys()) {
-					if (file.endsWith("hello.txt") && files.get(file)) {
-						return done(new Error("Renamed file was still in timeInfoEntries"));
-					}
-				}
+				// the old casing still names the renamed file
+				expect(files.get(path.join(fixtures, testFile))).toBe(
+					files.get(path.join(fixtures, testFileRename)),
+				);
 				return done();
 			});
 
@@ -120,11 +119,57 @@ if (fsIsCaseInsensitive) {
 				});
 			});
 		});
+
+		it("should give a file watched with the wrong casing the time info of the file (#228)", (done) => {
+			testHelper.file("a");
+			testHelper.tick(1000, () => {
+				const w = new Watchpack({
+					aggregateTimeout: 100,
+				});
+				const wrongCase = path.join(fixtures, "A");
+				w.watch({ files: [wrongCase] });
+				testHelper.tick(500, () => {
+					const before = w.getTimeInfoEntries().get(wrongCase);
+					expect(before).toBeTruthy();
+					w.on("aggregated", () => {
+						const files = w.getTimeInfoEntries();
+						w.close();
+						const after = files.get(wrongCase);
+						expect(after).toBe(files.get(path.join(fixtures, "a")));
+						expect(after).not.toEqual(before);
+						done();
+					});
+					testHelper.file("a");
+				});
+			});
+		});
 	});
 } else {
-	describe("casing (no tests)", () => {
-		it("pass", () => {
-			expect(true).toBe(true);
+	describe("casing (case-sensitive file system)", () => {
+		beforeEach((done) => {
+			testHelper.before(done);
+		});
+
+		afterEach((done) => {
+			testHelper.after(done);
+		});
+
+		it("should report a path with other casing as missing on a case-sensitive file system", (done) => {
+			testHelper.file("a");
+			testHelper.tick(() => {
+				const w = new Watchpack({
+					aggregateTimeout: 100,
+				});
+				const wrongCase = path.join(fixtures, "A");
+				w.watch({ files: [wrongCase] });
+				testHelper.tick(500, () => {
+					const files = w.getTimeInfoEntries();
+					w.close();
+					expect(files.get(wrongCase)).toBeNull();
+					expect(files.get(path.join(fixtures, "a"))).toBeTruthy();
+					done();
+				});
+			});
 		});
 	});
 }

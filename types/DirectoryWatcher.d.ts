@@ -46,6 +46,8 @@ declare class DirectoryWatcher extends EventEmitter<{
 	files: Map<string, Entry>;
 	/** @type {Map<string, number>} */
 	filesWithoutCase: Map<string, number>;
+	/** @type {boolean | undefined} */
+	caseInsensitive: boolean | undefined;
 	/** @type {Map<string, Watcher<DirectoryWatcherEvents> | boolean>} */
 	directories: Map<string, Watcher<DirectoryWatcherEvents> | boolean>;
 	/** @type {Map<string, Watcher<FileWatcherEvents>>} */
@@ -186,6 +188,11 @@ declare class DirectoryWatcher extends EventEmitter<{
 		fileTimestamps: TimeInfoEntries,
 		directoryTimestamps: TimeInfoEntries,
 	): number;
+	/**
+	 * @param {string} target a watched path that is not in `files`
+	 * @returns {string | undefined} the file it names on a case-insensitive file system
+	 */
+	getFileWithOtherCase(target: string): string | undefined;
 	close(): void;
 }
 declare namespace DirectoryWatcher {
