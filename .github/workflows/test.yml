@@ -68,13 +68,14 @@ jobs:
 
       - run: npm install --no-save webpack@5
 
+      # inside the repository, so it resolves the same dependencies
       - name: Extract the lib of main
         run: |
-          mkdir -p ../main
-          git archive origin/main lib | tar -x -C ../main
+          mkdir -p main
+          git archive origin/main lib | tar -x -C main
 
       - name: Probe with the lib of main
-        run: node tooling/case-probe.js ../main/lib || echo "main failed"
+        run: node tooling/case-probe.js main/lib || echo "main failed"
 
       - name: Probe with this lib
         run: node tooling/case-probe.js lib
