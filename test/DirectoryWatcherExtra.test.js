@@ -479,6 +479,37 @@ describe("DirectoryWatcher extra coverage", () => {
 		dw.close();
 	});
 
+	it("getFileWithOtherCase does not decide case sensitivity on a transient lstat error", () => {
+		testHelper.file("a");
+		const dw = new DirectoryWatcher(
+			getWatcherManager(EMPTY_OPTIONS),
+			fixtures,
+			EMPTY_OPTIONS,
+		);
+		const file = path.join(fixtures, "a");
+		const otherCase = path.join(fixtures, "A");
+		dw.setFileTime(file, Date.now(), true, false, "scan (file)");
+
+		const fs = require("graceful-fs");
+
+		const { lstatSync } = fs;
+		const spy = jest
+			.spyOn(fs, "lstatSync")
+			.mockImplementation((target, ...args) => {
+				if (target === otherCase) {
+					throw Object.assign(new Error("EBUSY"), { code: "EBUSY" });
+				}
+				return lstatSync(target, ...args);
+			});
+		try {
+			expect(dw.getFileWithOtherCase(otherCase)).toBeUndefined();
+			expect(dw.caseInsensitive).toBeUndefined();
+		} finally {
+			spy.mockRestore();
+			dw.close();
+		}
+	});
+
 	it("setFileTime detects a case-insensitive duplicate and triggers a rescan", () => {
 		const dw = new DirectoryWatcher(
 			getWatcherManager(EMPTY_OPTIONS),
