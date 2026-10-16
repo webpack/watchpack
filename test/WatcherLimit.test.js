@@ -58,7 +58,10 @@ describe("Watcher limit of the system (#46)", () => {
 			w.on("remove", (item) => {
 				removed.push(item);
 			});
+			let edited = false;
 			w.on("change", (item) => {
+				// coarse timestamps can report the file in the initial scan
+				if (!edited) return;
 				expect(item).toBe(file);
 				expect(removed).toEqual([]);
 				// tried once, not again and again
@@ -70,6 +73,7 @@ describe("Watcher limit of the system (#46)", () => {
 			});
 			w.watch({ files: [file], startTime: Date.now() });
 			testHelper.tick(1000, () => {
+				edited = true;
 				testHelper.file(path.join("dir", "a"));
 			});
 		});
