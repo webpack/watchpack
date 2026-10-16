@@ -44,6 +44,77 @@ jobs:
 
       - run: npm run lint
 
+  # TEMPORARY: reproduces #228 with webpack on case-insensitive file systems
+  case-probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.x
+          cache: "npm"
+
+      - run: npm ci
+
+      - run: npm install --no-save webpack@5
+
+      - name: Extract the lib of main
+        run: |
+          mkdir -p ../main
+          git archive origin/main lib | tar -x -C ../main
+
+      - name: Probe with the lib of main
+        run: node tooling/case-probe.js ../main/lib || echo "main failed"
+
+      - name: Probe with this lib
+        run: node tooling/case-probe.js lib
+
+  # TEMPORARY: webpack's watch tests with this lib
+  webpack-watch:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: watchpack
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: webpack/webpack
+          path: webpack
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.x
+
+      - run: yarn --frozen-lockfile --ignore-scripts
+        working-directory: webpack
+
+      - name: Use this lib
+        run: |
+          rm -rf webpack/node_modules/watchpack/lib
+          cp -R watchpack/lib webpack/node_modules/watchpack/lib
+
+      - run: yarn test:base --testMatch "<rootDir>/test/WatchTestCases.longtest.js" "<rootDir>/test/WatchCacheUnaffectedTestCases.longtest.js" "<rootDir>/test/unitCases/{Watch,WatchClose,WatchDetection,WatchSuspend,NodeWatchFileSystem,Compiler,MultiCompiler}.unittest.js"
+        working-directory: webpack
+
   test:
     strategy:
       fail-fast: true
