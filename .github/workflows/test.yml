@@ -116,6 +116,16 @@ jobs:
       - run: yarn test:base --testMatch "<rootDir>/test/WatchTestCases.longtest.js" "<rootDir>/test/WatchCacheUnaffectedTestCases.longtest.js" "<rootDir>/test/unitCases/{Watch,WatchClose,WatchDetection,WatchSuspend,NodeWatchFileSystem,Compiler,MultiCompiler}.unittest.js"
         working-directory: webpack
 
+      # does the NodeWatchFileSystem unit test fail with the published watchpack too?
+      - name: NodeWatchFileSystem with watchpack 2.6.1
+        if: always()
+        run: |
+          mkdir published && cd published && npm pack watchpack@2.6.1 && tar -xzf watchpack-2.6.1.tgz
+          cd ..
+          rm -rf webpack/node_modules/watchpack/lib
+          cp -R published/package/lib webpack/node_modules/watchpack/lib
+          cd webpack && yarn test:base --testMatch "<rootDir>/test/unitCases/NodeWatchFileSystem.unittest.js" || echo "2.6.1 failed too"
+
   test:
     strategy:
       fail-fast: true
