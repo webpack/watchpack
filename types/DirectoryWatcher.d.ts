@@ -152,6 +152,11 @@ declare class DirectoryWatcher extends EventEmitter<{
 	 */
 	onWatcherError(err?: unknown | undefined): void;
 	/**
+	 * Polls the directory, which still exists, when the OS cannot watch it.
+	 * @param {unknown} err watcher limit error
+	 */
+	pollAfterWatcherLimit(err: unknown): void;
+	/**
 	 * @param {Error | NodeJS.ErrnoException=} err error
 	 */
 	onStatsError(err?: (Error | NodeJS.ErrnoException) | undefined): void;
