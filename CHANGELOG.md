@@ -1,5 +1,21 @@
 # watchpack
 
+## 2.6.2
+
+### Patch Changes
+
+- On case-insensitive file systems, give a file watched with other casing (e.g. imported as `./B` while the file is `b.js`) the time info of the file instead of `null`, so webpack rebuilds it on every change, not only the first (fixes #228). (by [@alexander-akait](https://github.com/alexander-akait) in [#358](https://github.com/webpack/watchpack/pull/358))
+
+- fix: do not report directories created shortly before `startTime` as changed when the initial scan sees only directories (#295). (by [@alexander-akait](https://github.com/alexander-akait) in [#350](https://github.com/webpack/watchpack/pull/350))
+
+  Timestamp accuracy was learned only from file mtimes, so a scan that found only directories kept the 2000ms default and flagged anything created in the 2s before `startTime`. Directory mtimes now lower it the same way.
+
+- Report changes and removals macOS loses when a directory watcher starts or stops, by rescanning the watched directories once its event stream restarts. (by [@alexander-akait](https://github.com/alexander-akait) in [#354](https://github.com/webpack/watchpack/pull/354))
+
+- Watch a missing file whose parent path is a file (e.g. `src/foo/index.js`, tried by a resolver alias, while `src/foo` is a file) like one whose parent is missing: no more `ENOTDIR` "Watchpack Error (initial scan)" log, and the file is reported once the parent becomes a directory (fixes #226's case). (by [@alexander-akait](https://github.com/alexander-akait) in [#360](https://github.com/webpack/watchpack/pull/360))
+
+- When the system runs out of file watchers (`ENOSPC`/`EMFILE`, e.g. `fs.inotify.max_user_watches` on Linux), poll the directories it cannot watch instead of reporting their files as removed and retrying in a loop, and log the error once with a hint (fixes #46). (by [@alexander-akait](https://github.com/alexander-akait) in [#359](https://github.com/webpack/watchpack/pull/359))
+
 ## 2.6.1
 
 ### Patch Changes
