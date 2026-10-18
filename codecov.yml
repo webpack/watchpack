@@ -1,0 +1,20 @@
+codecov:
+  branch: main
+  notify:
+    # Statuses and the comment wait for `coverage-notify` in test.yml, which
+    # runs once every matrix job has uploaded, not after the first few.
+    manual_trigger: true
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+  status:
+    project:
+      default:
+        target: auto
+        # Which branch of a race a watcher test takes depends on the runner's
+        # timing, so the same code covers a few lines more or less run to run.
+        threshold: 0.5%
+    patch:
+      default:
+        target: auto
