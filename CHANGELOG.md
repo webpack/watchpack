@@ -1,5 +1,11 @@
 # watchpack
 
+## 2.6.3
+
+### Patch Changes
+
+- Report a watched missing directory that appeared while the previous watcher was paused (e.g. during a webpack build) to the watcher that replaces it, like a file; before, a `node_modules` directory created during a build could be missed until the next unrelated change, most often with polling. (by [@alexander-akait](https://github.com/alexander-akait) in [#361](https://github.com/webpack/watchpack/pull/361))
+
 ## 2.6.2
 
 ### Patch Changes
