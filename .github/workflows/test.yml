@@ -113,6 +113,8 @@ jobs:
 
   coverage-notify:
     needs: test
+    permissions:
+      contents: read
     # A failed matrix job still gets a report from what did upload.
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
