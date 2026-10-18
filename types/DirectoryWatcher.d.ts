@@ -50,6 +50,8 @@ declare class DirectoryWatcher extends EventEmitter<{
 	caseInsensitive: boolean | undefined;
 	/** @type {Map<string, Watcher<DirectoryWatcherEvents> | boolean>} */
 	directories: Map<string, Watcher<DirectoryWatcherEvents> | boolean>;
+	/** @type {Map<string, number>} */
+	directorySafeTimes: Map<string, number>;
 	/** @type {Map<string, Watcher<FileWatcherEvents>>} */
 	_symlinkTargetWatchers: Map<string, Watcher<FileWatcherEvents>>;
 	lastWatchEvent: number;
