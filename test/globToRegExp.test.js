@@ -9,6 +9,11 @@ const globToRegExp = require("../lib/util/globToRegExp");
 const compile = (glob) => new RegExp(`^${globToRegExp(glob)}$`);
 
 describe("globToRegExp", () => {
+	it("should throw for a glob that is not a string", () => {
+		const notAString = /** @type {string} */ (/** @type {unknown} */ (1));
+		expect(() => globToRegExp(notAString)).toThrow(TypeError);
+	});
+
 	it("should translate common globs as before", () => {
 		/** @type {[string, string][]} */
 		const cases = [
