@@ -1,5 +1,13 @@
 # watchpack
 
+## 2.6.4
+
+### Patch Changes
+
+- Keep `globToRegExp` output a valid, fast regexp for unbalanced brackets, braces and many `**/`. (by [@alexander-akait](https://github.com/alexander-akait) in [#370](https://github.com/webpack/watchpack/pull/370))
+
+- `globToRegExp` checks that its output compiles without building a regular expression, which makes it about five times faster. (by [@alexander-akait](https://github.com/alexander-akait) in [#372](https://github.com/webpack/watchpack/pull/372))
+
 ## 2.6.3
 
 ### Patch Changes
