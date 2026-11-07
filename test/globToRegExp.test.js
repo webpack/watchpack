@@ -79,6 +79,50 @@ describe("globToRegExp", () => {
 		}
 	});
 
+	it("should read escapes and ranges in a class as a regexp does", () => {
+		/** @type {[string, string][]} */
+		const read = [
+			["[\\d-a].js", "5.js"],
+			["[a-\\d].js", "-.js"],
+			["[\\x41-\\x5a].js", "M.js"],
+			["[\\u0041-\\u005a].js", "M.js"],
+			["[\\cA-\\cZ].js", "\u0005.js"],
+			["[\\c_-a].js", "Z.js"],
+			["[\\101-\\132].js", "M.js"],
+			["[\\0-\\7].js", "\u0003.js"],
+			["[\\b-\\t].js", "\t.js"],
+			["[\\f-\\r].js", "\r.js"],
+			["[\\n-\\n].js", "\n.js"],
+			["[\\x4-a].js", "x.js"],
+			["[\\u12-a].js", "u.js"],
+			["[\\v-\\v].js", "\u000B.js"],
+			["[\\--a].js", "M.js"],
+			["[a-].js", "-.js"],
+			["[-a].js", "-.js"],
+			["[\\s-\\w].js", "-.js"],
+		];
+		for (const [glob, path] of read) {
+			expect(globToRegExp(glob)).not.toContain("\\[");
+			expect(compile(glob).test(path)).toBe(true);
+		}
+		/** @type {string[]} */
+		const literal = [
+			"[\\x5a-\\x41].js",
+			"[\\u005a-\\u0041].js",
+			"[\\cZ-\\cA].js",
+			"[\\c-a].js",
+			"[\\132-\\101].js",
+			"[\\7-\\1].js",
+			"[\\t-\\b].js",
+			"[a\\",
+			"[a-\\",
+			"[abc",
+		];
+		for (const glob of literal) {
+			expect(compile(glob).test(glob)).toBe(true);
+		}
+	});
+
 	it("should match many globstars against a deep path in linear time", () => {
 		const deep = `${"d/".repeat(20)}file.css`;
 		const regexp = compile(`${"**/".repeat(14)}*.js`);
